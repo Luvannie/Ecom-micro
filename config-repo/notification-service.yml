@@ -1,0 +1,22 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: jdbc:postgresql://localhost:5439/notification_service
+    username: notification_user
+    password: notification_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: localhost:9092
+
+notification:
+  providers:
+    email: mock
+    sms: mock

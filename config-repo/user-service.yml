@@ -1,0 +1,15 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://localhost:5434/user_service
+    username: user_user
+    password: user_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true

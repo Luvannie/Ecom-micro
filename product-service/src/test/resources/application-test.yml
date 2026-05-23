@@ -1,0 +1,23 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+  datasource:
+    url: jdbc:h2:mem:product_service;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  cache:
+    type: simple
+  data:
+    redis:
+      repositories:
+        enabled: false
+eureka:
+  client:
+    enabled: false

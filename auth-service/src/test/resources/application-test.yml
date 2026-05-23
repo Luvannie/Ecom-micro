@@ -1,0 +1,27 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+  datasource:
+    url: jdbc:h2:mem:auth_service;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  data:
+    redis:
+      repositories:
+        enabled: false
+eureka:
+  client:
+    enabled: false
+security:
+  jwt:
+    issuer: ecom-auth-service
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 30
+    secret: local-development-secret-must-be-32-bytes

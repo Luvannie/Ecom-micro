@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+eureka:
+  client:
+    enabled: false
+clients:
+  product-service:
+    name: product-service

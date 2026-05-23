@@ -1,0 +1,64 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+        - id: product-service-products
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/**
+        - id: product-service-categories
+          uri: lb://product-service
+          predicates:
+            - Path=/api/categories/**
+        - id: product-service-admin
+          uri: lb://product-service
+          predicates:
+            - Path=/api/admin/products/**,/api/admin/categories/**
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=/api/cart/**
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/inventory/**,/api/admin/inventory/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+
+security:
+  jwt:
+    issuer: ecom-auth-service
+    secret: local-development-secret-must-be-32-bytes
+  public-paths:
+    - /api/auth/register
+    - /api/auth/login
+    - /api/auth/refresh
+    - /api/products
+    - /api/categories
+    - /api/inventory/products
+    - /actuator/health
+    - /v3/api-docs
+    - /swagger-ui

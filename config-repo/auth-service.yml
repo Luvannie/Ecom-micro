@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/auth_service
+    username: auth_user
+    password: auth_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+security:
+  jwt:
+    issuer: ecom-auth-service
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 30
+    secret: local-development-secret-must-be-32-bytes

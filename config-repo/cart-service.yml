@@ -1,0 +1,14 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: cart-service
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+clients:
+  product-service:
+    name: product-service
