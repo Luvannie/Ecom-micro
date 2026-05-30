@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafka Setup Documentation - Ecom Micro Services</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --border-color: #30363d;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 3rem 0 1.5rem;
+            color: var(--accent-blue);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--accent-green);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent-orange);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+        }
+
+        /* Architecture Diagram */
+        .diagram {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            white-space: pre;
+            line-height: 1.4;
+        }
+
+        /* Info Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .card h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card .icon {
+            font-size: 1.2rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        /* Code Blocks */
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--accent-orange);
+        }
+
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        pre code {
+            padding: 0;
+            background: none;
+            color: var(--text-primary);
+        }
+
+        .comment { color: var(--text-muted); }
+        .keyword { color: var(--accent-purple); }
+        .string { color: var(--accent-green); }
+        .number { color: var(--accent-orange); }
+
+        /* Service Cards */
+        .service-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-card h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .service-card .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .badge-producer {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--accent-green);
+        }
+
+        .badge-consumer {
+            background: rgba(88, 166, 255, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .badge-both {
+            background: rgba(163, 113, 247, 0.2);
+            color: var(--accent-purple);
+        }
+
+        /* Flow Indicators */
+        .flow-section {
+            margin: 3rem 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .flow-number {
+            width: 2rem;
+            height: 2rem;
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .flow-content {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+        }
+
+        /* Topic Flow */
+        .topic-flow {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .topic-flow-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .arrow {
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+
+        /* Patterns */
+        .pattern-box {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+            border: 1px solid var(--accent-purple);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .pattern-box h3 {
+            color: var(--accent-purple);
+            margin-top: 0;
+        }
+
+        /* Highlight Box */
+        .highlight {
+            background: rgba(210, 153, 34, 0.1);
+            border-left: 3px solid var(--accent-orange);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-green {
+            background: rgba(63, 185, 80, 0.1);
+            border-left: 3px solid var(--accent-green);
+        }
+
+        /* Config Section */
+        .config-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .config-item code {
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* TOC */
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .toc h4 {
+            margin-top: 0;
+            color: var(--accent-blue);
+        }
+
+        .toc ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .toc li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .toc a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        /* Key Points */
+        .key-point {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .key-point .icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* JSON styling */
+        .json-key { color: var(--accent-blue); }
+        .json-string { color: var(--accent-green); }
+        .json-number { color: var(--accent-orange); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kafka Setup Documentation</h1>
+            <p class="subtitle">Ecom Micro Services - Event-Driven Architecture</p>
+        </header>
+
+        <nav class="toc">
+            <h4>Mục lục</h4>
+            <ol>
+                <li><a href="#overview">Tổng quan</a></li>
+                <li><a href="#infrastructure">Infrastructure Configuration</a></li>
+                <li><a href="#topics">Topics và Message Flow</a></li>
+                <li><a href="#services">Services và Kafka Components</a></li>
+                <li><a href="#patterns">Design Patterns</a></li>
+                <li><a href="#configuration">Configuration Details</a></li>
+                <li><a href="#testing">Testing Strategy</a></li>
+                <li><a href="#architecture">Architecture Diagram</a></li>
+            </ol>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Tổng quan</h2>
+            <p class="intro">
+                Project sử dụng <strong>Apache Kafka 3.7.0</strong> vớiKRaft mode (không cần ZooKeeper) để implement
+                event-driven architecture cho hệ thống micro services. Kafka đóng vai trò central message broker
+                cho phép các services giao tiếp异步 qua event.
+            </p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4><span class="icon">📦</span> Version</h4>
+                    <p>Apache Kafka 3.7.0</p>
+                    <p>KRaft Mode (Không ZooKeeper)</p>
+                </div>
+                <div class="card">
+                    <h4><span class="icon">🔧</span> Topology</h4>
+                    <p>Single Broker</p>
+                    <p>Replication Factor: 1</p>
+                </div>
+                <div class="card">
+                    <h4><span class="icon">🌐</span> Network</h4>
+                    <p>PLAINTEXT on port 9092</p>
+                    <p>Advertised: localhost:9092</p>
+                </div>
+                <div class="card">
+                    <h4><span class="icon">📊</span> Topics</h4>
+                    <p>7 Topics active</p>
+                    <p>4 Services produce/consume</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="infrastructure">
+            <h2>2. Infrastructure Configuration</h2>
+            <p>Kafka được định nghĩa trong docker-compose.yml với cấu hình KRaft mode:</p>
+
+            <pre><code class="keyword">services:</code>
+  <span class="comment"># ... other services ...</span>
+
+  <span class="keyword">kafka:</span>
+    <span class="json-key">image</span>: <span class="json-string">apache/kafka:3.7.0</span>
+    <span class="json-key">ports</span>:
+      - <span class="json-string">"9092:9092"</span>
+    <span class="json-key">environment</span>:
+      <span class="comment"># Node configuration</span>
+      KAFKA_NODE_ID: <span class="json-number">1</span>
+      KAFKA_PROCESS_ROLES: <span class="json-string">broker,controller</span>
+      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="json-string">1@kafka:9093</span>
+
+      <span class="comment"># Listeners - internal and controller</span>
+      KAFKA_LISTENERS: <span class="json-string">PLAINTEXT://:9092,CONTROLLER://:9093</span>
+      KAFKA_ADVERTISED_LISTENERS: <span class="json-string">PLAINTEXT://localhost:9092</span>
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: <span class="json-string">CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT</span>
+      KAFKA_CONTROLLER_LISTENER_NAMES: <span class="json-string">CONTROLLER</span>
+      KAFKA_INTER_BROKER_LISTENER_NAME: <span class="json-string">PLAINTEXT</span>
+
+      <span class="comment"># Replication settings (dev mode)</span>
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: <span class="json-number">1</span>
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: <span class="json-number">1</span>
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: <span class="json-number">1</span>
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="json-number">0</span>
+    <span class="json-key">volumes</span>:
+      - kafka-data:/tmp/kraft-combined-logs</code></pre>
+
+            <div class="highlight">
+                <strong>⚠️ Lưu ý:</strong> Đây là cấu hình development (single broker, replication factor = 1).
+                Cho production, cần nhiều brokers hơn và tăng replication factor.
+            </div>
+        </section>
+
+        <section id="topics">
+            <h2>3. Topics và Message Flow</h2>
+            <p>Hệ thống sử dụng 7 topics được định nghĩa trong các class Topic definitions:</p>
+
+            <h3>3.1 Topic Definitions</h3>
+
+            <pre><code><span class="comment">// OrderTopics.java</span>
+<span class="keyword">public final class</span> OrderTopics {
+    <span class="keyword">public static final String</span> INVENTORY_RESERVATION_REQUESTED = <span class="json-string">"inventory.reservation-requested"</span>;
+    <span class="keyword">public static final String</span> INVENTORY_RESERVED = <span class="json-string">"inventory.reserved"</span>;
+    <span class="keyword">public static final String</span> INVENTORY_RESERVATION_FAILED = <span class="json-string">"inventory.reservation-failed"</span>;
+    <span class="keyword">public static final String</span> ORDER_CANCELLED = <span class="json-string">"order.cancelled"</span>;
+    <span class="keyword">public static final String</span> ORDER_CONFIRMED = <span class="json-string">"order.confirmed"</span>;
+    <span class="keyword">public static final String</span> PAYMENT_SUCCEEDED = <span class="json-string">"payment.succeeded"</span>;
+    <span class="keyword">public static final String</span> PAYMENT_FAILED = <span class="json-string">"payment.failed"</span>;
+}</code></pre>
+
+            <h3>3.2 Message Flow Overview</h3>
+
+            <div class="diagram">┌─────────────────────────────────────────────────────────────────────────────┐
+│                           KAFKA MESSAGE FLOW                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  ORDER-SERVICE              KAFKA                     INVENTORY-SERVICE
+       │                      │                               │
+       │  ──► inventory.      │                               │
+       │      reservation-    │                               │
+       │      requested       │                               │
+       │                      │    ┌──────────────────────────┤
+       │                      │    │                          │
+       │                      ▼    ▼                          │
+       │                 ┌──────────────────┐                   │
+       │                 │  Topic:         │                   │
+       │                 │  inventory.     │                   │
+       │                 │  reservation-   │                   │
+       │                 │  requested      │                   │
+       │                 └────────┬─────────┘                   │
+       │                          │                             │
+       │                          ▼                             │
+       │                 ┌──────────────────┐                   │
+       │                 │  Reservation     │◄───────┐         │
+       │                 │  Event Consumer  │        │         │
+       │                 └──────────────────┘        │         │
+       │                                        ┌─────┴─────┐   │
+       │                                        │           │   │
+       │                                        ▼           ▼   │
+       │                              SUCCESS           FAILURE │
+       │                                  │               │    │
+       │                                  ▼               ▼    │
+       │              inventory.reserved │               │    │
+       │                    (publish)     │               │    │
+       │                                  │     inventory.     │
+       │                                  │     reservation-   │
+       │                                  │     failed         │
+       │                                  │     (publish)     │
+       │                                  │         │         │
+       │                                  │         │         │
+       └──────────────────────────────────┴─────────┴─────────┘
+                                       │
+                                       ▼
+                               KAFKA (inventory.reserved hoặc
+                                      inventory.reservation-failed)
+                                       │
+                                       │  ┌──────────────────────────┐
+                                       │  │ INVENTORY-EVENT-CONSUMER │
+                                       │  │ trong ORDER-SERVICE      │
+                                       │  └──────────────────────────┘
+                                       ▼
+                            ORDER-SERVICE cập nhật trạng thái</code></pre>
+
+            <h3>3.3 Complete Topic Map</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Producer</th>
+                        <th>Consumer(s)</th>
+                        <th>Mục đích</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>inventory.reservation-requested</code></td>
+                        <td>Order Service</td>
+                        <td>Inventory Service</td>
+                        <td>Yêu cầu reserve inventory cho order</td>
+                    </tr>
+                    <tr>
+                        <td><code>inventory.reserved</code></td>
+                        <td>Inventory Service</td>
+                        <td>Order Service</td>
+                        <td>Thông báo reservation thành công</td>
+                    </tr>
+                    <tr>
+                        <td><code>inventory.reservation-failed</code></td>
+                        <td>Inventory Service</td>
+                        <td>Order Service</td>
+                        <td>Thông báo reservation thất bại</td>
+                    </tr>
+                    <tr>
+                        <td><code>order.confirmed</code></td>
+                        <td>Order Service</td>
+                        <td>Notification Service</td>
+                        <td>Thông báo order đã confirm</td>
+                    </tr>
+                    <tr>
+                        <td><code>order.cancelled</code></td>
+                        <td>Order Service</td>
+                        <td>Inventory Service, Notification Service</td>
+                        <td>Thông báo order bị hủy</td>
+                    </tr>
+                    <tr>
+                        <td><code>payment.succeeded</code></td>
+                        <td>Payment Service (Outbox)</td>
+                        <td>Order Service, Notification Service</td>
+                        <td>Thông báo payment thành công</td>
+                    </tr>
+                    <tr>
+                        <td><code>payment.failed</code></td>
+                        <td>Payment Service (Outbox)</td>
+                        <td>Order Service, Notification Service</td>
+                        <td>Thông báo payment thất bại</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="services">
+            <h2>4. Services và Kafka Components</h2>
+
+            <h3>4.1 Order Service</h3>
+            <div class="service-card">
+                <h3>
+                    order-service
+                    <span class="badge badge-both">Producer & Consumer</span>
+                    <span class="badge">Port 8086</span>
+                </h3>
+
+                <h4>Producers</h4>
+                <p><strong>OrderEventProducer</strong> - Gửi các events liên quan đến order:</p>
+                <ul>
+                    <li><code>publishReservationRequested()</code> - Gửi yêu cầu reserve inventory</li>
+                    <li><code>publishOrderConfirmed()</code> - Thông báo order confirm (sau payment thành công)</li>
+                    <li><code>publishOrderCancelled()</code> - Thông báo order bị hủy</li>
+                </ul>
+
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> OrderEventProducer {
+    <span class="keyword">private final</span> KafkaTemplate&lt;Object, Object&gt; kafkaTemplate;
+
+    <span class="keyword">public void</span> publishReservationRequested(OrderResponse order) {
+        <span class="keyword">var</span> event = <span class="keyword">new</span> ReservationRequestEvent(
+            order.id(),
+            order.items().stream()
+                .map(item -> <span class="keyword">new</span> ReservationItemEvent(
+                    item.productId(), item.quantity()))
+                .toList()
+        );
+        <span class="comment">// Send với key = orderId để đảm bảo partition affinity</span>
+        kafkaTemplate.send(OrderTopics.INVENTORY_RESERVATION_REQUESTED,
+                          order.id().toString(), event)
+                     .get(5, TimeUnit.SECONDS);
+    }
+
+    <span class="comment">// Record classes cho events</span>
+    <span class="keyword">public record</span> ReservationRequestEvent(UUID orderId, List&lt;ReservationItemEvent&gt; items) {}
+    <span class="keyword">public record</span> ReservationItemEvent(UUID productId, <span class="keyword">int</span> quantity) {}
+    <span class="keyword">public record</span> OrderCancelledEvent(UUID orderId, UUID userId, UUID reservationId) {}
+    <span class="keyword">public record</span> OrderConfirmedEvent(UUID orderId, UUID userId, BigDecimal total) {}
+}</code></pre>
+
+                <h4>Consumers</h4>
+                <p><strong>PaymentEventConsumer</strong> - Nhận payment events từ Payment Service:</p>
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> PaymentEventConsumer {
+
+    <span class="keyword">@KafkaListener</span>(topics = OrderTopics.PAYMENT_SUCCEEDED,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleSucceeded(PaymentEvent event) {
+        <span class="comment">// Confirm order và gửi order.confirmed event</span>
+        eventProducer.publishOrderConfirmed(
+            orderService.markConfirmed(event.orderId()));
+    }
+
+    <span class="keyword">@KafkaListener</span>(topics = OrderTopics.PAYMENT_FAILED,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleFailed(PaymentEvent event) {
+        <span class="comment">// Cancel order và gửi order.cancelled event</span>
+        eventProducer.publishOrderCancelled(
+            orderService.cancelAfterPaymentFailure(event.orderId()));
+    }
+
+    <span class="keyword">public record</span> PaymentEvent(UUID paymentId, UUID orderId, UUID userId,
+                                     BigDecimal amount, String currency, String status) {}
+}</code></pre>
+
+                <p><strong>InventoryEventConsumer</strong> - Nhận inventory reservation results:</p>
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> InventoryEventConsumer {
+
+    <span class="keyword">@KafkaListener</span>(topics = OrderTopics.INVENTORY_RESERVED,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleReserved(ReservationResult event) {
+        orderService.markReserved(event.orderId(), event.reservationId());
+    }
+
+    <span class="keyword">@KafkaListener</span>(topics = OrderTopics.INVENTORY_RESERVATION_FAILED,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleReservationFailed(ReservationResult event) {
+        orderService.markReservationFailed(event.orderId(), event.failureReason());
+    }
+
+    <span class="keyword">public record</span> ReservationResult(UUID reservationId, UUID orderId,
+                                      String status, String failureReason) {}
+}</code></pre>
+            </div>
+
+            <h3>4.2 Inventory Service</h3>
+            <div class="service-card">
+                <h3>
+                    inventory-service
+                    <span class="badge badge-consumer">Consumer</span>
+                    <span class="badge badge-producer">Producer</span>
+                    <span class="badge">Port 8085</span>
+                </h3>
+
+                <h4>Consumer</h4>
+                <p><strong>ReservationEventConsumer</strong> - Xử lý reservation requests từ Order Service:</p>
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> ReservationEventConsumer {
+    <span class="keyword">private final</span> InventoryService inventoryService;
+    <span class="keyword">private final</span> InventoryEventProducer eventProducer;
+
+    <span class="keyword">@KafkaListener</span>(topics = InventoryTopics.RESERVATION_REQUESTED,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleReservationRequested(ReservationRequest request) {
+        <span class="keyword">var</span> result = inventoryService.reserve(request);
+
+        <span class="comment">// Quyết định gửi success hay failure event</span>
+        <span class="keyword">if</span> (result.status() == ReservationStatus.RESERVED) {
+            eventProducer.publishReserved(result);
+            <span class="keyword">return</span>;
+        }
+        eventProducer.publishReservationFailed(result);
+    }
+}</code></pre>
+
+                <h4>Producer</h4>
+                <p><strong>InventoryEventProducer</strong> - Gửi kết quả reservation:</p>
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> InventoryEventProducer {
+    <span class="keyword">private final</span> KafkaTemplate&lt;Object, Object&gt; kafkaTemplate;
+
+    <span class="keyword">public void</span> publishReserved(ReservationResult result) {
+        kafkaTemplate.send(InventoryTopics.RESERVED,
+                          result.orderId().toString(), result)
+                     .get(5, TimeUnit.SECONDS);
+    }
+
+    <span class="keyword">public void</span> publishReservationFailed(ReservationResult result) {
+        kafkaTemplate.send(InventoryTopics.RESERVATION_FAILED,
+                          result.orderId().toString(), result)
+                     .get(5, TimeUnit.SECONDS);
+    }
+}</code></pre>
+            </div>
+
+            <h3>4.3 Payment Service</h3>
+            <div class="service-card">
+                <h3>
+                    payment-service
+                    <span class="badge badge-producer">Producer (Outbox)</span>
+                    <span class="badge">Port 8087</span>
+                </h3>
+
+                <p>Payment Service sử dụng <strong>Transactional Outbox Pattern</strong> thay vì direct Kafka producer.</p>
+
+                <h4>Outbox Pattern Flow</h4>
+                <div class="diagram">┌──────────────────────────────────────────────────────────────────┐
+│                    TRANSACTIONAL OUTBOX PATTERN                        │
+└──────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────┐         ┌─────────────────────┐
+│   Payment Service   │         │    Payment DB       │
+└─────────┬───────────┘         └─────────┬───────────┘
+          │                               │
+          │   1. Process payment          │
+          │   ─────────────────────────►  │
+          │                               │
+          │   2. Save Order + Outbox      │
+          │      (SAME TRANSACTION)       │
+          │   ─────────────────────────►  │
+          │                               │
+          │   3. Commit                   │
+          │   ◄─────────────────────────  │
+          │                               │
+          │                               ▼
+          │                     ┌─────────────────────┐
+          │                     │   OutboxEvent       │
+          │                     │   Table             │
+          │                     │   ───────────       │
+          │                     │   • event_type      │
+          │                     │   • aggregate_id    │
+          │                     │   • payload         │
+          │                     │   • status (PENDING)│
+          │                     └─────────┬───────────┘
+          │                               │
+          │                               │  4. Polling
+          │                               │  ◄─────────
+          │                               ▼
+          │                     ┌─────────────────────┐
+          │                     │   OutboxPublisher   │
+          │                     │   (Scheduled Task)  │
+          │                     └─────────┬───────────┘
+          │                               │
+          │   5. KafkaTemplate.send()     │
+          │   ─────────────────────────►  │
+          │                               │
+          │   6. Mark as PUBLISHED        │
+          │   ─────────────────────────►  │
+          │                               │
+          ▼                               ▼
+   KAFKA (payment.succeeded hoặc payment.failed)</code></pre>
+
+                <h4>OutboxPublisher Implementation</h4>
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> OutboxPublisher {
+    <span class="keyword">private final</span> OutboxEventRepository repository;
+    <span class="keyword">private final</span> KafkaTemplate&lt;Object, Object&gt; kafkaTemplate;
+
+    <span class="comment">// Poll mỗi 5 giây cho đến khi có pending events</span>
+    <span class="keyword">@Scheduled</span>(fixedDelayString = <span class="string">"${payment.outbox.publish-fixed-delay-ms:5000}"</span>)
+    <span class="keyword">public void</span> publishPending() {
+        repository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.PENDING)
+            .forEach(event -> {
+                <span class="comment">// Gửi bất đồng bộ đến Kafka</span>
+                CompletableFuture&lt;SendResult&lt;Object, Object&gt;&gt; future =
+                    kafkaTemplate.send(event.getEventType(),
+                                      event.getAggregateId().toString(),
+                                      event.getPayload());
+
+                future.whenComplete((result, ex) -> {
+                    <span class="comment">// Cập nhật trạng thái sau khi gửi</span>
+                    <span class="keyword">if</span> (ex != <span class="keyword">null</span>) {
+                        event.markFailed();
+                    } <span class="keyword">else</span> {
+                        event.markPublished();
+                    }
+                    repository.save(event);
+                });
+            });
+    }
+}</code></pre>
+
+                <div class="highlight">
+                    <strong>💡 Tại sao dùng Outbox Pattern?</strong>
+                    <ul>
+                        <li>Đảm bảo <strong>atomicity</strong>: Payment và Event được lưu trong cùng transaction</li>
+                        <li>Tránh <strong>dual-writes</strong>: Không cần đồng thời gọi DB và Kafka</li>
+                        <li>Đảm bảo <strong>at-least-once delivery</strong>: Event không bị mất nếu service crash</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>4.4 Notification Service</h3>
+            <div class="service-card">
+                <h3>
+                    notification-service
+                    <span class="badge badge-consumer">Consumer</span>
+                    <span class="badge">Port 8088</span>
+                </h3>
+
+                <p>Notification Service nhận các events và gửi email/SMS notifications:</p>
+
+                <h4>OrderEventConsumer</h4>
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> OrderEventConsumer {
+    <span class="keyword">private final</span> NotificationService notificationService;
+
+    <span class="keyword">@KafkaListener</span>(topics = <span class="string">"order.confirmed"</span>,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleConfirmed(OrderConfirmedEvent event) {
+        notificationService.sendEmail(
+            event.userId(),
+            recipient(event.userId()),
+            <span class="string">"order-confirmed"</span>,
+            Map.of(<span class="string">"orderId"</span>, event.orderId(),
+                   <span class="string">"total"</span>, event.total(),
+                   <span class="string">"email"</span>, recipient(event.userId())));
+    }
+
+    <span class="keyword">@KafkaListener</span>(topics = <span class="string">"order.cancelled"</span>,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleCancelled(OrderCancelledEvent event) {
+        <span class="comment">// Gửi cả email và SMS</span>
+        notificationService.sendEmail(event.userId(), recipient(event.userId()),
+            <span class="string">"order-cancelled"</span>, model);
+        notificationService.sendSms(event.userId(), <span class="string">"+10000000000"</span>,
+            <span class="string">"Order cancelled: "</span> + event.orderId());
+    }
+}</code></pre>
+
+                <h4>PaymentEventConsumer</h4>
+                <pre><code><span class="keyword">@Component</span>
+<span class="keyword">public class</span> PaymentEventConsumer {
+    <span class="keyword">private final</span> NotificationService notificationService;
+
+    <span class="keyword">@KafkaListener</span>(topics = <span class="string">"payment.succeeded"</span>,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleSucceeded(PaymentEvent event) {
+        notificationService.sendEmail(event.userId(), recipient(event.userId()),
+            <span class="string">"payment-succeeded"</span>, model(event));
+    }
+
+    <span class="keyword">@KafkaListener</span>(topics = <span class="string">"payment.failed"</span>,
+                     groupId = <span class="string">"${spring.application.name}"</span>)
+    <span class="keyword">public void</span> handleFailed(PaymentEvent event) {
+        notificationService.sendEmail(event.userId(), recipient(event.userId()),
+            <span class="string">"payment-failed"</span>, model(event));
+    }
+}</code></pre>
+            </div>
+        </section>
+
+        <section id="patterns">
+            <h2>5. Design Patterns</h2>
+
+            <h3>5.1 Consumer Group Pattern</h3>
+            <p>Mỗi service sử dụng <code>${spring.application.name}</code> làm group ID:</p>
+
+            <pre><code><span class="keyword">@KafkaListener</span>(
+    topics = <span class="string">"payment.succeeded"</span>,
+    groupId = <span class="string">"${spring.application.name}"</span>  <span class="comment">// VD: "payment-service"</span>
+)</code></pre>
+
+            <div class="highlight-green">
+                <strong>✓ Lợi ích:</strong>
+                <ul>
+                    <li>Mỗi service là một consumer group riêng</li>
+                    <li>Nhiều instances của cùng service cùng share messages (scale horizontally)</li>
+                    <li>Khi order-service nhận message, notification-service cũng nhận được (fan-out)</li>
+                </ul>
+            </div>
+
+            <h3>5.2 Partition Affinity</h3>
+            <p>Tất cả producers sử dụng <code>orderId</code> làm message key:</p>
+
+            <pre><code><span class="comment">// Key = orderId.toString() đảm bảo tất cả messages của 1 order
+// đi đến cùng một partition</span>
+kafkaTemplate.send(topic, order.id().toString(), event)</code></pre>
+
+            <div class="highlight">
+                <strong>💡 Tại sao quan trọng?</strong>
+                Kafka đảm bảo messages có cùng key luôn đi đến cùng partition.
+                Điều này đảm bảo message ordering cho một đơn hàng cụ thể.
+            </div>
+
+            <h3>5.3 Outbox Pattern (Đã trình bày ở trên)</h3>
+
+            <h3>5.4 Fire-and-Forget với Acknowledgment</h3>
+            <p>Producers sử dụng synchronous send với timeout để đảm bảo delivery:</p>
+
+            <pre><code><span class="keyword">try</span> {
+    kafkaTemplate.send(Topic, key, event)
+                .get(5, TimeUnit.SECONDS);  <span class="comment">// Timeout 5s, throw exception nếu fail</span>
+} <span class="keyword">catch</span> (Exception e) {
+    <span class="keyword">throw new</span> RuntimeException(<span class="string">"Failed to publish..."</span>, e);
+}</code></pre>
+        </section>
+
+        <section id="configuration">
+            <h2>6. Configuration Details</h2>
+
+            <h3>6.1 Common Kafka Configuration (tất cả services)</h3>
+            <div class="config-item">
+                <strong>Bootstrap Server:</strong>
+                <code>spring.kafka.bootstrap-servers: localhost:9092</code>
+            </div>
+            <div class="config-item">
+                <strong>Consumer Group ID:</strong>
+                <code>groupId = "${spring.application.name}"</code>
+                <p><em>Mỗi service tự động có consumer group riêng dựa trên application name</em></p>
+            </div>
+
+            <h3>6.2 Service-specific Configurations</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Port</th>
+                        <th>Database</th>
+                        <th>Special Config</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>order-service</td>
+                        <td>8086</td>
+                        <td>5437/order_service</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>inventory-service</td>
+                        <td>8085</td>
+                        <td>5436/inventory_service</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>payment-service</td>
+                        <td>8087</td>
+                        <td>5438/payment_service</td>
+                        <td><code>payment.outbox.publish-fixed-delay-ms: 5000</code></td>
+                    </tr>
+                    <tr>
+                        <td>notification-service</td>
+                        <td>8088</td>
+                        <td>5439/notification_service</td>
+                        <td><code>notification.providers.email/sms: mock</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>6.3 Test Configuration</h3>
+            <p>Trong test environment, Kafka listeners bị disabled để test đơn vị:</p>
+
+            <pre><code><span class="comment"># application-test.yml</span>
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    <span class="json-key">listener</span>:
+      <span class="json-key">auto-startup</span>: <span class="json-string">false</span>  <span class="comment"># Disable auto-startup trong tests</span></code></pre>
+        </section>
+
+        <section id="testing">
+            <h2>7. Testing Strategy</h2>
+
+            <h3>7.1 Integration Tests</h3>
+            <p>Các integration tests sử dụng <code>@SpringBootTest</code> với <code>@ActiveProfiles("test")</code>:</p>
+
+            <pre><code><span class="comment">// Ví dụ: PaymentEventConsumerIT.java</span>
+@SpringBootTest
+@ActiveProfiles(<span class="string">"test"</span>)
+<span class="keyword">class</span> PaymentEventConsumerIT {
+    <span class="keyword">@Autowired</span>
+    <span class="keyword">private</span> PaymentEventConsumer consumer;
+
+    <span class="keyword">@Autowired</span>
+    <span class="keyword">private</span> OrderRepository orderRepository;
+
+    <span class="keyword">@Test</span>
+    <span class="keyword">void</span> paymentSuccessConfirmsOrderAndEmitsOrderConfirmed() {
+        <span class="comment">// Setup: Create pending order</span>
+        Order order = reservedOrder();
+        orderRepository.save(order);
+
+        <span class="comment">// Act: Simulate payment success event</span>
+        consumer.handleSucceeded(<span class="keyword">new</span> PaymentEvent(...));
+
+        <span class="comment">// Assert: Order status updated</span>
+        assertThat(orderRepository.findById(order.getId()))
+            .get()
+            .extracting(<span class="string">"status"</span>)
+            .isEqualTo(OrderStatus.CONFIRMED);
+
+        <span class="comment">// Verify: OrderConfirmed event published</span>
+        verify(eventProducer).publishOrderConfirmed(any());
+    }
+}</code></pre>
+
+            <h3>7.2 Unit Tests cho OutboxPublisher</h3>
+            <pre><code><span class="comment">// OutboxPublisherTest.java</span>
+<span class="keyword">@Test</span>
+<span class="keyword">void</span> publisherSendsEventToTopicAndMarksPublished() {
+    <span class="comment">// Given: Một pending outbox event</span>
+    OutboxEvent event = <span class="keyword">new</span> OutboxEvent(<span class="string">"Payment"</span>, uuid,
+                            <span class="string">"payment.succeeded"</span>, <span class="string">"{\"ok\":true}"</span>);
+    when(repository.findTop100ByStatusOrderByCreatedAtAsc(PENDING))
+        .thenReturn(List.of(event));
+
+    <span class="comment">// When: Publisher chạy</span>
+    publisher.publishPending();
+
+    <span class="comment">// Then: Event được gửi và mark là PUBLISHED</span>
+    verify(kafkaTemplate).send(<span class="string">"payment.succeeded"</span>, ...);
+    assertThat(event.getStatus()).isEqualTo(PUBLISHED);
+}
+
+<span class="keyword">@Test</span>
+<span class="keyword">void</span> publisherMarksFailedWhenKafkaSendThrows() {
+    <span class="comment">// Given: Kafka throw exception</span>
+    when(kafkaTemplate.send(...)).thenThrow(<span class="keyword">new</span> RuntimeException(<span class="string">"broker unavailable"</span>));
+
+    <span class="comment">// When</span>
+    publisher.publishPending();
+
+    <span class="comment">// Then: Event được mark là FAILED</span>
+    assertThat(event.getStatus()).isEqualTo(FAILED);
+}</code></pre>
+
+            <h3>7.3 Test Classes Available</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Test Class</th>
+                        <th>Service</th>
+                        <th>Coverage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PaymentEventConsumerIT</td>
+                        <td>order-service</td>
+                        <td>handleSucceeded, handleFailed</td>
+                    </tr>
+                    <tr>
+                        <td>InventoryEventConsumerIT</td>
+                        <td>order-service</td>
+                        <td>handleReserved, handleReservationFailed</td>
+                    </tr>
+                    <tr>
+                        <td>ReservationEventConsumerIT</td>
+                        <td>inventory-service</td>
+                        <td>reservation success/failure scenarios</td>
+                    </tr>
+                    <tr>
+                        <td>NotificationConsumerIT</td>
+                        <td>notification-service</td>
+                        <td>email và SMS notifications</td>
+                    </tr>
+                    <tr>
+                        <td>OutboxPublisherTest</td>
+                        <td>payment-service</td>
+                        <td>Unit test cho outbox publishing</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="architecture">
+            <h2>8. Architecture Diagram</h2>
+
+            <div class="diagram">┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           ECOM MICRO SERVICES - KAFKA ARCHITECTURE                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+                                        ┌───────────────┐
+                                        │    KAFKA      │
+                                        │  localhost    │
+                                        │   :9092       │
+                                        │               │
+                                        │  ┌─────────┐  │
+                                        │  │ KRaft   │  │
+                                        │  │ Mode    │  │
+                                        │  └─────────┘  │
+                                        └───────┬───────┘
+                                                │
+            ┌───────────────────────────────────┼───────────────────────────────────┐
+            │                                   │                                   │
+            ▼                                   ▼                                   ▼
+   ┌─────────────────┐              ┌─────────────────┐              ┌─────────────────┐
+   │  ORDER-SERVICE  │              │INVENTORY-SERVICE│              │ PAYMENT-SERVICE│
+   │    :8086        │              │    :8085         │              │    :8087        │
+   └────────┬────────┘              └────────┬─────────┘              └────────┬────────┘
+            │                                │                                │
+   ┌────────┴────────┐              ┌────────┴─────────┐              ┌────────┴────────┐
+   │                 │              │                │              │                 │
+   ▼                 ▼              ▼                │              ▼                 │
+┌────────────┐  ┌────────────┐  ┌────────────┐       │        ┌────────────┐           │
+│OrderEvent  │  │InventoryEvt│  │Reservation │       │        │  Outbox    │           │
+│Producer    │  │Consumer    │  │EventConsumer│      │        │  Publisher │           │
+└─────┬──────┘  └─────┬──────┘  └──────┬──────┘       │        └──────┬──────┘           │
+      │               │                │               │               │                  │
+      │               │                │               │               │                  │
+      │     ┌─────────┴─┐     ┌─────────┴───┐          │               │                  │
+      │     │  RESERVED │     │ RESERVATION │          │               │                  │
+      │     │  FAILED   │     │  REQUEST    │          │               │                  │
+      │     │  events  │     │  events     │          │               │                  │
+      │     │           │     │             │          │               │                  │
+      └─────┼───────────┘     └──────┬──────┘          │               │                  │
+            │                        │                 │               │                  │
+            ▼                        ▼                 │               ▼                  │
+    ┌─────────────────────────────────────────┐      │      ┌─────────────────┐        │
+    │           INVENTORY EVENTS              │      │      │  OUTBOX TABLE   │        │
+    │  (reservation-requested, reserved,     │      │      │  (PENDING events)│        │
+    │   reservation-failed)                   │      │      └────────┬────────┘        │
+    └─────────────────────────────────────────┘      │               │                  │
+                                                     │         SCHEDULED (5s)          │
+                                                     │               │                  │
+                                                     └───────────────┼──────────────────┘
+                                                                     │
+                                                                     ▼
+                                                     ┌─────────────────────────────┐
+                                                     │   PAYMENT EVENTS            │
+                                                     │   (payment.succeeded,       │
+                                                     │    payment.failed)          │
+                                                     └─────────────┬───────────────┘
+                                                                   │
+                                                                   ▼
+    ┌─────────────────────────────────────────────────────────────────────────────┐
+    │                            NOTIFICATION-SERVICE :8088                        │
+    │  ┌───────────────────┐  ┌───────────────────┐                              │
+    │  │ OrderEventConsumer │  │PaymentEventConsumer│                             │
+    │  │  • order.confirmed │  │  • payment.succeeded│                            │
+    │  │  • order.cancelled │  │  • payment.failed   │                             │
+    │  └─────────┬─────────┘  └─────────┬─────────┘                               │
+    │            │                       │                                          │
+    │            ▼                       ▼                                          │
+    │  ┌─────────────────────────────────────────┐                                │
+    │  │       NotificationService                │                                │
+    │  │  • sendEmail() • sendSms()              │                                │
+    │  └─────────────────────────────────────────┘                                │
+    └─────────────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>8.1 Complete Business Flow</h3>
+
+            <div class="topic-flow">
+                <div class="topic-flow-header">
+                    <span class="icon">🛒</span>
+                    ORDER CONFIRMATION FLOW (Happy Path)
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">1</span>
+                    <div class="flow-content">
+                        <strong>User tạo Order</strong><br>
+                        Order Service tạo order với status <code>PENDING</code>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">2</span>
+                    <div class="flow-content">
+                        <strong>Publish <code>inventory.reservation-requested</code></strong><br>
+                        OrderEventProducer gửi message đến Kafka topic
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">3</span>
+                    <div class="flow-content">
+                        <strong>Inventory Service nhận và xử lý</strong><br>
+                        ReservationEventConsumer nhận message, kiểm tra stock, reserve inventory
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">4</span>
+                    <div class="flow-content">
+                        <strong>Publish <code>inventory.reserved</code></strong><br>
+                        InventoryEventProducer gửi success event với reservationId
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">5</span>
+                    <div class="flow-content">
+                        <strong>Order Service cập nhật status</strong><br>
+                        InventoryEventConsumer nhận event, cập nhật order thành <code>RESERVED</code>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">6</span>
+                    <div class="flow-content">
+                        <strong>Payment Service xử lý payment</strong><br>
+                        User thanh toán, payment được lưu vào Outbox table (same transaction)
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">7</span>
+                    <div class="flow-content">
+                        <strong>OutboxPublisher gửi <code>payment.succeeded</code></strong><br>
+                        Scheduled task poll outbox, gửi event đến Kafka
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">8</span>
+                    <div class="flow-content">
+                        <strong>Order Service confirm order</strong><br>
+                        PaymentEventConsumer nhận event, gọi <code>markConfirmed()</code>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">9</span>
+                    <div class="flow-content">
+                        <strong>Publish <code>order.confirmed</code></strong><br>
+                        OrderEventProducer gửi confirmation event
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">10</span>
+                    <div class="flow-content">
+                        <strong>Notification Service gửi email</strong><br>
+                        OrderEventConsumer nhận event, gửi confirmation email cho user
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Generated for Ecom Micro Services Project</p>
+            <p>Kafka Version: 3.7.0 | Spring Kafka | KRaft Mode</p>
+        </footer>
+    </div>
+</body>
+</html>
