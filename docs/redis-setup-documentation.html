@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis Setup Documentation - Ecom Micro Services</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-red: #f85149;
+            --accent-orange: #d29922;
+            --accent-green: #3fb950;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --border-color: #30363d;
+            --code-bg: #0d1117;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle { color: var(--text-secondary); font-size: 1.1rem; }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 3rem 0 1.5rem;
+            color: var(--accent-red);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--accent-orange);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent-green);
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        .intro { font-size: 1.1rem; color: var(--text-primary); margin-bottom: 2rem; }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--accent-orange);
+        }
+
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        pre code {
+            padding: 0;
+            background: none;
+            color: var(--text-primary);
+        }
+
+        .comment { color: var(--text-muted); }
+        .keyword { color: var(--accent-purple); }
+        .string { color: var(--accent-green); }
+        .number { color: var(--accent-orange); }
+        .annotation { color: var(--accent-blue); }
+        .type { color: var(--accent-green); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        td { color: var(--text-secondary); }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .card h4 { margin-top: 0; color: var(--accent-blue); }
+
+        .card-red { border-left: 3px solid var(--accent-red); }
+        .card-orange { border-left: 3px solid var(--accent-orange); }
+        .card-green { border-left: 3px solid var(--accent-green); }
+
+        .highlight {
+            background: rgba(248, 81, 73, 0.1);
+            border-left: 3px solid var(--accent-red);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-green {
+            background: rgba(63, 185, 80, 0.1);
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .highlight-blue {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .file-path {
+            background: var(--bg-tertiary);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .toc h4 { margin-top: 0; color: var(--accent-red); }
+        .toc ol { margin: 0; padding-left: 1.5rem; }
+        .toc li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+        .toc a { color: var(--accent-blue); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .diagram {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            white-space: pre;
+            line-height: 1.4;
+        }
+
+        .service-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .service-card h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .badge-primary { background: rgba(88, 166, 255, 0.2); color: var(--accent-blue); }
+        .badge-red { background: rgba(248, 81, 73, 0.2); color: var(--accent-red); }
+        .badge-orange { background: rgba(210, 153, 34, 0.2); color: var(--accent-orange); }
+        .badge-green { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); }
+
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .flow-number {
+            width: 2rem;
+            height: 2rem;
+            background: var(--accent-red);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .flow-content {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Redis Setup Documentation</h1>
+            <p class="subtitle">Ecom Micro Services - Caching & Session Management</p>
+        </header>
+
+        <nav class="toc">
+            <h4>Mục lục</h4>
+            <ol>
+                <li><a href="#overview">Tổng quan</a></li>
+                <li><a href="#infrastructure">Infrastructure Configuration</a></li>
+                <li><a href="#services">Services sử dụng Redis</a></li>
+                <li><a href="#cart-service">Cart Service - Redis Data Store</a></li>
+                <li><a href="#product-service">Product Service - Caching</a></li>
+                <li><a href="#patterns">Design Patterns</a></li>
+                <li><a href="#testing">Testing Strategy</a></li>
+                <li><a href="#architecture">Architecture Diagram</a></li>
+            </ol>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Tổng quan</h2>
+            <p class="intro">
+                Project sử dụng <strong>Redis 7</strong> ( Alpine image) như một phần quan trọng trong hạ tầng micro services.
+                Redis được dùng cho <strong>caching</strong> (product-service) và <strong>data storage</strong> (cart-service).
+            </p>
+
+            <div class="card-grid">
+                <div class="card card-red">
+                    <h4>Redis Version</h4>
+                    <p>Redis 7 Alpine</p>
+                    <p>Port: 6379</p>
+                </div>
+                <div class="card card-orange">
+                    <h4>Primary Usage</h4>
+                    <p>Cart Storage (cart-service)</p>
+                    <p>Product Caching (product-service)</p>
+                </div>
+                <div class="card card-green">
+                    <h4>Key Patterns</h4>
+                    <p><code>cart:{userId}</code></p>
+                    <p><code>product-detail</code>, <code>product-search</code></p>
+                </div>
+                <div class="card">
+                    <h4>TTL Policy</h4>
+                    <p>Cart: 30 days</p>
+                    <p>Product cache: Default</p>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Redis Usage</th>
+                        <th>Pattern</th>
+                        <th>TTL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>cart-service</strong></td>
+                        <td>Primary data store</td>
+                        <td><code>StringRedisTemplate</code></td>
+                        <td>30 days</td>
+                    </tr>
+                    <tr>
+                        <td><strong>product-service</strong></td>
+                        <td>Caching</td>
+                        <td><code>@Cacheable</code></td>
+                        <td>Default</td>
+                    </tr>
+                    <tr>
+                        <td><strong>auth-service</strong></td>
+                        <td>Configured (not active)</td>
+                        <td>JWT-based auth</td>
+                        <td>N/A</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="infrastructure">
+            <h2>2. Infrastructure Configuration</h2>
+
+            <h3>2.1 Docker Compose Setup</h3>
+            <span class="file-path">BE/docker-compose.yml</span>
+
+            <pre><code><span class="keyword">redis:</span>
+  <span class="json-key">image</span>: <span class="string">redis:7-alpine</span>
+  <span class="json-key">ports</span>:
+    - <span class="string">"6379:6379"</span></code></pre>
+
+            <div class="highlight">
+                <strong>⚠️ Lưu ý:</strong> Redis được cấu hình với authentication mặc định (no password).
+                Cho production, nên thêm password protection và persistent storage.
+            </div>
+
+            <h3>2.2 Service-specific Redis Configuration</h3>
+
+            <h4>Auth Service</h4>
+            <span class="file-path">BE/config-repo/auth-service.yml</span>
+            <pre><code><span class="keyword">spring:</span>
+  <span class="annotation">data:</span>
+    <span class="annotation">redis:</span>
+      <span class="json-key">host</span>: <span class="string">localhost</span>
+      <span class="json-key">port</span>: <span class="number">6379</span></code></pre>
+
+            <h4>Cart Service</h4>
+            <span class="file-path">BE/config-repo/cart-service.yml</span>
+            <pre><code><span class="keyword">spring:</span>
+  <span class="annotation">application:</span>
+    <span class="json-key">name</span>: <span class="string">cart-service</span>
+  <span class="annotation">data:</span>
+    <span class="annotation">redis:</span>
+      <span class="json-key">host</span>: <span class="string">localhost</span>
+      <span class="json-key">port</span>: <span class="number">6379</span></code></pre>
+
+            <h4>Product Service</h4>
+            <span class="file-path">BE/config-repo/product-service.yml</span>
+            <pre><code><span class="keyword">spring:</span>
+  <span class="annotation">data:</span>
+    <span class="annotation">redis:</span>
+      <span class="json-key">host</span>: <span class="string">localhost</span>
+      <span class="json-key">port</span>: <span class="number">6379</span>
+  <span class="annotation">cache:</span>
+    <span class="json-key">type</span>: <span class="string">redis</span>   <span class="comment"># Enable Redis caching</span></code></pre>
+
+            <h3>2.3 Dependencies (pom.xml)</h3>
+
+            <p>Tất cả services cần Redis đều khai báo dependency:</p>
+
+            <pre><code><span class="comment">&lt;!-- Required for all Redis-using services --&gt;</span>
+&lt;<span class="keyword">dependency</span>&gt;
+    &lt;<span class="type">groupId</span>&gt;org.springframework.boot&lt;/<span class="type">groupId</span>&gt;
+    &lt;<span class="type">artifactId</span>&gt;spring-boot-starter-data-redis&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="keyword">dependency</span>&gt;
+
+<span class="comment">&lt;!-- Additional for product-service caching --&gt;</span>
+&lt;<span class="keyword">dependency</span>&gt;
+    &lt;<span class="type">groupId</span>&gt;org.springframework.boot&lt;/<span class="type">groupId</span>&gt;
+    &lt;<span class="type">artifactId</span>&gt;spring-boot-starter-cache&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="keyword">dependency</span>&gt;</code></pre>
+        </section>
+
+        <section id="services">
+            <h2>3. Services sử dụng Redis</h2>
+
+            <div class="diagram">┌─────────────────────────────────────────────────────────────────────────────┐
+│                          REDIS USAGE IN ECOM MICRO SERVICES                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                        ┌───────────────┐
+                        │     REDIS     │
+                        │  localhost    │
+                        │    :6379      │
+                        └───────┬───────┘
+                                │
+        ┌───────────────────────┼───────────────────────┬───────────────────────┐
+        │                       │                       │                       │
+        ▼                       ▼                       │                       │
+┌───────────────┐     ┌───────────────┐                │                       │
+│ CART-SERVICE   │     │PRODUCT-SERVICE│                │                       │
+│   :8084        │     │    :8083      │                │                       │
+│               │     │               │                │                       │
+│ ┌───────────┐ │     │ ┌───────────┐ │                │                       │
+│ │CartRepo   │ │     │ │@Enable    │ │                │                       │
+│ │           │ │     │ │Caching    │ │                │                       │
+│ │• findBy   │ │     │ │           │ │                │                       │
+│ │  UserId   │ │     │ │┌───────┐ │ │                │                       │
+│ │• save     │ │     │ ││Cache  │ │ │                │                       │
+│ │• delete   │ │     │ ││Manager│ │ │                │                       │
+│ └───────────┘ │     │ │└───────┘ │ │                │                       │
+│               │     │ │         │ │                │                       │
+│ Key Pattern:  │     │ │@Cacheable│                │                       │
+│ cart:{userId} │     │ │• search │ │                │                       │
+│               │     │ │• getProd│ │                │                       │
+│ TTL: 30 days  │     │ │         │ │                │                       │
+└───────────────┘     │ └───────────┘ │                │                       │
+                                │                       │                       │
+                                ▼                       │                       │
+                    ┌───────────────────────┐            │                       │
+                    │  Cache Names:        │            │                       │
+                    │  • product-detail    │            │                       │
+                    │  • product-search    │            │                       │
+                    └───────────────────────┘            │                       │
+                                                        │                       │
+                                                        ▼                       ▼
+                                            ┌─────────────────┐     ┌─────────────────┐
+                                            │  AUTH-SERVICE   │     │ OTHER SERVICES  │
+                                            │     :8082       │     │                 │
+                                            │                 │     │                 │
+                                            │ (JWT-based,     │     │ (No Redis       │
+                                            │  no session)    │     │  usage)         │
+                                            └─────────────────┘     └─────────────────┘</code></pre>
+        </section>
+
+        <section id="cart-service">
+            <h2>4. Cart Service - Redis Data Store</h2>
+
+            <div class="service-card">
+                <h3>
+                    cart-service
+                    <span class="badge badge-primary">Primary Data Store</span>
+                    <span class="badge badge-red">Port 8084</span>
+                </h3>
+
+                <p>
+                    Cart Service sử dụng Redis như <strong>primary data store</strong> cho shopping carts.
+                    Thay vì lưu trong database, carts được lưu hoàn toàn trong Redis với TTL 30 ngày.
+                </p>
+
+                <h4>4.1 CartRepository Implementation</h4>
+                <span class="file-path">BE/cart-service/src/main/java/com/ecom/cart/repository/CartRepository.java</span>
+
+                <pre><code><span class="keyword">package</span> com.ecom.cart.repository;
+
+<span class="keyword">import</span> com.ecom.cart.domain.Cart;
+<span class="keyword">import</span> com.fasterxml.jackson.core.JsonProcessingException;
+<span class="keyword">import</span> com.fasterxml.jackson.databind.ObjectMapper;
+<span class="keyword">import</span> org.springframework.data.redis.core.StringRedisTemplate;
+<span class="keyword">import</span> org.springframework.stereotype.Repository;
+
+<span class="keyword">import</span> java.time.Duration;
+<span class="keyword">import</span> java.util.Optional;
+<span class="keyword">import</span> java.util.UUID;
+
+<span class="annotation">@Repository</span>
+<span class="keyword">public class</span> CartRepository {
+    <span class="comment">// TTL: 30 days - cart data expires after this period</span>
+    <span class="keyword">private static final</span> Duration TTL = Duration.ofDays(<span class="number">30</span>);
+
+    <span class="keyword">private final</span> StringRedisTemplate redisTemplate;
+    <span class="keyword">private final</span> ObjectMapper objectMapper;
+
+    <span class="comment">// Constructor injection via Spring</span>
+    <span class="keyword">public</span> CartRepository(StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+        <span class="keyword">this</span>.redisTemplate = redisTemplate;
+        <span class="keyword">this</span>.objectMapper = objectMapper;
+    }
+
+    <span class="comment">// Find cart by userId - key pattern: "cart:{userId}"</span>
+    <span class="keyword">public</span> Optional&lt;Cart&gt; findByUserId(UUID userId) {
+        String value = redisTemplate.opsForValue().get(key(userId));
+        <span class="keyword">if</span> (value == <span class="keyword">null</span>) {
+            <span class="keyword">return</span> Optional.empty();
+        }
+        <span class="keyword">try</span> {
+            <span class="keyword">return</span> Optional.of(objectMapper.readValue(value, Cart.class));
+        } <span class="keyword">catch</span> (JsonProcessingException exception) {
+            <span class="keyword">throw new</span> IllegalStateException(<span class="string">"Unable to read cart "</span> + userId, exception);
+        }
+    }
+
+    <span class="comment">// Save cart with 30-day TTL</span>
+    <span class="keyword">public</span> Cart save(Cart cart) {
+        <span class="keyword">try</span> {
+            redisTemplate.opsForValue().set(
+                key(cart.getUserId()),
+                objectMapper.writeValueAsString(cart),
+                TTL
+            );
+            <span class="keyword">return</span> cart;
+        } <span class="keyword">catch</span> (JsonProcessingException exception) {
+            <span class="keyword">throw new</span> IllegalStateException(<span class="string">"Unable to write cart "</span> + cart.getUserId(), exception);
+        }
+    }
+
+    <span class="comment">// Delete cart by userId</span>
+    <span class="keyword">public void</span> deleteByUserId(UUID userId) {
+        redisTemplate.delete(key(userId));
+    }
+
+    <span class="comment">// Key generation: "cart:{userId}"</span>
+    <span class="keyword">private</span> String key(UUID userId) {
+        <span class="keyword">return</span> <span class="string">"cart:"</span> + userId;
+    }
+}</code></pre>
+
+                <div class="highlight-green">
+                    <strong>✓ Key Points:</strong>
+                    <ul>
+                        <li>Sử dụng <code>StringRedisTemplate</code> để lưu JSON string</li>
+                        <li>ObjectMapper serialize/deserialize Cart object</li>
+                        <li>Key pattern: <code>cart:{userId}</code></li>
+                        <li>TTL: 30 days - tự động xóa sau 30 ngày không hoạt động</li>
+                    </ul>
+                </div>
+
+                <h4>4.2 CartService - Business Logic</h4>
+                <span class="file-path">BE/cart-service/src/main/java/com/ecom/cart/service/CartService.java</span>
+
+                <pre><code><span class="keyword">package</span> com.ecom.cart.service;
+
+<span class="keyword">import</span> com.ecom.cart.client.ProductClient;
+<span class="keyword">import</span> com.ecom.cart.client.ProductSnapshot;
+<span class="keyword">import</span> com.ecom.cart.repository.CartRepository;
+<span class="keyword">import</span> org.springframework.stereotype.Service;
+
+<span class="keyword">import</span> java.util.UUID;
+
+<span class="annotation">@Service</span>
+<span class="keyword">public class</span> CartService {
+    <span class="keyword">private final</span> CartRepository cartRepository;
+    <span class="keyword">private final</span> ProductClient productClient;
+
+    <span class="keyword">public</span> CartService(CartRepository cartRepository, ProductClient productClient) {
+        <span class="keyword">this</span>.cartRepository = cartRepository;
+        <span class="keyword">this</span>.productClient = productClient;
+    }
+
+    <span class="comment">// Get cart - create new if not exists</span>
+    <span class="keyword">public</span> Cart getCart(UUID userId) {
+        <span class="keyword">return</span> cartRepository.findByUserId(userId)
+            .orElseGet(() -&gt; <span class="keyword">new</span> Cart(userId));
+    }
+
+    <span class="comment">// Add item to cart</span>
+    <span class="keyword">public</span> Cart addItem(UUID userId, UUID productId, <span class="keyword">int</span> quantity) {
+        validateQuantity(quantity);
+        Cart cart = getCart(userId);
+        cart.addOrUpdate(snapshot(productId), quantity);  <span class="comment">// Get fresh product snapshot</span>
+        <span class="keyword">return</span> cartRepository.save(cart);
+    }
+
+    <span class="comment">// Update quantity or remove if quantity = 0</span>
+    <span class="keyword">public</span> Cart updateQuantity(UUID userId, UUID productId, <span class="keyword">int</span> quantity) {
+        <span class="keyword">if</span> (quantity &lt; <span class="number">0</span> || quantity &gt; <span class="number">99</span>) {
+            <span class="keyword">throw new</span> InvalidCartQuantityException();
+        }
+        Cart cart = getCart(userId);
+        <span class="keyword">if</span> (quantity == <span class="number">0</span>) {
+            cart.remove(productId);
+        } <span class="keyword">else</span> {
+            cart.updateQuantity(snapshot(productId), quantity);
+        }
+        <span class="keyword">return</span> cartRepository.save(cart);
+    }
+
+    <span class="comment">// Remove single item</span>
+    <span class="keyword">public</span> Cart removeItem(UUID userId, UUID productId) {
+        Cart cart = getCart(userId);
+        cart.remove(productId);
+        <span class="keyword">return</span> cartRepository.save(cart);
+    }
+
+    <span class="comment">// Clear entire cart</span>
+    <span class="keyword">public void</span> clear(UUID userId) {
+        cartRepository.deleteByUserId(userId);
+    }
+
+    <span class="comment">// Get product snapshot from ProductService via Feign</span>
+    <span class="keyword">private</span> ProductSnapshot snapshot(UUID productId) {
+        ProductSnapshot product = productClient.getProduct(productId);
+        <span class="keyword">if</span> (product == <span class="keyword">null</span> || !product.active()) {
+            <span class="keyword">throw new</span> ProductUnavailableException(productId);
+        }
+        <span class="keyword">return</span> product;
+    }
+
+    <span class="keyword">private void</span> validateQuantity(<span class="keyword">int</span> quantity) {
+        <span class="keyword">if</span> (quantity &lt; <span class="number">1</span> || quantity &gt; <span class="number">99</span>) {
+            <span class="keyword">throw new</span> InvalidCartQuantityException();
+        }
+    }
+}</code></pre>
+
+                <h4>4.3 Cart Domain Model</h4>
+                <span class="file-path">BE/cart-service/src/main/java/com/ecom/cart/domain/Cart.java</span>
+
+                <pre><code><span class="keyword">package</span> com.ecom.cart.domain;
+
+<span class="keyword">import</span> com.ecom.cart.client.ProductSnapshot;
+<span class="keyword">import</span> java.math.BigDecimal;
+<span class="keyword">import</span> java.time.Instant;
+<span class="keyword">import</span> java.util.ArrayList;
+<span class="keyword">import</span> java.util.List;
+<span class="keyword">import</span> java.util.UUID;
+
+<span class="keyword">public class</span> Cart {
+    <span class="keyword">private</span> UUID userId;
+    <span class="keyword">private</span> List&lt;CartItem&gt; items = <span class="keyword">new</span> ArrayList&lt;&gt;();
+    <span class="keyword">private</span> Instant updatedAt;
+
+    <span class="comment">// Synchronized access for thread safety</span>
+    <span class="keyword">public synchronized void</span> addOrUpdate(ProductSnapshot product, <span class="keyword">int</span> quantity) {
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; items.size(); i++) {
+            CartItem item = items.get(i);
+            <span class="keyword">if</span> (item.getProductId().equals(product.id())) {
+                item.refresh(product, Math.min(<span class="number">99</span>, item.getQuantity() + quantity));
+                <span class="keyword">return</span>;
+            }
+        }
+        items.add(<span class="keyword">new</span> CartItem(product, quantity));
+        touch();
+    }
+
+    <span class="comment">// Remove item by productId</span>
+    <span class="keyword">public synchronized void</span> remove(UUID productId) {
+        items.removeIf(item -&gt; item.getProductId().equals(productId));
+        touch();
+    }
+
+    <span class="comment">// Calculate total price</span>
+    <span class="keyword">public synchronized</span> BigDecimal total() {
+        <span class="keyword">return</span> items.stream()
+            .map(CartItem::subtotal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    <span class="keyword">private void</span> touch() { updatedAt = Instant.now(); }
+
+    <span class="comment">// Getters and setters...</span>
+}</code></pre>
+
+                <div class="highlight">
+                    <strong>💡 Design Decisions:</strong>
+                    <ul>
+                        <li><strong>Thread Safety:</strong> Sử dụng <code>synchronized</code> methods để tránh race conditions</li>
+                        <li><strong>Product Snapshot:</strong> Lưu product data tại thời điểm thêm vào cart (không rely on live prices)</li>
+                        <li><strong>JSON Serialization:</strong> Cart được serialize thành JSON string trong Redis</li>
+                        <li><strong>Quantity Limits:</strong> Mỗi item tối đa 99 units</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="product-service">
+            <h2>5. Product Service - Caching</h2>
+
+            <div class="service-card">
+                <h3>
+                    product-service
+                    <span class="badge badge-green">Caching Layer</span>
+                    <span class="badge badge-red">Port 8083</span>
+                </h3>
+
+                <p>
+                    Product Service sử dụng Redis như <strong>caching layer</strong> cho product catalog.
+                    Sử dụng Spring's <code>@Cacheable</code> annotation với Redis là backend.
+                </p>
+
+                <h4>5.1 Enable Caching</h4>
+                <span class="file-path">BE/product-service/src/main/java/com/ecom/product/ProductServiceApplication.java</span>
+
+                <pre><code><span class="keyword">package</span> com.ecom.product;
+
+<span class="keyword">import</span> org.springframework.boot.SpringApplication;
+<span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+<span class="keyword">import</span> org.springframework.cache.annotation.EnableCaching;
+
+<span class="annotation">@EnableCaching</span>  <span class="comment">// Enable Spring Cache with Redis backend</span>
+<span class="annotation">@SpringBootApplication</span>
+<span class="keyword">public class</span> ProductServiceApplication {
+    <span class="keyword">public static void</span> main(String[] args) {
+        SpringApplication.run(ProductServiceApplication.class, args);
+    }
+}</code></pre>
+
+                <h4>5.2 Cacheable Methods</h4>
+                <span class="file-path">BE/product-service/src/main/java/com/ecom/product/service/ProductCatalogService.java</span>
+
+                <pre><code><span class="keyword">package</span> com.ecom.product.service;
+
+<span class="comment">// ... imports ...</span>
+
+<span class="annotation">@Service</span>
+<span class="annotation">@Transactional</span>
+<span class="keyword">public class</span> ProductCatalogService {
+    <span class="keyword">private final</span> CategoryRepository categoryRepository;
+    <span class="keyword">private final</span> ProductRepository productRepository;
+
+    <span class="comment">// Cache Evict: Xóa cache khi có thay đổi</span>
+    <span class="annotation">@CacheEvict</span>(cacheNames = {<span class="string">"product-detail"</span>, <span class="string">"product-search"</span>}, allEntries = <span class="keyword">true</span>)
+    <span class="keyword">public</span> ProductResponse createProduct(CreateProductRequest request) {
+        Category category = findCategory(request.categoryId());
+        Product product = <span class="keyword">new</span> Product(category, request.name(), request.slug(),
+                         request.description(), request.price(), request.imageUrl(), request.promotionTag());
+        <span class="keyword">return</span> toProductResponse(productRepository.save(product));
+    }
+
+    <span class="annotation">@CacheEvict</span>(cacheNames = {<span class="string">"product-detail"</span>, <span class="string">"product-search"</span>}, allEntries = <span class="keyword">true</span>)
+    <span class="keyword">public</span> ProductResponse updateProduct(UUID productId, UpdateProductRequest request) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -&gt; <span class="keyword">new</span> ProductNotFoundException(productId));
+        <span class="comment">// ... update logic ...</span>
+        <span class="keyword">return</span> toProductResponse(product);
+    }
+
+    <span class="annotation">@CacheEvict</span>(cacheNames = {<span class="string">"product-detail"</span>, <span class="string">"product-search"</span>}, allEntries = <span class="keyword">true</span>)
+    <span class="keyword">public</span> ProductResponse changeStatus(UUID productId, <span class="keyword">boolean</span> active) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -&gt; <span class="keyword">new</span> ProductNotFoundException(productId));
+        product.setActive(active);
+        <span class="keyword">return</span> toProductResponse(product);
+    }
+
+    <span class="comment">// Cacheable: Kết quả được cache lại</span>
+    <span class="annotation">@Cacheable</span>(
+        cacheNames = <span class="string">"product-search"</span>,
+        key = <span class="string">"#p0.toCacheKey() + ':' + #p1.pageNumber + ':' + #p1.pageSize"</span>
+    )
+    <span class="annotation">@Transactional(readOnly = true)</span>
+    <span class="keyword">public</span> Page&lt;ProductSummaryResponse&gt; search(ProductSearchCriteria criteria, Pageable pageable) {
+        <span class="keyword">return</span> productRepository.findAll(specification(criteria), pageable)
+            .map(<span class="keyword">this</span>::toProductSummary);
+    }
+
+    <span class="comment">// Cacheable: Cache by productId</span>
+    <span class="annotation">@Cacheable</span>(
+        cacheNames = <span class="string">"product-detail"</span>,
+        key = <span class="string">"#p0"</span>
+    )
+    <span class="annotation">@Transactional(readOnly = true)</span>
+    <span class="keyword">public</span> ProductResponse getProduct(UUID productId) {
+        <span class="keyword">return</span> productRepository.findByIdAndActiveTrue(productId)
+            .map(<span class="keyword">this</span>::toProductResponse)
+            .orElseThrow(() -&gt; <span class="keyword">new</span> ProductNotFoundException(productId));
+    }
+}</code></pre>
+
+                <div class="diagram">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PRODUCT CACHE FLOW                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    GET /products/{id}                              GET /products/search
+         │                                                 │
+         ▼                                                 ▼
+┌──────────────────┐                          ┌──────────────────┐
+│  Check Cache     │                          │  Check Cache     │
+│  "product-detail"│                          │"product-search"  │
+│  Key: {productId}│                          │Key: {criteria}   │
+└────────┬─────────┘                          └────────┬─────────┘
+         │                                             │
+    ┌────┴────┐                                   ┌────┴────┐
+    │ Hit?    │                                   │ Hit?    │
+    └────┬────┘                                   └────┬────┘
+         │                                             │
+    ┌────┴────┐                                   ┌────┴────┐
+    │ YES     │ NO                                 │ YES     │ NO
+    ▼         ▼                                   ▼         ▼
+┌────────┐ ┌──────────────┐                 ┌────────┐ ┌──────────────┐
+│ Return │ │ Query DB     │                 │ Return │ │ Query DB     │
+│ cached │ │ FindById     │                 │ cached │ │ findAll      │
+│ value  │ │              │                 │ value  │ │              │
+└────────┘ └──────┬───────┘                 └────────┘ └──────┬───────┘
+                  │                                     │
+                  ▼                                     │
+            ┌──────────────┐                            │
+            │ Store in     │                            │
+            │ cache        │                            │
+            └──────────────┘                            │
+                  │                                     ▼
+                  │                               ┌──────────────┐
+                  │                               │ Store in     │
+                  │                               │ cache        │
+                  │                               └──────────────┘
+                  ▼                                     │
+            ┌──────────────┐                            │
+            │ Return to    │                            │
+            │ client       │                            │
+            └──────────────┘                            │</code></pre>
+
+                <h4>5.3 Cache Configuration (application.yml)</h4>
+                <pre><code><span class="comment"># product-service config</span>
+spring:
+  <span class="annotation">cache:</span>
+    <span class="json-key">type</span>: <span class="string">redis</span>   <span class="comment"># Use Redis as cache backend</span>
+
+  <span class="annotation">data:</span>
+    <span class="annotation">redis:</span>
+      <span class="json-key">host</span>: <span class="string">localhost</span>
+      <span class="json-key">port</span>: <span class="number">6379</span></code></pre>
+
+                <h4>5.4 Cache Behavior Summary</h4>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cache Name</th>
+                            <th>Key Pattern</th>
+                            <th>Method</th>
+                            <th>Evict Triggers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>product-detail</code></td>
+                            <td><code>{productId}</code></td>
+                            <td><code>getProduct(UUID)</code></td>
+                            <td>createProduct, updateProduct, changeStatus</td>
+                        </tr>
+                        <tr>
+                            <td><code>product-search</code></td>
+                            <td><code>{criteria}:{page}:{size}</code></td>
+                            <td><code>search(Criteria, Pageable)</code></td>
+                            <td>createProduct, updateProduct, changeStatus</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="patterns">
+            <h2>6. Design Patterns</h2>
+
+            <h3>6.1 Repository Pattern (Cart Service)</h3>
+            <p>
+                Cart Service sử dụng Repository pattern để trừu tượng hóa Redis operations:
+            </p>
+
+            <pre><code><span class="comment">// CartRepository encapsulates all Redis operations
+// Caller (CartService) doesn't know about Redis implementation</span>
+
+<span class="annotation">@Repository</span>
+<span class="keyword">public class</span> CartRepository {
+    <span class="keyword">private final</span> StringRedisTemplate redisTemplate;
+
+    <span class="keyword">public</span> Optional&lt;Cart&gt; findByUserId(UUID userId) { ... }
+    <span class="keyword">public</span> Cart save(Cart cart) { ... }
+    <span class="keyword">public void</span> deleteByUserId(UUID userId) { ... }
+}</code></pre>
+
+            <div class="highlight-blue">
+                <strong>✓ Benefits:</strong>
+                <ul>
+                    <li>Separation of concerns - business logic không phụ thuộc vào Redis API</li>
+                    <li>Dễ test - có thể mock CartRepository</li>
+                    <li>Dễ thay đổi storage backend nếu cần</li>
+                </ul>
+            </div>
+
+            <h3>6.2 Declarative Caching (Product Service)</h3>
+            <p>
+                Sử dụng Spring's <code>@Cacheable</code> và <code>@CacheEvict</code> annotations
+                để declarative cache management:
+            </p>
+
+            <pre><code><span class="comment">// Cache result of this method</span>
+<span class="annotation">@Cacheable</span>(cacheNames = <span class="string">"product-detail"</span>, key = <span class="string">"#p0"</span>)
+<span class="keyword">public</span> ProductResponse getProduct(UUID productId) {
+    <span class="comment">// Only executes if cache miss</span>
+    <span class="keyword">return</span> productRepository.findByIdAndActiveTrue(productId)...;
+}
+
+<span class="comment">// Evict all entries from these caches</span>
+<span class="annotation">@CacheEvict</span>(cacheNames = {<span class="string">"product-detail"</span>, <span class="string">"product-search"</span>}, allEntries = <span class="keyword">true</span>)
+<span class="keyword">public</span> ProductResponse createProduct(...) {
+    <span class="comment">// Cache evicted after this method succeeds</span>
+}</code></pre>
+
+            <h3>6.3 TTL-based Expiration</h3>
+            <p>
+                Cart data có TTL 30 days - tự động cleanup nếu user không quay lại:
+            </p>
+
+            <pre><code><span class="keyword">private static final</span> Duration TTL = Duration.ofDays(<span class="number">30</span>);
+
+<span class="keyword">public</span> Cart save(Cart cart) {
+    redisTemplate.opsForValue().set(
+        key(cart.getUserId()),
+        objectMapper.writeValueAsString(cart),
+        TTL   <span class="comment">// Redis automatically deletes after 30 days</span>
+    );
+    <span class="keyword">return</span> cart;
+}</code></pre>
+
+            <h3>6.4 Thread Safety</h3>
+            <p>
+                Cart class sử dụng synchronized methods để đảm bảo thread safety
+                khi nhiều requests cùng modify cart:
+            </p>
+
+            <pre><code><span class="keyword">public class</span> Cart {
+    <span class="comment">// Synchronized access prevents race conditions</span>
+    <span class="keyword">public synchronized void</span> addOrUpdate(ProductSnapshot product, <span class="keyword">int</span> quantity) {
+        <span class="comment">// Critical section</span>
+    }
+
+    <span class="keyword">public synchronized void</span> remove(UUID productId) { ... }
+    <span class="keyword">public synchronized</span> BigDecimal total() { ... }
+}</code></pre>
+
+            <h3>6.5 Product Snapshot Pattern</h3>
+            <p>
+                Khi thêm item vào cart, product data được snapshot (copy) để không phụ thuộc vào
+                live product data:
+            </p>
+
+            <pre><code><span class="keyword">public</span> Cart addItem(UUID userId, UUID productId, <span class="keyword">int</span> quantity) {
+    <span class="comment">// Get current product data via Feign client</span>
+    ProductSnapshot product = productClient.getProduct(productId);
+
+    <span class="comment">// Store snapshot in cart - independent of future product changes</span>
+    cart.addOrUpdate(product, quantity);
+    <span class="keyword">return</span> cartRepository.save(cart);
+}</code></pre>
+        </section>
+
+        <section id="testing">
+            <h2>7. Testing Strategy</h2>
+
+            <h3>7.1 Test Configuration</h3>
+            <p>
+                Tests sử dụng in-memory cache thay vì Redis để đảm bảo test isolation:
+            </p>
+
+            <span class="file-path">BE/cart-service/src/test/resources/application-test.yml</span>
+            <pre><code><span class="keyword">spring:</span>
+  <span class="annotation">data:</span>
+    <span class="annotation">redis:</span>
+      <span class="annotation">repositories:</span>
+        <span class="json-key">enabled</span>: <span class="keyword">false</span>   <span class="comment"># Disable Redis repositories</span>
+  <span class="comment"># No Redis connection needed for unit tests</span></code></pre>
+
+            <span class="file-path">BE/product-service/src/test/resources/application-test.yml</span>
+            <pre><code><span class="keyword">spring:</span>
+  <span class="annotation">cache:</span>
+    <span class="json-key">type</span>: <span class="string">simple</span>   <span class="comment"># Use ConcurrentHashMap instead of Redis</span>
+  <span class="annotation">data:</span>
+    <span class="annotation">redis:</span>
+      <span class="annotation">repositories:</span>
+        <span class="json-key">enabled</span>: <span class="keyword">false</span></code></pre>
+
+            <h3>7.2 CartService Unit Tests</h3>
+            <span class="file-path">BE/cart-service/src/test/java/com/ecom/cart/service/CartServiceTest.java</span>
+
+            <pre><code><span class="annotation">@Test</span>
+<span class="keyword">void</span> clearDeletesRedisCartKey() {
+    UUID userId = UUID.randomUUID();
+
+    <span class="comment">// Call clear() - should invoke repository.deleteByUserId()</span>
+    cartService.clear(userId);
+
+    <span class="comment">// Verify repository method was called</span>
+    verify(cartRepository).deleteByUserId(userId);
+}</code></pre>
+
+            <h3>7.3 ProductService Cache Tests</h3>
+            <span class="file-path">BE/product-service/src/test/java/com/ecom/product/service/ProductCatalogServiceTest.java</span>
+
+            <pre><code><span class="annotation">@Test</span>
+<span class="keyword">void</span> updateProductEvictsCachedDetail() {
+    <span class="comment">// Create category and product</span>
+    <span class="keyword">var</span> category = catalogService.createCategory(...);
+    <span class="keyword">var</span> product = catalogService.createProduct(...);
+
+    <span class="comment">// First call - cache miss, should query DB</span>
+    assertThat(catalogService.getProduct(product.id()).name()).isEqualTo(<span class="string">"Fries"</span>);
+
+    <span class="comment">// Second call - cache hit, returns cached value</span>
+    assertThat(catalogService.getProduct(product.id()).name()).isEqualTo(<span class="string">"Fries"</span>);
+
+    <span class="comment">// Update product - should evict cache</span>
+    catalogService.updateProduct(product.id(), ...);
+
+    <span class="comment">// Third call - cache was evicted, queries DB again</span>
+    assertThat(catalogService.getProduct(product.id()).name()).isEqualTo(<span class="string">"Curly Fries"</span>);
+
+    <span class="comment">// Verify DB was queried (at least 2 times: initial + after evict)</span>
+    verify(productRepository, atLeast(<span class="number">2</span>)).findByIdAndActiveTrue(product.id());
+}</code></pre>
+
+            <h3>7.4 Test Summary Table</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Cache Type in Tests</th>
+                        <th>Mock Strategy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>cart-service</td>
+                        <td>No cache (uses mock repository)</td>
+                        <td>Mock CartRepository</td>
+                    </tr>
+                    <tr>
+                        <td>product-service</td>
+                        <td>simple (ConcurrentHashMap)</td>
+                        <td>Real service with simple cache</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="architecture">
+            <h2>8. Architecture Diagram</h2>
+
+            <h3>8.1 Complete Redis Architecture</h3>
+
+            <div class="diagram">┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    ECOM MICRO SERVICES - REDIS ARCHITECTURE                              │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+                          ┌─────────────────────────────────┐
+                          │              REDIS               │
+                          │      localhost:6379              │
+                          │                                 │
+                          │  ┌───────────────────────────┐  │
+                          │  │     KEY STORE            │  │
+                          │  │                          │  │
+                          │  │  cart:user-uuid-1 ────────┼──┼──► JSON Cart Data
+                          │  │  cart:user-uuid-2 ────────┼──┼──► JSON Cart Data
+                          │  │  cart:user-uuid-3 ────────┼──┼──► JSON Cart Data
+                          │  │                          │  │
+                          │  │  product-detail::uuid1 ──┼──┼──► Cached Product
+                          │  │  product-search::... ────┼──┼──► Cached Search
+                          │  │                          │  │
+                          │  └───────────────────────────┘  │
+                          └─────────────────────────────────┘
+                                          ▲
+          ┌─────────────────────────────────┼─────────────────────────────────┐
+          │                                 │                                 │
+          │                                 │                                 │
+          ▼                                 ▼                                 │
+    ┌─────────────┐                  ┌─────────────┐                          │
+    │CART-SERVICE │                  │PRODUCT-SERVICE                          │
+    │   :8084     │                  │    :8083                                │
+    │             │                  │                                         │
+    │ ┌─────────┐ │                  │ ┌─────────────────────────────────────┐ │
+    │ │CartRepo │ │                  │ │ @EnableCaching                      │ │
+    │ │         │ │                  │ │                                     │ │
+    │ │String   │ │                  │ │ ┌─────────────────────────────────┐ │ │
+    │ │Redis    │ │                  │ │ │ @Cacheable("product-detail")    │ │ │
+    │ │Template │ │                  │ │ │ getProduct()                    │ │ │
+    │ │         │ │                  │ │ └─────────────────────────────────┘ │ │
+    │ └─────────┘ │                  │ │                                     │ │
+    │             │                  │ │ ┌─────────────────────────────────┐ │ │
+    │ ┌─────────┐ │                  │ │ │ @Cacheable("product-search")    │ │ │
+    │ │Cart     │ │                  │ │ │ search()                       │ │ │
+    │ │Service  │ │                  │ │ └─────────────────────────────────┘ │ │
+    │ │         │ │                  │ │                                     │ │
+    │ └─────────┘ │                  │ │ ┌─────────────────────────────────┐ │ │
+    │             │                  │ │ │ @CacheEvict(...)                │ │ │
+    │ ┌─────────┐ │                  │ │ │ createProduct()                 │ │ │
+    │ │Cart     │ │                  │ │ │ updateProduct()                 │ │ │
+    │ │Controller│ │                  │ │ │ changeStatus()                  │ │ │
+    │ └─────────┘ │                  │ │ └─────────────────────────────────┘ │ │
+    └─────────────┘                  │ └─────────────────────────────────────┘ │
+                                     └─────────────────────────────────────────┘</code></pre>
+
+            <h3>8.2 Cart Data Flow</h3>
+
+            <div class="topic-flow">
+                <div class="topic-flow-header">
+                    <span class="icon">🛒</span>
+                    ADD ITEM TO CART FLOW
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">1</span>
+                    <div class="flow-content">
+                        <strong>User sends POST /cart/items</strong><br>
+                        Request: { userId, productId, quantity }
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">2</span>
+                    <div class="flow-content">
+                        <strong>CartService.addItem()</strong><br>
+                        Validates quantity (1-99), gets product snapshot via Feign
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">3</span>
+                    <div class="flow-content">
+                        <strong>Get or create Cart</strong><br>
+                        CartRepository.findByUserId(userId) → Redis lookup<br>
+                        If not found → new Cart(userId)
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">4</span>
+                    <div class="flow-content">
+                        <strong>Update Cart in memory</strong><br>
+                        cart.addOrUpdate(productSnapshot, quantity)
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">5</span>
+                    <div class="flow-content">
+                        <strong>Save to Redis</strong><br>
+                        CartRepository.save(cart) → Redis SET with 30-day TTL<br>
+                        Key: <code>cart:{userId}</code>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">6</span>
+                    <div class="flow-content">
+                        <strong>Return updated Cart</strong><br>
+                        JSON response to client
+                    </div>
+                </div>
+            </div>
+
+            <h3>8.3 Product Cache Flow</h3>
+
+            <div class="topic-flow">
+                <div class="topic-flow-header">
+                    <span class="icon">📦</span>
+                    GET PRODUCT (WITH CACHING) FLOW
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">1</span>
+                    <div class="flow-content">
+                        <strong>GET /products/{id}</strong><br>
+                        Controller receives request
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">2</span>
+                    <div class="flow-content">
+                        <strong>Check Cache</strong><br>
+                        Spring Cache checks Redis for key <code>product-detail::{id}</code>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">3</span>
+                    <div class="flow-content">
+                        <strong>Cache HIT?</strong><br>
+                        YES → Return cached ProductResponse immediately<br>
+                        NO → Continue to step 4
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">4</span>
+                    <div class="flow-content">
+                        <strong>Query Database</strong><br>
+                        ProductRepository.findByIdAndActiveTrue(id)
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">5</span>
+                    <div class="flow-content">
+                        <strong>Store in Cache</strong><br>
+                        Redis SET with key <code>product-detail::{id}</code>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">6</span>
+                    <div class="flow-content">
+                        <strong>Return ProductResponse</strong><br>
+                        Next request for same product will hit cache
+                    </div>
+                </div>
+            </div>
+
+            <h3>8.4 Cache Invalidation Flow</h3>
+
+            <div class="topic-flow">
+                <div class="topic-flow-header">
+                    <span class="icon">🔄</span>
+                    UPDATE PRODUCT → CACHE INVALIDATION
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">1</span>
+                    <div class="flow-content">
+                        <strong>PUT /products/{id}</strong><br>
+                        Admin updates product data
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">2</span>
+                    <div class="flow-content">
+                        <strong>@CacheEvict triggered</strong><br>
+                        <code>@CacheEvict(cacheNames={"product-detail","product-search"}, allEntries=true)</code>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">3</span>
+                    <div class="flow-content">
+                        <strong>Cache cleared</strong><br>
+                        Both <code>product-detail::*</code> and <code>product-search::*</code> evicted
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-number">4</span>
+                    <div class="flow-content">
+                        <strong>Next requests rebuild cache</strong><br>
+                        getProduct() and search() will cache new data
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Generated for Ecom Micro Services Project</p>
+            <p>Redis Version: 7 Alpine | Spring Data Redis | Spring Cache</p>
+        </footer>
+    </div>
+</body>
+</html>
