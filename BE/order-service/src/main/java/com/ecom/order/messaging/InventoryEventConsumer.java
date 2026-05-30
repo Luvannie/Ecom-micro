@@ -4,7 +4,6 @@ import com.ecom.order.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -21,8 +20,7 @@ public class InventoryEventConsumer {
     @KafkaListener(
         topics = OrderTopics.INVENTORY_RESERVED,
         groupId = "${spring.application.name}",
-        concurrency = "3",
-        errorHandler = "kafkaErrorHandler"
+        concurrency = "3"
     )
     public void handleReserved(ReservationResult event) {
         log.info("Processing INVENTORY_RESERVED for orderId={}, reservationId={}",
@@ -40,8 +38,7 @@ public class InventoryEventConsumer {
     @KafkaListener(
         topics = OrderTopics.INVENTORY_RESERVATION_FAILED,
         groupId = "${spring.application.name}",
-        concurrency = "3",
-        errorHandler = "kafkaErrorHandler"
+        concurrency = "3"
     )
     public void handleReservationFailed(ReservationResult event) {
         log.info("Processing INVENTORY_RESERVATION_FAILED for orderId={}", event.orderId());

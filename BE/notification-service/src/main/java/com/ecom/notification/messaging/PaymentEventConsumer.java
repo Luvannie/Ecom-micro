@@ -22,8 +22,7 @@ public class PaymentEventConsumer {
     @KafkaListener(
         topics = "payment.succeeded",
         groupId = "${spring.application.name}",
-        concurrency = "2",
-        errorHandler = "kafkaErrorHandler"
+        concurrency = "2"
     )
     public void handleSucceeded(PaymentEvent event) {
         log.info("Processing PAYMENT_SUCCEEDED for paymentId={}, orderId={}",
@@ -42,8 +41,7 @@ public class PaymentEventConsumer {
     @KafkaListener(
         topics = "payment.failed",
         groupId = "${spring.application.name}",
-        concurrency = "2",
-        errorHandler = "kafkaErrorHandler"
+        concurrency = "2"
     )
     public void handleFailed(PaymentEvent event) {
         log.info("Processing PAYMENT_FAILED for paymentId={}, orderId={}",

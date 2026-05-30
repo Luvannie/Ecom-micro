@@ -22,8 +22,7 @@ public class OrderEventConsumer {
     @KafkaListener(
         topics = "order.confirmed",
         groupId = "${spring.application.name}",
-        concurrency = "2",
-        errorHandler = "kafkaErrorHandler"
+        concurrency = "2"
     )
     public void handleConfirmed(OrderConfirmedEvent event) {
         log.info("Processing ORDER_CONFIRMED for orderId={}, userId={}", event.orderId(), event.userId());
@@ -40,8 +39,7 @@ public class OrderEventConsumer {
     @KafkaListener(
         topics = "order.cancelled",
         groupId = "${spring.application.name}",
-        concurrency = "2",
-        errorHandler = "kafkaErrorHandler"
+        concurrency = "2"
     )
     public void handleCancelled(OrderCancelledEvent event) {
         log.info("Processing ORDER_CANCELLED for orderId={}, userId={}", event.orderId(), event.userId());

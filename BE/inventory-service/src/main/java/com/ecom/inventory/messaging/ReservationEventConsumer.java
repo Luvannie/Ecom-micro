@@ -22,8 +22,7 @@ public class ReservationEventConsumer {
     @KafkaListener(
         topics = InventoryTopics.RESERVATION_REQUESTED,
         groupId = "${spring.application.name}",
-        concurrency = "3",
-        errorHandler = "kafkaErrorHandler"
+        concurrency = "3"
     )
     public void handleReservationRequested(ReservationRequest request) {
         log.info("Processing RESERVATION_REQUESTED for orderId={}, itemCount={}",
