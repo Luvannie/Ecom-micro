@@ -5,16 +5,35 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://localhost:5438/payment_service
-    username: payment_user
-    password: payment_password
+    url: jdbc:postgresql://${PAYMENT_DB_HOST:-payment-db}:5432/${PAYMENT_DB_NAME:-payment_service}
+    username: ${PAYMENT_DB_USER:-payment_user}
+    password: ${PAYMENT_DB_PASSWORD:?PAYMENT_DB_PASSWORD is required}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
   flyway:
     enabled: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  actuator:
+    health:
+      db: true
 
 payment:
   outbox:

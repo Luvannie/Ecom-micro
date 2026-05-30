@@ -9,6 +9,7 @@ export default function Home() {
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -23,15 +24,20 @@ export default function Home() {
 
   const handleAddToCart = async (productId: string) => {
     if (!user) { navigate('/login'); return; }
+    setError(null);
     try {
       await cartApi.addItem({ productId, quantity: 1 });
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) {
+      setError(e.message || 'Failed to add item to cart');
+    }
   };
 
   if (loading) return <div className="loading">Loading...</div>;
 
   return (
     <div className="home-page">
+      {error && <div className="error-msg" onClick={() => setError(null)}>{error}</div>}
+
       <section className="hero">
         <h1>Welcome to Ecom Food Delivery</h1>
         <p>Fresh food delivered to your door</p>

@@ -12,6 +12,7 @@ public class Cart {
     private UUID userId;
     private List<CartItem> items = new ArrayList<>();
     private Instant updatedAt;
+    private int version = 0;  // For optimistic locking
 
     public Cart() {
     }
@@ -19,6 +20,7 @@ public class Cart {
     public Cart(UUID userId) {
         this.userId = userId;
         this.updatedAt = Instant.now();
+        this.version = 1;
     }
 
     public synchronized void addOrUpdate(ProductSnapshot product, int quantity) {
@@ -57,9 +59,11 @@ public class Cart {
     }
 
     private void touch() {
-        updatedAt = Instant.now();
+        this.updatedAt = Instant.now();
+        // Note: version is incremented by the repository on save
     }
 
+    // Getters and setters
     public UUID getUserId() {
         return userId;
     }
@@ -82,5 +86,13 @@ public class Cart {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

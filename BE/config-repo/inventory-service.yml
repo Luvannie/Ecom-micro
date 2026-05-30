@@ -5,13 +5,41 @@ spring:
   application:
     name: inventory-service
   datasource:
-    url: jdbc:postgresql://localhost:5436/inventory_service
-    username: inventory_user
-    password: inventory_password
+    url: jdbc:postgresql://${INVENTORY_DB_HOST:-inventory-db}:5432/${INVENTORY_DB_NAME:-inventory_service}
+    username: ${INVENTORY_DB_USER:-inventory_user}
+    password: ${INVENTORY_DB_PASSWORD:?INVENTORY_DB_PASSWORD is required}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
   flyway:
     enabled: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+    listener:
+      concurrency: 3
+      ack-mode: RECORD
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  actuator:
+    health:
+      db: true

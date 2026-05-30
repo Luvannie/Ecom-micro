@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -58,14 +60,25 @@ function AppContent() {
       <Navbar />
       <main className="container">
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login onNavigate={navigate} />} />
           <Route path="/register" element={<Register onNavigate={navigate} />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart onNavigate={navigate} />} />
-          <Route path="/checkout" element={<Checkout onNavigate={navigate} onOrderComplete={() => {}} />} />
-          <Route path="/orders" element={<Orders onNavigate={navigate} />} />
-          <Route path="/profile" element={<Profile onNavigate={navigate} />} />
+
+          {/* Protected routes - require authentication */}
+          <Route path="/cart" element={
+            <ProtectedRoute><Cart onNavigate={navigate} /></ProtectedRoute>
+          } />
+          <Route path="/checkout" element={
+            <ProtectedRoute><Checkout onNavigate={navigate} onOrderComplete={() => {}} /></ProtectedRoute>
+          } />
+          <Route path="/orders" element={
+            <ProtectedRoute><Orders onNavigate={navigate} /></ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute><Profile onNavigate={navigate} /></ProtectedRoute>
+          } />
         </Routes>
       </main>
     </div>
@@ -75,9 +88,11 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

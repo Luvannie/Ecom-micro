@@ -14,6 +14,7 @@ export default function Products() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     categoryApi.getAll().then(r => setCategories(r.categories || [])).catch(() => {});
@@ -21,7 +22,10 @@ export default function Products() {
 
   useEffect(() => {
     setLoading(true);
-    const params: any = { page, size: 12 };
+    const params: { page: number; size: number; categoryId?: string; keyword?: string } = {
+      page,
+      size: 12
+    };
     if (selectedCategory) params.categoryId = selectedCategory;
     if (keyword) params.keyword = keyword;
     productApi.getAll(params)
@@ -35,10 +39,13 @@ export default function Products() {
 
   const handleAddToCart = async (productId: string) => {
     if (!user) { navigate('/login'); return; }
+    setError(null);
     setAddingToCart(productId);
     try {
       await cartApi.addItem({ productId, quantity: 1 });
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) {
+      setError(e.message || 'Failed to add item to cart');
+    }
     finally { setAddingToCart(null); }
   };
 
@@ -52,6 +59,8 @@ export default function Products() {
   return (
     <div className="products-page">
       <h2>Products</h2>
+      {error && <div className="error-msg" onClick={() => setError(null)}>{error}</div>}
+
       <div className="filters">
         <form onSubmit={handleSearch} className="search-form">
           <input name="keyword" type="text" className="input" placeholder="Search products..." />

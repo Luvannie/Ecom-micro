@@ -5,8 +5,25 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: true
+    kafka:
+      enabled: true
 
 logging:
   pattern:
     level: "%5p [${spring.application.name:unknown},%X{correlationId:-}]"
+  level:
+    root: INFO
+    com.ecom: DEBUG
+    org.springframework.web: INFO
+    org.apache.kafka: WARN

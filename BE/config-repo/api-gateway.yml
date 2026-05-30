@@ -51,7 +51,7 @@ spring:
 security:
   jwt:
     issuer: ecom-auth-service
-    secret: local-development-secret-must-be-32-bytes
+    secret: ${JWT_SECRET:?JWT_SECRET environment variable is required}
   public-paths:
     - /api/auth/register
     - /api/auth/login

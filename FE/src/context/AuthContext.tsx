@@ -14,6 +14,7 @@ interface AuthContextType {
   register: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  refreshToken: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -36,10 +37,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = await userApi.getMe();
       setUser(userData);
     } catch {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      // Token might be expired, try refreshing
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshToken = async (): Promise<boolean> => {
+    const refreshTokenValue = localStorage.getItem('refreshToken');
+    if (!refreshTokenValue) {
+      return false;
+    }
+
+    try {
+      const data = await authApi.refresh({ refreshToken: refreshTokenValue });
+      localStorage.setItem('accessToken', data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      // Refresh user data with new token
+      const userData = await userApi.getMe();
+      setUser(userData);
+      return true;
+    } catch {
+      // Refresh failed, credentials are invalid
+      return false;
     }
   };
 
@@ -61,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, refreshToken }}>
       {children}
     </AuthContext.Provider>
   );

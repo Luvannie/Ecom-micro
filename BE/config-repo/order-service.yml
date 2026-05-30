@@ -5,13 +5,41 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5437/order_service
-    username: order_user
-    password: order_password
+    url: jdbc:postgresql://${ORDER_DB_HOST:-order-db}:5432/${ORDER_DB_NAME:-order_service}
+    username: ${ORDER_DB_USER:-order_user}
+    password: ${ORDER_DB_PASSWORD:?ORDER_DB_PASSWORD is required}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
   flyway:
     enabled: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+    listener:
+      concurrency: 3
+      ack-mode: RECORD
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  actuator:
+    health:
+      db: true

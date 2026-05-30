@@ -47,9 +47,9 @@ public class OrderController {
     }
 
     @PostMapping("/api/orders/{orderId}/cancel")
-    public OrderResponse cancel(HttpServletRequest request, @PathVariable("orderId") UUID orderId) {
+    public ResponseEntity<OrderResponse> cancel(HttpServletRequest request, @PathVariable("orderId") UUID orderId) {
         OrderResponse order = orderService.cancelOrder(GatewayUserContext.from(request).userId(), orderId);
         eventProducer.publishOrderCancelled(order);
-        return order;
+        return ResponseEntity.ok(order);
     }
 }

@@ -5,17 +5,34 @@ spring:
   application:
     name: product-service
   datasource:
-    url: jdbc:postgresql://localhost:5435/product_service
-    username: product_user
-    password: product_password
+    url: jdbc:postgresql://${PRODUCT_DB_HOST:-product-db}:5432/${PRODUCT_DB_NAME:-product_service}
+    username: ${PRODUCT_DB_USER:-product_user}
+    password: ${PRODUCT_DB_PASSWORD:?PRODUCT_DB_PASSWORD is required}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
   flyway:
     enabled: true
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:-redis}
+      port: ${REDIS_PORT:-6379}
+      password: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
   cache:
     type: redis
+  actuator:
+    health:
+      db: true

@@ -102,10 +102,7 @@ public class InventoryService {
         Map<UUID, ProductStock> lockedStocks = new LinkedHashMap<>();
         for (UUID productId : quantitiesByProduct.keySet()) {
             ProductStock stock = productStockRepository.findLockedByProductId(productId)
-                    .orElseGet(() -> {
-                        ProductStock newStock = new ProductStock(productId, 0);
-                        return productStockRepository.save(newStock);
-                    });
+                    .orElseThrow(() -> new StockNotFoundException(productId));
             lockedStocks.put(productId, stock);
         }
 

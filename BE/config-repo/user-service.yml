@@ -5,11 +5,27 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:postgresql://localhost:5434/user_service
-    username: user_user
-    password: user_password
+    url: jdbc:postgresql://${USER_DB_HOST:-user-db}:5432/${USER_DB_NAME:-user_service}
+    username: ${USER_DB_USER:-user_user}
+    password: ${USER_DB_PASSWORD:?USER_DB_PASSWORD is required}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
   flyway:
     enabled: true
+  actuator:
+    health:
+      db: true
