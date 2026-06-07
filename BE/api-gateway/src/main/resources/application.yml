@@ -6,6 +6,9 @@ spring:
     name: api-gateway
   config:
     import: optional:configserver:http://localhost:8888
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
   cloud:
     gateway:
       discovery:
@@ -34,7 +37,41 @@ spring:
         - name: RequestSize
           args:
             maxSize: 10485760  # 10MB max request size
-        # Rate limiting would go here with additional dependencies
+      # Per-route rate limiting
+      routes:
+        - id: auth-strict
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/register,/api/auth/login
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 5
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
+        - id: auth-refresh-normal
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/refresh
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 30
+                redis-rate-limiter.burstCapacity: 60
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
+        - id: products-normal
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/**,/api/categories/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 30
+                redis-rate-limiter.burstCapacity: 60
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
 
 eureka:
   client:
