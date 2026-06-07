@@ -10,7 +10,7 @@ public record ErrorResponse(
         String correlationId,
         Instant timestamp
 ) {
-    public static ErrorResponse of(String code, String message, String correlationId) {
-        return new ErrorResponse(code, message, List.of(), correlationId, Instant.now());
+    public static ErrorResponse of(String code, String message, List<String> details, String correlationId, Instant timestamp) {
+        return new ErrorResponse(code, message, details, correlationId, timestamp);
     }
 }
