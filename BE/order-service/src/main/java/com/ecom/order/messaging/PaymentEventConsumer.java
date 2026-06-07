@@ -1,5 +1,6 @@
 package com.ecom.order.messaging;
 
+import com.ecom.common.messaging.KafkaListenerResilienceWrapper;
 import com.ecom.order.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +15,14 @@ public class PaymentEventConsumer {
     private static final Logger log = LoggerFactory.getLogger(PaymentEventConsumer.class);
     private final OrderService orderService;
     private final OrderEventProducer eventProducer;
+    private final KafkaListenerResilienceWrapper wrapper;
 
-    public PaymentEventConsumer(OrderService orderService, OrderEventProducer eventProducer) {
+    public PaymentEventConsumer(OrderService orderService,
+                                OrderEventProducer eventProducer,
+                                KafkaListenerResilienceWrapper wrapper) {
         this.orderService = orderService;
         this.eventProducer = eventProducer;
+        this.wrapper = wrapper;
     }
 
     @KafkaListener(
@@ -27,13 +32,15 @@ public class PaymentEventConsumer {
     )
     public void handleSucceeded(PaymentEvent event) {
         log.info("Processing PAYMENT_SUCCEEDED for orderId={}", event.orderId());
-        try {
-            eventProducer.publishOrderConfirmed(orderService.markConfirmed(event.orderId()));
-            log.info("Successfully processed PAYMENT_SUCCEEDED for orderId={}", event.orderId());
-        } catch (Exception e) {
-            log.error("Failed to process PAYMENT_SUCCEEDED for orderId={}: {}", event.orderId(), e.getMessage());
-            throw e;
-        }
+        wrapper.execute(
+            () -> {
+                eventProducer.publishOrderConfirmed(orderService.markConfirmed(event.orderId()));
+                log.info("Successfully processed PAYMENT_SUCCEEDED for orderId={}", event.orderId());
+                return null;
+            },
+            ex -> log.warn("Timeout/breaker open for order.payment-succeeded (orderId={}): {}",
+                           event.orderId(), ex.getMessage())
+        );
     }
 
     @KafkaListener(
@@ -43,13 +50,15 @@ public class PaymentEventConsumer {
     )
     public void handleFailed(PaymentEvent event) {
         log.info("Processing PAYMENT_FAILED for orderId={}", event.orderId());
-        try {
-            eventProducer.publishOrderCancelled(orderService.cancelAfterPaymentFailure(event.orderId()));
-            log.info("Successfully processed PAYMENT_FAILED for orderId={}", event.orderId());
-        } catch (Exception e) {
-            log.error("Failed to process PAYMENT_FAILED for orderId={}: {}", event.orderId(), e.getMessage());
-            throw e;
-        }
+        wrapper.execute(
+            () -> {
+                eventProducer.publishOrderCancelled(orderService.cancelAfterPaymentFailure(event.orderId()));
+                log.info("Successfully processed PAYMENT_FAILED for orderId={}", event.orderId());
+                return null;
+            },
+            ex -> log.warn("Timeout/breaker open for order.payment-failed (orderId={}): {}",
+                           event.orderId(), ex.getMessage())
+        );
     }
 
     public record PaymentEvent(UUID paymentId, UUID orderId, UUID userId, BigDecimal amount, String currency,

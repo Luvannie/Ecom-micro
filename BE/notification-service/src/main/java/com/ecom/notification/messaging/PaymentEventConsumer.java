@@ -1,5 +1,6 @@
 package com.ecom.notification.messaging;
 
+import com.ecom.common.messaging.KafkaListenerResilienceWrapper;
 import com.ecom.notification.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,12 @@ import java.util.UUID;
 public class PaymentEventConsumer {
     private static final Logger log = LoggerFactory.getLogger(PaymentEventConsumer.class);
     private final NotificationService notificationService;
+    private final KafkaListenerResilienceWrapper wrapper;
 
-    public PaymentEventConsumer(NotificationService notificationService) {
+    public PaymentEventConsumer(NotificationService notificationService,
+                                KafkaListenerResilienceWrapper wrapper) {
         this.notificationService = notificationService;
+        this.wrapper = wrapper;
     }
 
     @KafkaListener(
@@ -27,15 +31,16 @@ public class PaymentEventConsumer {
     public void handleSucceeded(PaymentEvent event) {
         log.info("Processing PAYMENT_SUCCEEDED for paymentId={}, orderId={}",
                 event.paymentId(), event.orderId());
-        try {
-            notificationService.sendEmail(event.userId(), recipient(event.userId()), "payment-succeeded",
-                    model(event));
-            log.info("Successfully sent PAYMENT_SUCCEEDED email for paymentId={}", event.paymentId());
-        } catch (Exception e) {
-            log.error("Failed to process PAYMENT_SUCCEEDED for paymentId={}: {}",
-                    event.paymentId(), e.getMessage());
-            throw e;
-        }
+        wrapper.execute(
+            () -> {
+                notificationService.sendEmail(event.userId(), recipient(event.userId()), "payment-succeeded",
+                        model(event));
+                log.info("Successfully sent PAYMENT_SUCCEEDED email for paymentId={}", event.paymentId());
+                return null;
+            },
+            ex -> log.warn("Timeout/breaker open for notification.payment-succeeded (paymentId={}): {}",
+                           event.paymentId(), ex.getMessage())
+        );
     }
 
     @KafkaListener(
@@ -46,15 +51,16 @@ public class PaymentEventConsumer {
     public void handleFailed(PaymentEvent event) {
         log.info("Processing PAYMENT_FAILED for paymentId={}, orderId={}",
                 event.paymentId(), event.orderId());
-        try {
-            notificationService.sendEmail(event.userId(), recipient(event.userId()), "payment-failed",
-                    model(event));
-            log.info("Successfully sent PAYMENT_FAILED email for paymentId={}", event.paymentId());
-        } catch (Exception e) {
-            log.error("Failed to process PAYMENT_FAILED for paymentId={}: {}",
-                    event.paymentId(), e.getMessage());
-            throw e;
-        }
+        wrapper.execute(
+            () -> {
+                notificationService.sendEmail(event.userId(), recipient(event.userId()), "payment-failed",
+                        model(event));
+                log.info("Successfully sent PAYMENT_FAILED email for paymentId={}", event.paymentId());
+                return null;
+            },
+            ex -> log.warn("Timeout/breaker open for notification.payment-failed (paymentId={}): {}",
+                           event.paymentId(), ex.getMessage())
+        );
     }
 
     private Map<String, Object> model(PaymentEvent event) {
