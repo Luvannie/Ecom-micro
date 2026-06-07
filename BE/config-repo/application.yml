@@ -27,3 +27,57 @@ logging:
     com.ecom: DEBUG
     org.springframework.web: INFO
     org.apache.kafka: WARN
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: true
+        recordExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.ResourceAccessException
+          - feign.FeignException
+    instances:
+      productService:    { baseConfig: default }
+      cartService:       { baseConfig: default }
+      inventoryService:  { baseConfig: default }
+
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 200ms
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.io.IOException
+          - feign.FeignException
+    instances:
+      productService:    { baseConfig: default }
+      cartService:       { baseConfig: default }
+      inventoryService:  { baseConfig: default }
+
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 0
+    instances:
+      productService:    { baseConfig: default }
+      cartService:       { baseConfig: default }
+      inventoryService:  { baseConfig: default }
+
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+    instances:
+      kafkaConsumer: { baseConfig: default }
