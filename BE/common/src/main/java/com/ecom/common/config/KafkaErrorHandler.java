@@ -24,7 +24,7 @@ public class KafkaErrorHandler {
      * Configured with retry logic and logging for failed messages.
      */
     @Bean
-    public DefaultErrorHandler kafkaErrorHandler() {
+    public DefaultErrorHandler defaultKafkaErrorHandler() {
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(
                 (record, exception) -> {
                     // This runs after all retries are exhausted

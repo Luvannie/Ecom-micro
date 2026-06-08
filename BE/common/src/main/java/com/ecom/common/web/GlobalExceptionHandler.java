@@ -1,5 +1,8 @@
 package com.ecom.common.web;
 
+import io.github.resilience4j.bulkhead.BulkheadFullException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +90,40 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
+    @ExceptionHandler({ServiceUnavailableException.class, CallNotPermittedException.class,
+                       BulkheadFullException.class, java.io.IOException.class})
+    public ResponseEntity<ErrorResponse> handleDownstreamUnavailable(Exception ex, HttpServletRequest request) {
+        String downstream = ex instanceof ServiceUnavailableException sue
+            ? sue.getDownstreamService() : "unknown";
+        log.warn("Downstream unavailable: {} | path={} | reason={}",
+                 downstream, request.getRequestURI(), ex.getMessage());
+        ErrorResponse body = ErrorResponse.of(
+            "SERVICE_UNAVAILABLE",
+            "Downstream service temporarily unavailable. Please retry.",
+            List.of(),
+            getCorrelationId(request),
+            java.time.Instant.now()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                             .header("Retry-After", "5")
+                             .body(body);
+    }
+
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<ErrorResponse> handleRateLimit(RequestNotPermitted ex, HttpServletRequest request) {
+        log.warn("Rate limit exceeded: {} | path={}", ex.getMessage(), request.getRequestURI());
+        ErrorResponse body = ErrorResponse.of(
+            "RATE_LIMITED",
+            "Rate limit exceeded. Please slow down.",
+            List.of(),
+            getCorrelationId(request),
+            java.time.Instant.now()
+        );
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                             .header("Retry-After", "60")
+                             .body(body);
     }
 
     private String getCorrelationId(HttpServletRequest request) {
