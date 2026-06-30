@@ -7,31 +7,54 @@ import json
 import sys
 from pathlib import Path
 
+# MUST match the second (hold) stage duration in every BE/benchmark/scripts/*.js.
+# If you change one, change the others.
+HOLD_STAGE_SECONDS = 30
+
+REQUIRED_KEYS = ('http_req_duration', 'http_req_failed')
+
 
 def load_metrics(path: Path) -> dict:
-    """Read k6 summary JSON and extract p50/p95/p99 + rps + failure rate."""
-    with path.open() as f:
-        data = json.load(f)
+    """Read k6 summary JSON and extract p50/p95/p99 + rps + failure rate.
 
-    metrics = data.get('metrics', {})
-    duration = metrics.get('http_req_duration', {}).get('values', {})
-    failed = metrics.get('http_req_failed', {}).get('values', {})
-    iterations = metrics.get('iterations', {}).get('values', {})
+    Exits with code 3 if the file is not a recognizable k6 summary.
+    """
+    try:
+        with path.open() as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"ERROR: cannot read {path}: {e}", file=sys.stderr)
+        sys.exit(3)
+
+    metrics = data.get('metrics') or {}
+    missing = [k for k in REQUIRED_KEYS if k not in metrics]
+    if missing:
+        print(
+            f"ERROR: {path} is not a k6 summary (missing keys: {missing})",
+            file=sys.stderr,
+        )
+        sys.exit(3)
+
+    duration = metrics['http_req_duration'].get('values', {})
+    failed = metrics['http_req_failed'].get('values', {})
     count = duration.get('count', 0)
-    period_s = 30  # matching hold stage in scripts
+    # RPS is requests/second during the hold stage, not over the full run.
+    rps = count / HOLD_STAGE_SECONDS if count else 0
 
     return {
         'p50_ms': duration.get('p(50)', 0) * 1000,
         'p95_ms': duration.get('p(95)', 0) * 1000,
         'p99_ms': duration.get('p(99)', 0) * 1000,
-        'rps': count / period_s if count else 0,
+        'rps': rps,
         'fail_rate': failed.get('rate', 0),
     }
 
 
-def fmt_delta(before: float, after: float, unit: str = 'ms') -> str:
+def fmt_delta(before: float, after: float) -> str:
+    if before == 0 and after == 0:
+        return '0.0%'
     if before == 0:
-        return 'n/a'
+        return 'n/a (baseline was 0)'
     pct = (after - before) / before * 100
     sign = '+' if pct > 0 else ''
     return f"{sign}{pct:.1f}%"

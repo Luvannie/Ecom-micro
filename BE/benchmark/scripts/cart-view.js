@@ -16,11 +16,14 @@ export const options = {
 const BASE = __ENV.BASE || 'http://localhost:8080';
 const TOKEN = __ENV.TOKEN;
 
-if (!TOKEN) {
-    throw new Error('TOKEN env var required. Obtain via POST /api/auth/login and pass -e TOKEN=...');
-}
-
 export default function () {
+    if (!TOKEN) {
+        // Surface as a k6 check failure with a clear label, not a module-load crash.
+        check(__ENV, {
+            'TOKEN env var is set (obtain via POST /api/auth/login and pass -e TOKEN=...)': (e) => !!e.TOKEN,
+        });
+        return;
+    }
     const url = `${BASE}/api/cart`;
     const res = http.get(url, {
         headers: { 'Authorization': `Bearer ${TOKEN}` },

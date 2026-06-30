@@ -17,11 +17,14 @@ const BASE = __ENV.BASE || 'http://localhost:8080';
 const TOKEN = __ENV.TOKEN; // supply via -e TOKEN=...
 const PRODUCT_ID = __ENV.PRODUCT_ID || '11111111-1111-1111-1111-111111111111';
 
-if (!TOKEN) {
-    throw new Error('TOKEN env var required. Obtain via POST /api/auth/login and pass -e TOKEN=...');
-}
-
 export default function () {
+    if (!TOKEN) {
+        // Surface as a k6 check failure with a clear label, not a module-load crash.
+        check(__ENV, {
+            'TOKEN env var is set (obtain via POST /api/auth/login and pass -e TOKEN=...)': (e) => !!e.TOKEN,
+        });
+        return;
+    }
     const url = `${BASE}/api/cart/items`;
     const payload = JSON.stringify({
         productId: PRODUCT_ID,
