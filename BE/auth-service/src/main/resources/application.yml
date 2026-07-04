@@ -15,9 +15,6 @@ management:
       exposure:
         include: health,info,prometheus
 
-security:
-  jwt:
-    issuer: ecom-auth-service
-    access-token-ttl-minutes: 15
-    refresh-token-ttl-days: 30
-    secret: ${JWT_SECRET:}
+keycloak:
+  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:?KEYCLOAK_JWK_SET_URI environment variable is required}
+  issuer: ${KEYCLOAK_ISSUER:?KEYCLOAK_ISSUER environment variable is required}
