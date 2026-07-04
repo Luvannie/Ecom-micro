@@ -22,9 +22,6 @@
   "quickLoginCheckMilliSeconds": 1000,
   "maxDeltaTimeSeconds": 43200,
   "failureFactor": 30,
-  "accessPolicy": {
-    "inferFromClientComponents": true
-  },
   "roles": {
     "realm": [
       {
@@ -63,7 +60,6 @@
   "requiredCredentials": [
     "password"
   ],
-  "passwordPolicy": "length(8) and lowerCase(1) and upperCase(1) and digits(1) and specialChars(1)",
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyDigits": 6,
@@ -103,7 +99,7 @@
       "protocol": "openid-connect",
       "defaultClientScopes": [
         "web-origins",
-        "role_list",
+        "roles",
         "profile",
         "email"
       ],
@@ -117,7 +113,7 @@
       "clientId": "ecom-backend",
       "enabled": true,
       "publicClient": false,
-      "secret": "${KEYCLOAK_BACKEND_CLIENT_SECRET:-change-me-in-env}",
+      "secret": "dev-ecom-backend-secret-change-me-32-chars-aB3xY7",
       "directAccessGrantsEnabled": false,
       "standardFlowEnabled": false,
       "implicitFlowEnabled": false,
@@ -141,6 +137,30 @@
         "display.on.consent.screen": "false",
         "consent.screen.text": ""
       }
+    },
+    {
+      "name": "roles",
+      "description": "OpenID Connect scope for add user realm roles to the access token",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "${rolesConsentText}"
+      },
+      "mappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "foo",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        }
+      ]
     },
     {
       "name": "role_list",

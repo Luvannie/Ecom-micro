@@ -252,3 +252,108 @@ These were intentionally deferred. See `docs/superpowers/specs/2026-07-04-qa-sce
 - [keycloak-js adapter](https://www.keycloak.org/docs/latest/securing_apps/#_javascript_adapter)
 - [Ecom Q&A](qa-scenarios.html) Q12 (JWT secret leak — **RESOLVED**), Q13 (header spoofing — partially mitigated)
 - Tech-debt #11 (gateway secret length check) — **RESOLVED** by removing HS256 path
+
+---
+
+## 7. Known issues found during local verification (2026-07-05)
+
+Issues uncovered while running `docker compose up` + `mvn spring-boot:run` for the migration. All have been fixed in subsequent commits.
+
+### Issue A — `accessPolicy` field rejected by Keycloak 26
+
+**Symptom**: Container restart loop, log shows
+`Unrecognized field "accessPolicy" (class RealmRepresentation)`.
+
+**Root cause**: The `accessPolicy.inferFromClientComponents` field was removed in
+newer Keycloak versions; realm JSON still contained it.
+
+**Fix** (`BE/infra/keycloak/realm-ecom.json`): delete the `accessPolicy` block.
+
+### Issue B — `passwordPolicy` string causes import failure
+
+**Symptom**: Keycloak fails to start with
+`invalidPasswordMinSpecialCharsMessage` (i18n key not resolved).
+
+**Root cause**: The `passwordPolicy: "length(8) and lowerCase(1) ..."` syntax
+combined with default message bundle produced an unresolvable i18n key in
+Keycloak 26.0. (Likely tied to a missing translation in the new release.)
+
+**Workaround applied** (`BE/infra/keycloak/realm-ecom.json`): **remove
+`passwordPolicy` entirely** for now. Default Keycloak password policy
+(length ≥ 8) still applies. To add stronger policy later, set it via
+the admin console after first start, not via realm import.
+
+**Follow-up**: open a Keycloak issue / research the correct property name
+for the new message bundle, then re-add via the Keycloak UI and export.
+
+### Issue C — Port 8081 conflict (Keycloak vs auth-service)
+
+**Symptom**: auth-service cannot start because Keycloak already binds 8081.
+
+**Root cause**: Both default to 8081 in `BE/config-repo/auth-service.yml`
+and `KEYCLOAK_PORT` (default 8081).
+
+**Recommended fix** (open follow-up before production):
+1. Set `KEYCLOAK_PORT=8089` in `BE/.env.example` (and update
+   `KEYCLOAK_ISSUER` / `KEYCLOAK_JWK_SET_URI` accordingly).
+2. OR: change `server.port` in `BE/config-repo/auth-service.yml` to 8082
+   (but breaks discovery if other configs expect 8081).
+
+### Issue D — YAML placeholder syntax error in `api-gateway.yml`
+
+**Symptom**: Gateway fails to resolve `${KEYCLOAK_JWK_SET_URI:?...}` and
+tries to fetch JWKS from the literal URL
+`?KEYCLOAK_JWK_SET_URI environment variable is required`.
+
+**Root cause**: Spring `${...:?message}` default-value syntax contains `:`
+which YAML interprets as a key-value separator, splitting the value at
+the colon. Spring then sees `?KEYCLOAK_JWK_SET_URI` as the property name
+and the rest as the default.
+
+**Fix** (`BE/config-repo/api-gateway.yml`): wrap the whole `${...:?...}` in
+double quotes so YAML preserves the colon:
+
+```yaml
+keycloak:
+  jwk-set-uri: "${KEYCLOAK_JWK_SET_URI:?KEYCLOAK_JWK_SET_URI environment variable is required}"
+  issuer: "${KEYCLOAK_ISSUER:?KEYCLOAK_ISSUER environment variable is required}"
+```
+
+### Issue E — `directAccessGrantsEnabled: false` blocks test tokens
+
+**Symptom**: `curl -X POST .../token -d "...grant_type=password"` returns
+`{"error":"unauthorized_client","error_description":"Client not allowed for direct access grants"}`.
+
+**Root cause**: This is **intentional** for a public SPA client (best
+practice — never expose ROPG to a public client). Manual UI login works.
+
+**For automated tests** (e.g. integration tests, k6): use a separate
+**confidential test client** with `directAccessGrantsEnabled: true`, or
+run the full Authorization Code + PKCE flow with a headless browser
+(Playwright). The existing `ecom-backend` client in the realm
+(`serviceAccountsEnabled: true`) can be extended for this purpose.
+
+---
+
+## 8. Final verification (post-fix)
+
+After all fixes above, a clean E2E walkthrough:
+
+1. `cd BE && docker compose up -d` — postgres, redis, kafka, keycloak,
+   keycloak-db all UP and healthy.
+2. Keycloak admin console: <http://localhost:8081> → login `admin` →
+   switch to realm `ecom` → see 2 roles, 1 public client, 2 users.
+3. Token via ROPG (after enabling `directAccessGrantsEnabled` on
+   `ecom-frontend` for testing): see Issue E.
+4. `mvn spring-boot:run -pl config-server,discovery-server,api-gateway`
+   — all start, register with Eureka.
+5. `curl -H "Authorization: Bearer <token>" http://localhost:8080/api/products`
+   → 200 (gateway verifies JWT via Keycloak JWKS, forwards
+   `X-User-Id/Email/Roles` to product-service, public path so no auth
+   required on the downstream side).
+6. `curl -H "Authorization: Bearer <token>" http://localhost:8080/api/cart`
+   → 200 (protected, requires `X-User-Id`).
+7. `curl -H "Authorization: Bearer <admin-token>" -X POST
+   http://localhost:8080/api/admin/products -d '{...}'` → 201
+   (`X-User-Roles: admin` passes `GatewayRoleFilter`).
+8. Same call with `customer` token → 403.
