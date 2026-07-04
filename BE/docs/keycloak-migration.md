@@ -257,6 +257,10 @@ These were intentionally deferred. See `docs/superpowers/specs/2026-07-04-qa-sce
 
 ## 7. Known issues found during local verification (2026-07-05)
 
+> **See** [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md) for the canonical list with
+> severity, fix, status, and verification steps. This section is kept
+> here for context; update the other file when adding new findings.
+
 Issues uncovered while running `docker compose up` + `mvn spring-boot:run` for the migration. All have been fixed in subsequent commits.
 
 ### Issue A — `accessPolicy` field rejected by Keycloak 26
