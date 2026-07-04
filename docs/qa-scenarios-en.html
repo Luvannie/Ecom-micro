@@ -1,0 +1,1669 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ecom Q&A — Microservices Interview Prep</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    transition: background-color .2s, color .2s;
+  }
+  html[data-theme="dark"] body { background: #0d1117; color: #e6edf3; }
+  html[data-theme="light"] body { background: #ffffff; color: #1f2328; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  header { padding: 32px 0 16px; border-bottom: 1px solid; margin-bottom: 24px; }
+  html[data-theme="dark"] header { border-color: #30363d; }
+  html[data-theme="light"] header { border-color: #d0d7de; }
+
+  h1 { margin: 0 0 4px; font-size: 28px; font-weight: 700; }
+  .subtitle { margin: 0 0 20px; opacity: .7; font-size: 14px; }
+
+  .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  #search {
+    flex: 1; min-width: 240px; padding: 10px 14px;
+    border-radius: 8px; border: 1px solid;
+    font-size: 14px; outline: none; transition: border-color .15s;
+  }
+  html[data-theme="dark"] #search { background: #0d1117; color: #e6edf3; border-color: #30363d; }
+  html[data-theme="dark"] #search:focus { border-color: #58a6ff; }
+  html[data-theme="light"] #search { background: #ffffff; color: #1f2328; border-color: #d0d7de; }
+  html[data-theme="light"] #search:focus { border-color: #0969da; }
+
+  #theme-toggle {
+    padding: 10px 14px; border-radius: 8px; border: 1px solid;
+    cursor: pointer; font-size: 14px; transition: background-color .15s;
+  }
+  html[data-theme="dark"] #theme-toggle { background: #161b22; color: #e6edf3; border-color: #30363d; }
+  html[data-theme="dark"] #theme-toggle:hover { background: #21262d; }
+  html[data-theme="light"] #theme-toggle { background: #f6f8fa; color: #1f2328; border-color: #d0d7de; }
+  html[data-theme="light"] #theme-toggle:hover { background: #eaeef2; }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip {
+    padding: 6px 12px; border-radius: 999px; border: 1px solid;
+    font-size: 13px; cursor: pointer; user-select: none;
+    transition: background-color .15s, border-color .15s, color .15s;
+  }
+  html[data-theme="dark"] .chip { background: #161b22; color: #e6edf3; border-color: #30363d; }
+  html[data-theme="light"] .chip { background: #f6f8fa; color: #1f2328; border-color: #d0d7de; }
+  .chip.active { font-weight: 600; }
+  html[data-theme="dark"] .chip.active { background: #1f6feb; color: #ffffff; border-color: #1f6feb; }
+  html[data-theme="light"] .chip.active { background: #0969da; color: #ffffff; border-color: #0969da; }
+  .chip:not(.active):hover { border-color: #58a6ff; }
+
+  .progress { font-size: 13px; opacity: .75; }
+  .progress strong { color: #58a6ff; }
+  html[data-theme="light"] .progress strong { color: #0969da; }
+
+  .qa-card {
+    border: 1px solid; border-radius: 10px;
+    margin-bottom: 14px; overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  html[data-theme="dark"] .qa-card { background: #161b22; border-color: #30363d; }
+  html[data-theme="light"] .qa-card { background: #ffffff; border-color: #d0d7de; }
+  .qa-card:hover { border-color: #58a6ff; }
+  html[data-theme="light"] .qa-card:hover { border-color: #0969da; }
+
+  .qa-question {
+    width: 100%; display: flex; align-items: flex-start; gap: 12px;
+    padding: 16px 20px; border: 0; background: transparent;
+    text-align: left; cursor: pointer; font-size: 15px;
+    color: inherit; font-family: inherit; line-height: 1.5;
+  }
+  .qa-question:hover { background: rgba(88, 166, 255, .08); }
+  html[data-theme="light"] .qa-question:hover { background: rgba(9, 105, 218, .06); }
+
+  .qa-num {
+    flex-shrink: 0; min-width: 44px; padding: 2px 8px;
+    background: #58a6ff; color: #0d1117; font-weight: 700; font-size: 12px;
+    border-radius: 4px; text-align: center;
+  }
+  html[data-theme="light"] .qa-num { background: #0969da; color: #ffffff; }
+
+  .qa-title { flex: 1; font-weight: 500; }
+
+  .qa-meta {
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+    font-size: 12px; opacity: .8;
+  }
+  .qa-cat {
+    padding: 2px 8px; border-radius: 4px;
+    font-weight: 500; font-size: 11px;
+  }
+  .cat-kafka-saga       { background: #6e40c9; color: #fff; }
+  .cat-outbox-idempotency { background: #bf3989; color: #fff; }
+  .cat-jwt-security     { background: #d29922; color: #fff; }
+  .cat-redis-cart       { background: #db6d28; color: #fff; }
+  .cat-tech-debt        { background: #f85149; color: #fff; }
+  .cat-ecom-general     { background: #2ea043; color: #fff; }
+
+  .qa-difficulty { font-size: 12px; letter-spacing: 1px; }
+  .qa-toggle { margin-left: 4px; font-size: 12px; transition: transform .2s; }
+  .qa-question[aria-expanded="true"] .qa-toggle { transform: rotate(180deg); }
+
+  .qa-answer {
+    padding: 0 20px 20px 76px;
+    font-size: 14px; line-height: 1.7;
+    border-top: 1px solid;
+  }
+  html[data-theme="dark"] .qa-answer { border-color: #21262d; }
+  html[data-theme="light"] .qa-answer { border-color: #eaeef2; }
+
+  .qa-answer p { margin: 12px 0; }
+  .qa-answer strong { font-weight: 600; }
+
+  .ans-tldr    { background: rgba(63, 185, 80, .1);  border-left: 3px solid #3fb950; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-flow    { background: rgba(88, 166, 255, .08); border-left: 3px solid #58a6ff; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-tradeoff{ background: rgba(210, 153, 34, .08); border-left: 3px solid #d29922; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-pitfall { background: rgba(248, 81, 73, .08);  border-left: 3px solid #f85149; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-verify  { background: rgba(110, 64, 201, .08); border-left: 3px solid #6e40c9; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  html[data-theme="light"] .ans-tldr    { background: rgba(46, 160, 67, .08); }
+  html[data-theme="light"] .ans-flow    { background: rgba(9, 105, 218, .06); }
+  html[data-theme="light"] .ans-tradeoff{ background: rgba(210, 153, 34, .06); }
+  html[data-theme="light"] .ans-pitfall { background: rgba(248, 81, 73, .06); }
+  html[data-theme="light"] .ans-verify  { background: rgba(110, 64, 201, .06); }
+
+  .ans-section-label { font-weight: 700; margin-right: 6px; }
+  .ans-tldr .ans-section-label    { color: #3fb950; }
+  .ans-flow .ans-section-label    { color: #58a6ff; }
+  .ans-tradeoff .ans-section-label{ color: #d29922; }
+  .ans-pitfall .ans-section-label { color: #f85149; }
+  .ans-verify .ans-section-label  { color: #6e40c9; }
+
+  .qa-refs {
+    margin-top: 16px; padding-top: 12px;
+    border-top: 1px dashed;
+    font-size: 13px;
+  }
+  html[data-theme="dark"] .qa-refs { border-color: #30363d; }
+  html[data-theme="light"] .qa-refs { border-color: #d0d7de; }
+
+  .qa-refs code, .qa-answer code {
+    font-family: "SF Mono", "Monaco", "Cascadia Code", "Consolas", monospace;
+    font-size: 12.5px; padding: 1px 5px; border-radius: 3px;
+  }
+  html[data-theme="dark"] code { background: #21262d; color: #79c0ff; }
+  html[data-theme="light"] code { background: #eaeef2; color: #0969da; }
+
+  .qa-tags { margin-top: 8px; font-size: 12px; opacity: .8; }
+  .qa-tag {
+    display: inline-block; padding: 1px 7px; margin-right: 4px;
+    border-radius: 3px; font-size: 11px;
+  }
+  html[data-theme="dark"] .qa-tag { background: #21262d; color: #79c0ff; }
+  html[data-theme="light"] .qa-tag { background: #eaeef2; color: #0969da; }
+
+  .qa-answer pre {
+    overflow-x: auto; padding: 12px 14px; border-radius: 6px;
+    font-size: 12.5px; line-height: 1.5; margin: 10px 0;
+  }
+  html[data-theme="dark"] .qa-answer pre { background: #010409; }
+  html[data-theme="light"] .qa-answer pre { background: #f6f8fa; }
+  .qa-answer pre code { background: transparent; padding: 0; color: inherit; }
+
+  footer {
+    margin-top: 40px; padding-top: 20px;
+    border-top: 1px solid; text-align: center;
+    font-size: 12px; opacity: .65;
+  }
+  html[data-theme="dark"] footer { border-color: #30363d; }
+  html[data-theme="light"] footer { border-color: #d0d7de; }
+
+  .empty { padding: 40px; text-align: center; opacity: .5; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>📚 Ecom Q&amp;A — Microservices Interview Prep</h1>
+  <p class="subtitle">70% Ecom project · 30% e-commerce · 33 scenario-based questions with depth answers (5 sections: TL;DR · Flow · Trade-off · Pitfall · Verify)</p>
+  <div class="toolbar">
+    <input id="search" type="text" placeholder="🔍 Search in questions / answers...">
+    <button id="theme-toggle">🌗 Theme</button>
+  </div>
+  <div class="filters">
+    <button class="chip active" data-filter="all">All (33)</button>
+    <button class="chip" data-filter="kafka-saga">Saga &amp; Kafka (6)</button>
+    <button class="chip" data-filter="outbox-idempotency">Outbox &amp; Idempotency (5)</button>
+    <button class="chip" data-filter="jwt-security">JWT &amp; Security (4)</button>
+    <button class="chip" data-filter="redis-cart">Redis &amp; Cart (5)</button>
+    <button class="chip" data-filter="tech-debt">Tech-debt &amp; Debug (6)</button>
+    <button class="chip" data-filter="ecom-general">E-commerce general (7)</button>
+  </div>
+  <div class="progress">Opened: <strong id="opened-count">0</strong> / 33</div>
+</header>
+
+<main id="qa-list"></main>
+
+<footer>
+  <p>📚 <strong>Ecom Q&amp;A</strong> — 33 microservices interview questions · References: <code>.claude/knowledge-map.md</code> · Spec: <code>docs/superpowers/specs/2026-07-04-qa-scenarios-design.md</code></p>
+  <p>Open this file offline. All CSS/JS inline, no CDN dependencies.</p>
+</footer>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const Q = [
+    /* ============== 4.1 SAGA & KAFKA (6) ============== */
+    {
+      id: 'q1', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Order publishes <code>inventory.reservation-requested</code> to Kafka. If the inventory service finishes consuming but does not yet publish <code>inventory.reserved</code> when the client order times out, what happens? How does compensation run?',
+      tldr: 'Order stays in <code>PENDING</code>. Client retry is safe (idempotent thanks to <code>order_id</code>). Compensation runs automatically through Kafka retry; it only runs explicitly when <code>payment.failed</code> arrives.',
+      flow: null,
+      flowPre: `1. Order POST <code>/api/orders</code> → creates order PENDING + publishes <code>inventory.reservation-requested</code> (key=orderId).
+2. Inventory consumer → reserves stock in a DB transaction (decrements <code>available_quantity</code>, increments <code>reserved_quantity</code>, creates a <code>stock_reservations</code> row with status=RESERVED).
+3. Inventory publishes <code>inventory.reserved</code> (key=orderId) — <strong>failure-prone point</strong> because the DB commit already succeeded but the Kafka send may fail.
+4. Order consumer receives the event → sets order to RESERVED.
+5. If step 3 fails 3 times (<code>FixedBackOff(1000ms, 2 retries)</code>) → <code>DefaultErrorHandler</code> logs an error, <strong>does NOT commit the offset</strong> → message is re-delivered when the consumer restarts.`,
+      tradeoff: 'Spring Kafka <code>ack-mode: RECORD</code> + retry provides <strong>at-least-once</strong> delivery, not exactly-once. If <code>inventory.reserved</code> is published successfully but the order-service consumer fails to process it → it will be received again → the handler must be idempotent (check status before updating). Currently <code>InventoryEventConsumer.handleReserved</code> checks status → OK.',
+      pitfall: 'Client retries while inventory is still processing → creates a second order with the same cart (cart is cleared but order still exists). Ecom <strong>does not yet check for duplicate client requests</strong> (no request signature / nonce). Recommendation: idempotency-key on <code>POST /api/orders</code> similar to payment.',
+      verify: 'Open Zipkin at <code>localhost:9411</code>, filter by <code>orderId=&lt;uuid&gt;</code> → see spans <code>publish-reservation-requested</code> → <code>inventory-service.handleReservationRequested</code> → <code>publishReserved</code>. If the last span is missing → bug. Or: <code>kafka-console-consumer.sh --topic inventory.reserved --from-beginning --property print.timestamp=true</code>.',
+      refs: '<code>BE/common/.../config/KafkaErrorHandler.java:19-55</code> · <code>BE/order-service/.../messaging/OrderEventProducer.java:19-29</code> · <code>BE/inventory-service/.../messaging/InventoryEventProducer.java:17-24</code>',
+      tags: ['#kafka', '#saga', '#compensation', '#timeout'],
+    },
+    {
+      id: 'q2', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Why is the partition key of <code>inventory.reservation-requested</code> set to <code>order.id()</code> rather than <code>product.id()</code>? Could a different key work?',
+      tldr: 'Partition key = <code>orderId</code> ensures that all events of one order go to the same partition → processed in order by a single consumer instance → avoids race conditions between items in the same order.',
+      flow: null,
+      flowPre: `Order #123 (2 items: A x3, B x2)
+     │
+     ▼ publish "inventory.reservation-requested" with key=orderId="123"
+┌──────────┐
+│ Kafka    │  Partition 0: order 123 (A, B processed in order)
+│ Partition│  Partition 1: order 124, 125, ...
+│ Strategy │
+└──────────┘
+     │
+     ▼
+Inventory-Consumer-Instance-0 (reads only Partition 0)
+     → reserve(A x3) done → reserve(B x2) done
+     → publish "inventory.reserved" with key=orderId="123"`,
+      tradeoff: [
+        '<strong>Using <code>orderId</code></strong> (current): each order is processed sequentially. But a hot product (e.g. iPhone) with N different orders → distributed evenly across partitions → high parallelism. <strong>Good for throughput</strong>.',
+        '<strong>Using <code>productId</code></strong>: all events for the same product go to one partition → serialized. A flash sale for iPhone with 10K orders for the same product → all piled into one partition → one consumer handles them → <strong>bottleneck</strong>.',
+        '<strong>Using <code>userId</code></strong>: also OK but less intuitive than <code>orderId</code> because a user may have multiple orders.',
+      ],
+      pitfall: 'If you ever need to scale, you <strong>cannot change the partition key</strong> of a topic that already has data (Kafka does not allow changing the key for the default partitioner once partition assignment exists). You must create a new topic.',
+      verify: '<code>BE/order-service/.../messaging/OrderEventProducer.java:19-29</code> shows <code>RecordMetadata(key=order.id().toString(), ...)</code>. Test with <code>kafka-console-producer.sh --property "parse.key=true" --property "key.separator=:"</code> producing 2 events with the same key → check they land on the same partition.',
+      refs: '<code>BE/order-service/.../messaging/OrderEventProducer.java:19-29</code> · <code>.claude/knowledge-map.md:128-142</code>',
+      tags: ['#kafka', '#partitioning', '#performance'],
+    },
+    {
+      id: 'q3', cat: 'kafka-saga', diff: 'mid',
+      catLabel: 'Kafka', difficulty: '★★',
+      title: 'What does <code>ack-mode: RECORD</code> mean? If the handler throws an exception midway, is the offset committed? Can the event be lost?',
+      tldr: '<code>RECORD</code> = commit the offset immediately after the handler returns successfully. On exception → retry 3 times (1s fixed back-off) → final failure → log an error, <strong>do NOT commit</strong>. Event is re-delivered on consumer restart. Events can be lost in edge cases.',
+      flow: null,
+      flowPre: `Consumer polls a batch
+     │
+     ▼ for each record
+┌────────────┐
+│ handler()  │ ← business logic
+└─────┬──────┘
+      │ success → commit offset
+      │
+      │ exception → DefaultErrorHandler
+      │             → retry attempt 1 (after 1s)
+      │             → retry attempt 2 (after 1s)
+      │             → retry attempt 3 (after 1s)
+      │             → final fail: log.error() + do NOT commit
+      │             → message will be re-delivered on the next poll`,
+      tradeoff: [
+        '<strong>RECORD</strong> (current): low latency (immediate commit). But if the commit succeeds and the handler later throws in a downstream step (e.g. publishing a response) → offset is already committed → <strong>event lost</strong>.',
+        '<strong>BATCH</strong>: commit at the end of a batch → safer but lower throughput.',
+        '<strong>MANUAL</strong>: explicitly manage <code>Acknowledgment.acknowledge()</code> → maximum control, more complex code.',
+        '<strong>COUNT, TIME</strong>: commit by count or time window.',
+      ],
+      pitfall: 'When the handler calls <code>kafkaTemplate.send().get()</code> (sync wait) to ensure the message is sent before commit → adds latency. The current code uses fire-and-forget → <strong>can be optimized</strong>.',
+      verify: '<code>BE/config-repo/*-service.yml</code> shows <code>spring.kafka.listener.ack-mode: record</code>. Trigger an error: stop the DB mid-consume → check the log for 3 retries + 1 final error.',
+      refs: '<code>BE/common/.../config/KafkaErrorHandler.java:19-55</code> · <code>BE/config-repo/order-service.yml:29-42</code>',
+      tags: ['#kafka', '#reliability', '#at-least-once'],
+    },
+    {
+      id: 'q4', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Order state machine: PENDING → RESERVED → CONFIRMED. If <code>payment.failed</code> is received while the order is RESERVED, how is inventory released? Can the state become inconsistent?',
+      tldr: '<code>PaymentEventConsumer.handleFailed</code> → <code>OrderService.cancelAfterPaymentFailure(orderId)</code> → calls <code>InventoryClient.release(reservationId)</code> via Feign → DB update order=CANCELLED → publishes <code>order.cancelled</code>.',
+      flow: null,
+      flowPre: `payment-service → Kafka "payment.failed" with key=paymentId
+     │
+     ▼
+order-service.PaymentEventConsumer.handleFailed
+     │
+     ├─→ OrderService.cancelAfterPaymentFailure(orderId)
+     │     │
+     │     ├─→ OrderRepo.findById(orderId) → order.status=RESERVED
+     │     ├─→ InventoryClient.release(reservationId) ← Feign HTTP
+     │     ├─→ OrderRepo.save(status=CANCELLED) ← DB
+     │     └─→ OrderEventProducer.publishOrderCancelled()
+     │              │
+     │              ▼
+     │         Kafka "order.cancelled" with key=orderId
+     │              │
+     │              ▼
+     │         notification-service.OrderEventConsumer.handleCancelled
+     │              → send email + SMS
+     │
+     └─→ (parallel) notification-service.PaymentEventConsumer.handleFailed
+          → send "payment failed" email`,
+      tradeoff: 'Compensation through Feign (sync HTTP) — fast, can return clear errors. Alternative: send a Kafka event <code>inventory.release-requested</code> (async) — more loosely coupled but the user has to wait. Currently sync because cancel is on the critical path that the user is waiting for.',
+      pitfall: [
+        '1. If <code>InventoryClient.release</code> fails (inventory-service down) → <code>OrderService</code> still sets CANCELLED → <strong>inconsistent state</strong> (order is CANCELLED but stock is still RESERVED). No retry for the compensation step yet.',
+        '2. If <code>publishOrderCancelled</code> fails after the DB commit → notification is not sent. General tech-debt: order-service has no transactional outbox.',
+        '3. If <code>payment.failed</code> is received twice (duplicate Kafka) → <code>cancelAfterPaymentFailure</code> checks order.status; if already CANCELLED → returns no-op. OK.',
+      ],
+      verify: 'Integration test: create an order, mock payment.failed, verify the stock returns to available. Or manual: trigger the webhook <code>POST /api/payments/webhooks/mock</code> with eventType=FAILED → grep the log for <code>cancelAfterPaymentFailure</code>.',
+      refs: '<code>BE/order-service/.../messaging/PaymentEventConsumer.java:39-54</code> · <code>BE/order-service/.../service/OrderService.java:91-101</code>',
+      tags: ['#saga', '#compensation', '#state-machine'],
+    },
+    {
+      id: 'q5', cat: 'kafka-saga', diff: 'mid',
+      catLabel: 'Kafka', difficulty: '★★',
+      title: 'If the Kafka broker goes down while order-service is publishing <code>order.confirmed</code>, can the event be lost? What configuration should be added?',
+      tldr: 'The event can be lost. Default <code>acks=1</code> (leader reports success once written) → if the leader fails before replication → the event is lost. Fix: set <code>acks=all</code> + <code>enable.idempotence=true</code> + retry config.',
+      flow: null,
+      flowPre: `OrderEventProducer.publishOrderConfirmed(order)
+     │
+     ▼
+KafkaTemplate.send(topic, key, value)
+     │
+     ├─→ Producer batches the record → sends to broker leader
+     │
+     ▼ (acks=1, current config)
+Leader writes to log → returns success immediately
+     │
+     ▼
+If the leader crashes right after → record not yet replicated → lost`,
+      tradeoff: [
+        '<strong>acks=1</strong> (current): lowest latency (1 RTT). But only the leader, no replication. Suitable for non-critical events.',
+        '<strong>acks=all</strong> + <code>min.insync.replicas=2</code>: wait for all in-sync replicas to write → safe. Higher latency. Suitable for critical events (payment, order).',
+        '<strong>enable.idempotence=true</strong>: producer guarantees no duplicate sequence numbers. Prevents duplicates on retry.',
+        '<strong>transactional.id</strong>: exactly-once across producer/consumer (most expensive).',
+      ],
+      pitfall: [
+        '1. The project has <strong>NOT</strong> configured <code>acks=all</code> in order-service / payment-service yet. Gap to address.',
+        '2. <code>acks=all</code> is only safe if <code>min.insync.replicas ≥ 2</code> on the broker. With a single broker (KRaft single-broker in dev) → set <code>min.insync.replicas=1</code> to avoid "Not enough replicas" errors.',
+        '3. Need to test: stop 1 broker, publish an event, verify nothing is lost.',
+      ],
+      verify: 'Check <code>BE/config-repo/order-service.yml</code> for <code>spring.kafka.producer.acks</code> — currently none → default <code>acks=1</code>. Recommendation: add <code>acks: all</code>, <code>enable.idempotence: true</code>, <code>retries: 3</code>.',
+      refs: '<code>BE/config-repo/order-service.yml:29-42</code> · <code>BE/config-repo/payment-service.yml:29-33</code>',
+      tags: ['#kafka', '#reliability', '#durability'],
+    },
+    {
+      id: 'q6', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Is the Saga pattern in Ecom orchestration or choreography? Why? When should each be used?',
+      tldr: '<strong>Choreography</strong>. Each service reacts to Kafka events on its own; there is no central orchestrator. Pros: loose coupling, easy to scale. Cons: hard to trace, requires a distributed tracing tool (Zipkin).',
+      flow: null,
+      flowPre: `Orchestration (NOT used in Ecom):
+┌─────────────────┐
+│ Saga Orchestrator│ ← knows the whole flow
+└────────┬────────┘
+         ▼
+Order → Inventory (RPC) → Payment (RPC) → Notification (RPC)
+
+Choreography (Ecom):
+OrderService publishes "order.created" → Kafka
+     │
+     ├→ InventoryService consumes → reserve → publishes "inventory.reserved"
+     │     │
+     │     └→ OrderService consumes → mark RESERVED → publishes "order.confirmed"
+     │           │
+     │           └→ NotificationService consumes → send email
+     │
+     └→ (in parallel) PaymentService can also listen to "order.confirmed" to charge`,
+      tradeoff: [
+        '<strong>Choreography</strong> (Ecom): each service is independent, adding a new service just means listening to events. But the flow is distributed → hard to debug, must correlate via <code>X-Correlation-Id</code> + Zipkin. Risk: cycles (A triggers B, B triggers A).',
+        '<strong>Orchestration</strong> (e.g. Camunda, Temporal): one service controls the whole flow and clearly knows which step is running. Easy to debug. But tight coupling, the orchestrator becomes a single point of failure.',
+        '<strong>Hybrid</strong>: orchestration for the core flow (order saga), choreography for side effects (notification, analytics).',
+      ],
+      pitfall: [
+        '1. Event versioning: adding a new field to <code>OrderConfirmedEvent</code> can crash consumers that have not been updated. Ecom uses <code>JsonDeserializer</code> with trusted packages <code>"*"</code> → dangerous. A schema registry is needed for production.',
+        '2. Cycles: <code>order.confirmed</code> → notification.email → user click → <code>payment.created</code> → <code>order.updated</code> → ... → loop.',
+        '3. Lost events: if a service is down when an event is published → retries exhausted → event is lost. Need DLQ + monitoring.',
+      ],
+      verify: '<code>grep -r "@KafkaListener" BE/*/src/</code>. Ecom currently has about 7 listeners, OK.',
+      refs: '<code>BE/.../messaging/*EventConsumer.java</code> · <code>.claude/knowledge-map.md:126-142</code>',
+      tags: ['#saga', '#architecture', '#choreography'],
+    },
+
+    /* ============== 4.2 OUTBOX & IDEMPOTENCY (5) ============== */
+    {
+      id: 'q7', cat: 'outbox-idempotency', diff: 'senior',
+      catLabel: 'Outbox', difficulty: '★★★',
+      title: 'Explain the Transactional Outbox pattern. Why does payment-service use it but order-service does not? What are the drawbacks?',
+      tldr: 'Outbox stores the event in the <code>outbox_events</code> table <strong>in the same transaction</strong> as the business write → guarantees atomic "DB + event". A scheduler reads PENDING rows → publishes to Kafka. order-service publishes directly in its handler → can lose events if Kafka goes down after the DB commit.',
+      flow: null,
+      flowPre: `PaymentService.markSucceeded(paymentId)  [inside one @Transactional]
+     │
+     ├─→ paymentsRepo.save(status=SUCCEEDED)
+     │
+     └─→ outboxRepo.save(
+            OutboxEvent(
+              aggregateType="Payment",
+              aggregateId=paymentId,
+              eventType="payment.succeeded",
+              payload=Map<...>,
+              status=PENDING,
+              createdAt=now()
+            )
+          )  ← SAME transaction → committed together
+
+--- a few ms/seconds later ---
+
+OutboxPublisher @Scheduled(fixedDelay=5000ms)
+     │
+     ├─→ SELECT * FROM outbox_events WHERE status='PENDING' ORDER BY created_at LIMIT 100
+     │
+     ├─→ for each event: kafkaTemplate.send(eventType, key, payload)
+     │
+     └─→ on success → status=PUBLISHED, published_at=now() [OUTSIDE transaction → tech-debt #3]`,
+      tradeoff: [
+        '<strong>Outbox (Ecom payment)</strong>: guarantees at-least-once delivery. Publish latency = 0-5s. Requires an extra table + scheduler.',
+        '<strong>Direct publish (Ecom order)</strong>: low latency (ms). But if Kafka is down → events are lost. Needs a retry queue or message buffer.',
+        '<strong>CDC-based (Debezium)</strong>: reads the Postgres WAL → publishes to Kafka. Zero code change. But requires the Debezium connector + extra overhead.',
+      ],
+      pitfall: [
+        '1. <strong>Dual-write problem</strong>: if Kafka is published first and the DB is updated after (or vice versa) → one side fails → inconsistent. Outbox solves this by guaranteeing both commit together.',
+        '2. <strong>Outbox bloat</strong>: if the scheduler fails repeatedly → the <code>outbox_events</code> table grows → slow queries. Needs monthly partitioning or a TTL.',
+        '3. <strong>No DLQ for outbox</strong>: an event that fails to publish 3 times → status=FAILED → only logged. Need an alert + manual replay tool.',
+      ],
+      verify: 'Query <code>SELECT count(*), status FROM outbox_events GROUP BY status;</code> — if FAILED &gt; 0 → needs investigation.',
+      refs: '<code>BE/payment-service/.../outbox/OutboxPublisher.java:22-36</code> · <code>BE/payment-service/.../service/PaymentService.java:43-53, 107-115</code>',
+      tags: ['#outbox', '#reliability', '#eventual-consistency'],
+    },
+    {
+      id: 'q8', cat: 'outbox-idempotency', diff: 'senior',
+      catLabel: 'Outbox', difficulty: '★★★',
+      title: 'OutboxPublisher runs with <code>fixedDelay 5s</code>. If the scheduler restarts in the middle of sending to Kafka, can the event be duplicated? How to fix it?',
+      tldr: '<strong>Duplicates are possible</strong>. <code>repository.save(event)</code> is called outside the transaction (after the Kafka send future returns). If the app crashes between <code>send()</code> and <code>save()</code> → status is still PENDING → the next scheduler run sends it again. This is tech-debt #3.',
+      flow: null,
+      flowPre: `t=0ms:    Scheduler polls → fetches event #1 (status=PENDING)
+t=10ms:   kafkaTemplate.send(...) → fire-and-forget, returns a Future
+t=20ms:   ── APP CRASH ──
+          (send may or may not have reached the broker)
+t=5s:     Scheduler restarts → polls event #1 again (status=PENDING)
+          → sends it again
+          → DUPLICATE if the previous send actually reached the broker`,
+      tradeoff: [
+        '<strong>Optimistic update with a version field</strong>: add a <code>version</code> column, update <code>SET status=PUBLISHED, version=version+1 WHERE id=? AND version=?</code>. Safe, lock-free.',
+        '<strong>Pessimistic lock <code>SELECT ... FOR UPDATE SKIP LOCKED</code></strong>: each scheduler instance only picks up rows that are not locked → scales.',
+        '<strong>Kafka idempotent producer + consumer</strong>: consumer checks if <code>eventId</code> has already been processed (via a Redis set or DB).',
+        '<strong>WAL-based outbox (Debezium)</strong>: removes the scheduler, uses CDC instead.',
+      ],
+      pitfall: [
+        '1. Currently <code>OutboxPublisher.java:33-36</code> calls <code>kafkaTemplate.send(...).whenComplete((result, ex) -&gt; { if (ex == null) repository.save(event); })</code> — the save happens in a callback, not atomic with the send.',
+        '2. <code>fixedDelay=5000ms</code> has no jitter → many instances poll at the same time → DB spike. Add a random <code>initialDelay</code>.',
+        '3. No max retry → a poison event (always fails) causes the scheduler to loop forever.',
+      ],
+      verify: 'Reproduce by running <code>kill -9</code> on the Java process while the scheduler is publishing, restart, and check for duplicate events in the Kafka topic.',
+      refs: '<code>BE/payment-service/.../outbox/OutboxPublisher.java:22-36</code> · tech-debt #3 in <code>.claude/knowledge-map.md:286-305</code>',
+      tags: ['#outbox', '#race-condition', '#at-least-once'],
+    },
+    {
+      id: 'q9', cat: 'outbox-idempotency', diff: 'mid',
+      catLabel: 'Idempotency', difficulty: '★★',
+      title: 'Idempotency-Key <code>pay-{orderId}</code> on <code>POST /api/payments</code>. If the client calls twice with the same key, what happens? What are the trade-offs around how to generate the key?',
+      tldr: 'The first call creates a new Payment (status=PENDING). The second <code>findByIdempotencyKey</code> returns the existing record → returns the previous response. A UNIQUE constraint in the DB prevents race conditions. The client must generate a stable key across retries.',
+      flow: null,
+      flowPre: `POST /api/payments {orderId, amount, currency}
+Header: Idempotency-Key: pay-uuid-123
+
+PaymentService.createPayment(req, key):
+     │
+     ├─→ paymentsRepo.findByIdempotencyKey(key)
+     │     │
+     │     ├─ found → return existing PaymentResponse  ← idempotent
+     │     └─ null  ↓
+     │
+     ├─→ mockProvider.createPayment() → providerPaymentId
+     │
+     ├─→ paymentsRepo.save(Payment(id, ..., idempotencyKey=key, status=PENDING))
+     │     [UNIQUE constraint on idempotency_key]
+     │
+     └─→ return new PaymentResponse
+
+--- retry with the SAME key ---
+
+PaymentService.createPayment(req, key):
+     │
+     ├─→ findByIdempotencyKey(key) → found → return the same response
+     │
+     └─→ NO new record, NO second charge`,
+      tradeoff: [
+        '<strong>Key = <code>pay-{orderId}</code></strong> (Ecom): stable, easy to debug. But if the user wants to retry with a different amount (e.g. change tip) → the key must change → fail.',
+        '<strong>Key = client UUID</strong>: a new key is generated for every retry → not idempotent. <strong>WRONG</strong>.',
+        '<strong>Key = UUID per logical attempt</strong>: user clicks "Pay" once → generate a UUID → all retries share the same UUID. This is the pattern Stripe uses.',
+      ],
+      pitfall: [
+        '1. <strong>Idempotency on create but NOT on webhook</strong>: if the webhook is sent twice with the same <code>providerEventId</code> → processed twice → 2 SUCCEEDED marks + 2 outbox events. Ecom handles this in Q10 — OK.',
+        '2. <strong>Idempotency only checks exact body match</strong>: if the client retries with the same key but a different body (e.g. changed amount) → the old response is still returned. Could be a silent bug. Stripe returns 422 "key reused with different params".',
+        '3. <strong>Idempotency window is not set</strong>: Ecom stores the key forever. It should expire after 24h.',
+      ],
+      verify: '<code>BE/payment-service/.../service/PaymentService.java:36-41</code> shows the <code>findByIdempotencyKey</code> check. Test: call twice with <code>curl -X POST -H "Idempotency-Key: test-123"</code> → verify only 1 row in the <code>payments</code> table.',
+      refs: '<code>BE/payment-service/.../service/PaymentService.java:36-41</code> · <code>BE/database/payment-service/V1__create_payment_tables.sql:10</code>',
+      tags: ['#idempotency', '#payment', '#reliability'],
+    },
+    {
+      id: 'q10', cat: 'outbox-idempotency', diff: 'mid',
+      catLabel: 'Idempotency', difficulty: '★★',
+      title: 'How does the mock webhook <code>POST /api/payments/webhooks/mock</code> handle a duplicate <code>providerEventId</code>? Compare with how Stripe does it.',
+      tldr: '<code>PaymentWebhookService.handle</code> calls <code>existsById(providerEventId)</code> → if present, returns immediately (no-op). Otherwise, processes + saves <code>payment_webhook_events</code> with the <code>provider_event_id</code> PK. Idempotent at the DB layer.',
+      flow: null,
+      flowPre: `POST /api/payments/webhooks/mock
+Body: {providerEventId, providerPaymentId, eventType}
+
+PaymentWebhookService.handle(event):
+     │
+     ├─→ paymentWebhookEventRepo.existsById(event.providerEventId())
+     │     │
+     │     ├─ true → log.info("already processed") + return  ← DEDUP
+     │     └─ false ↓
+     │
+     ├─→ paymentService.markSucceeded(paymentId)
+     │     or markFailed(paymentId) [based on eventType]
+     │     │
+     │     └─→ @Transactional:
+     │           ├─ paymentsRepo.save(status=...)
+     │           └─ outboxRepo.save(...)
+     │
+     └─→ paymentWebhookEventRepo.save(
+            PaymentWebhookEvent(providerEventId=PK, processedAt=now())
+          ) ← inside the same transaction as markSucceeded`,
+      tradeoff: [
+        '<strong>Ecom</strong>: idempotency at the application layer (check exists first). DB unique constraint on <code>payment_webhook_events.provider_event_id</code> PK → safety net.',
+        '<strong>Stripe</strong>: uses signed webhooks + a separate idempotency key. Requests have the <code>Stripe-Signature</code> header verified with a secret. Every event has a UUID. Stripe stores them for 30 days.',
+        '<strong>Ecom currently does NOT verify signatures</strong> (mock provider) → must be added for production. Tech-debt #7.',
+      ],
+      pitfall: [
+        '1. <strong>Race condition between existsById and save</strong>: 2 webhooks with the same <code>providerEventId</code> arrive at the same time → both pass existsById=false → both save → one fails on PK constraint → exception. Not caught yet. Need <code>try/catch DataIntegrityViolationException</code> → return 200.',
+        '2. <strong>Duplicate outbox event</strong>: if webhook dedup fails → 2 outbox events → 2 Kafka <code>payment.succeeded</code> messages → idempotent check at the consumer.',
+        '3. <strong>Provider retry storm</strong>: providers (Stripe, Adyen) retry webhooks if they do not receive a 2xx within a few seconds. Need a quick response + async processing.',
+      ],
+      verify: 'Read the flow in <code>BE/payment-service/.../service/PaymentWebhookService.java:24-38</code>. Test: send 2 webhooks with the same <code>providerEventId</code> → verify the log shows "processed" only once.',
+      refs: '<code>BE/payment-service/.../service/PaymentWebhookService.java:24-38</code> · <code>BE/payment-service/.../web/MockPaymentWebhookController.java:19-23</code>',
+      tags: ['#webhook', '#idempotency', '#payment'],
+    },
+    {
+      id: 'q11', cat: 'outbox-idempotency', diff: 'mid',
+      catLabel: 'Idempotency', difficulty: '★★',
+      title: 'What happens if 2 clients call <code>POST /api/payments</code> at the same time for the same order but with different <code>idempotency_key</code> values?',
+      tldr: 'Both create a Payment, but <code>payments.order_id</code> is UNIQUE → the second request fails with <code>DataIntegrityViolationException</code> → returns 409 Conflict. Double-charge is prevented at the DB layer.',
+      flow: null,
+      flowPre: `Client A: POST /api/payments {orderId: 100, amount: 50}
+          Header: Idempotency-Key: key-A
+Client B: POST /api/payments {orderId: 100, amount: 50}  (same order)
+          Header: Idempotency-Key: key-B
+──────────────── concurrent ────────────────
+
+Thread A: findByIdempotencyKey(key-A) → null
+Thread B: findByIdempotencyKey(key-B) → null  (keys are different)
+
+Thread A: save(Payment(orderId=100, key=key-A, status=PENDING)) → SUCCESS
+Thread B: save(Payment(orderId=100, key=key-B, status=PENDING))
+          → DataIntegrityViolationException (order_id UNIQUE)
+          → catch → return 409 Conflict`,
+      tradeoff: [
+        '<strong>UNIQUE on <code>order_id</code></strong> (Ecom): simple, guaranteed, no race. Trade-off: an order only has one payment attempt. If it fails → the user must create a new order or cancel the old one.',
+        '<strong>UNIQUE on <code>(order_id, status)</code></strong>: allows multiple payment attempts with different statuses (e.g. PENDING + FAILED), only blocks two SUCCEEDED. More complex but more flexible.',
+        '<strong>No constraint</strong>: double-charge is possible. <strong>Never do this</strong>.',
+      ],
+      pitfall: [
+        '1. <strong>Exception handling is not explicit</strong>: need to catch <code>DataIntegrityViolationException</code> in the controller or <code>GlobalExceptionHandler</code> → return 409. If it bubbles up → 500 Internal Server Error → the user retries → confusion.',
+        '2. <strong>Same user opens 2 browser tabs</strong>: same cart → same order → one of the two tabs gets 409. The frontend must handle it.',
+        '3. <strong>Refund flow</strong>: after a refund, if the user buys the same order again → must create a new order (different order_id). OK.',
+      ],
+      verify: '<code>BE/database/payment-service/V1__create_payment_tables.sql:7</code> shows <code>order_id UUID UNIQUE NOT NULL</code>. Test: create 2 Payments with the same order_id → 1 succeeds, 1 fails.',
+      refs: '<code>BE/database/payment-service/V1__create_payment_tables.sql:7</code> · <code>BE/payment-service/.../service/PaymentService.java</code>',
+      tags: ['#payment', '#double-charge', '#constraint'],
+    },
+
+    /* ============== 4.3 JWT & SECURITY (4) ============== */
+    {
+      id: 'q12', cat: 'jwt-security', diff: 'senior',
+      catLabel: 'Security', difficulty: '★★★',
+      title: 'JWT HS256 uses a shared secret between auth-service and api-gateway. What happens if the secret leaks? How to mitigate? Compare HS256 vs RS256.',
+      tldr: 'An attacker can forge tokens with any role (CUSTOMER/ADMIN) → access any API. Mitigations: rotate the secret regularly, use RS256 with the private key only held by auth-service and the public key used by the gateway to verify, store the secret in Vault/KMS. Tech-debt #11: the gateway does not enforce a secret length of ≥ 32 bytes.',
+      flow: null,
+      flowPre: `Attacker obtains JWT_SECRET (via env var leak, log dump, git history)
+     │
+     ▼
+Forges a JWT:
+eyJhbGciOiJIUzI1NiJ9
+.eyJzdWIiOiJmYWtlLXVzZXItaWQiLCJyb2xlcyI6WyJBRE1JTiJdLCJleHAiOjQ4MDAwMDAwMDB9
+.<signature with the known secret>
+     │
+     ▼
+GET /api/admin/products -H "Authorization: Bearer <fake-token>"
+     │
+     ▼
+Gateway verifies → valid → passes
+Downstream trusts header X-User-Roles=ADMIN → returns data
+     │
+     ▼
+Attacker: full admin access`,
+      tradeoff: [
+        '<strong>HS256 (Ecom)</strong>: symmetric, 1 secret for both sign and verify. Pros: fast, simple. Cons: every service must know the secret → leak risk.',
+        '<strong>RS256</strong>: asymmetric. auth-service holds the private key (sign), gateway only has the public key (verify). Pros: the gateway cannot create tokens, only verify. Cons: slightly slower (~10ms), key management is more complex.',
+        '<strong>ES256</strong>: elliptic curve, faster than RS256, shorter keys.',
+      ],
+      pitfall: [
+        '1. <strong>Tech-debt #11</strong>: <code>GatewayJwtTokenService.java:73-75</code> takes <code>secret.getBytes(UTF_8)</code> without checking ≥ 32 bytes. auth-service has the check at <code>JwtTokenService.java:85-91</code>. If a short secret is set → auth-service fails but the gateway still verifies → inconsistent.',
+        '2. <strong>Secret in env file</strong>: <code>BE/.env</code> contains <code>JWT_SECRET=xxx</code>. If committed by accident or logged in a container → leak. Use Docker secrets or Vault.',
+        '3. <strong>Token revocation</strong>: Ecom only revokes refresh tokens; access tokens (15 min) <strong>cannot be revoked</strong>. If leaked, the attacker can use them until expiry. Mitigations: Redis blacklist, reduce TTL to 5 minutes, or use short-lived + refresh.',
+      ],
+      verify: 'Set <code>JWT_SECRET=test</code> (4 chars) in <code>.env</code> → start the gateway → is there any warning/error? Currently <strong>none</strong> (tech-debt). Suggestion: add <code>if (secret.length &lt; 32) throw</code>.',
+      refs: '<code>BE/auth-service/.../security/JwtTokenService.java:40-57, 85-91</code> · <code>BE/api-gateway/.../security/GatewayJwtTokenService.java:54-75</code> · tech-debt #11',
+      tags: ['#jwt', '#security', '#secret-management'],
+    },
+    {
+      id: 'q13', cat: 'jwt-security', diff: 'senior',
+      catLabel: 'Security', difficulty: '★★★',
+      title: 'The gateway sets 3 headers <code>X-User-Id/Email/Roles</code> to downstream services. If an attacker sends <code>X-User-Roles: ADMIN</code> directly to payment-service (bypassing the gateway), what happens? How serious is it?',
+      tldr: '<strong>Critical vulnerability (P0)</strong>. The downstream <code>GatewayUserContextFilter</code> only reads the headers, it does NOT verify any signature. Mitigations: (1) network policy only allowing requests from the gateway IP, (2) every service re-verifies the JWT with the public key, (3) bind headers at the TLS terminator.',
+      flow: null,
+      flowPre: `Attacker discovers port payment-service :8087 (via internal nmap scan)
+     │
+     ▼
+curl -X POST http://payment-service:8087/api/payments/123/refund \\
+     -H "X-User-Id: any-uuid" \\
+     -H "X-User-Email: hacker@evil.com" \\
+     -H "X-User-Roles: ADMIN"
+     │
+     ▼
+GatewayUserContextFilter: parses headers → sets attribute
+GatewayRoleFilter: checks X-User-Roles contains ADMIN → passes
+PaymentController.refund: executes refund logic
+     │
+     ▼
+Refund succeeds WITHOUT login`,
+      tradeoff: [
+        '<strong>Network policy (Kubernetes NetworkPolicy)</strong>: only the gateway pod can call payment-service. Simple and effective. But hard to enforce in dev/test locally.',
+        '<strong>Re-verify JWT</strong>: every service has the public key → verifies the <code>Authorization</code> header. Adds ~5-10ms.',
+        '<strong>mTLS</strong>: service-to-service TLS + client cert. The most secure. Requires Istio/Linkerd.',
+        '<strong>Bind headers at the TLS terminator</strong>: Envoy/Istio strips client headers, only accepts them from the gateway. More complex.',
+      ],
+      pitfall: [
+        '1. <strong>Service exposed in the Docker network</strong>: docker-compose exposes port <code>:8087</code> as <code>localhost:8087</code> → developers can curl directly from the host. In production, use an internal network + ingress that only allows the gateway.',
+        '2. <strong>Kubernetes Service</strong>: every service has a ClusterIP → other pods in the cluster can call it. Need a NetworkPolicy to block it.',
+        '3. <strong>Audit log only records after the filter passes</strong>: if an attack succeeds, the log contains no warning. Need to also log "denied" requests.',
+      ],
+      verify: 'Test: turn off the gateway, run payment-service standalone, send a request with <code>X-User-Roles: ADMIN</code> → check whether it passes. Ecom currently <strong>WILL PASS</strong> (vulnerability). P0 recommendation: add NetworkPolicy + verify the JWT.',
+      refs: '<code>BE/cart-service/.../security/GatewayUserContextFilter.java:13-34</code> · <code>BE/payment-service/.../security/GatewayRoleFilter.java:14-32</code>',
+      tags: ['#security', '#authorization', '#spoofing'],
+    },
+    {
+      id: 'q14', cat: 'jwt-security', diff: 'mid',
+      catLabel: 'Security', difficulty: '★★',
+      title: 'Refresh tokens are stored in the DB as SHA-256 hashes, not as plaintext. Why? Compare with storing them directly.',
+      tldr: 'If the DB leaks (SQL injection, backup exposure, insider), the attacker cannot use the refresh tokens to obtain new access tokens. One-way hash → can only verify, not reverse. Combined with a UNIQUE constraint + <code>revoked_at</code> for invalidation.',
+      flow: null,
+      flowPre: `AuthService.register/login:
+     │
+     ├─→ generateRefreshToken():
+     │     raw = base64url(16 random bytes)
+     │     hash = SHA-256(raw)
+     │     save RefreshToken(id, userId, tokenHash=hash, expiresAt=now+30d)
+     │     return raw  ← only returned once to the client
+     │
+AuthService.refresh(rawToken):
+     │
+     ├─→ hash = SHA-256(rawToken)
+     │
+     ├─→ refreshTokenRepo.findByTokenHash(hash)
+     │     │
+     │     ├─ not found → 401 invalid
+     │     ├─ revoked_at != null → 401 revoked
+     │     ├─ expires_at < now → 401 expired
+     │     └─ valid ↓
+     │
+     ├─→ revoke old (set revoked_at)
+     │
+     └─→ issue new access + refresh token`,
+      tradeoff: [
+        '<strong>SHA-256 hash (Ecom)</strong>: fast, sufficient for this use case (not a password). Trade-off: SHA-256 is fast → if the attacker gets the DB they could brute-force if the token is weak. But a 16-random-byte token = 128 bit entropy → cannot be brute-forced.',
+        '<strong>BCrypt</strong>: slower (~100ms), designed for passwords. Overkill for random tokens.',
+        '<strong>HMAC-SHA256 with a server secret</strong>: hash with a secret, the same secret verifies. Safer than plain SHA-256 because the attacker needs both the DB and the secret.',
+        '<strong>Argon2</strong>: state-of-the-art, resists GPU attacks. Not yet needed for refresh tokens.',
+      ],
+      pitfall: [
+        '1. <strong>Token rotation</strong>: each refresh → revoke old, issue new. Ecom does this correctly. Without rotation → the attacker can use the token in parallel.',
+        '2. <strong>Stolen token detection</strong>: if user A uses an old refresh token (already revoked) → may indicate a stolen token → force logout of all of user A&apos;s sessions. Ecom has not implemented this yet.',
+        '3. <strong>Long expiry</strong>: 30 days is quite long. Best practice: 7-14 days, with an absolute timeout.',
+      ],
+      verify: '<code>BE/auth-service/.../service/AuthService.java:95-109</code> shows <code>sha256(token)</code> → save hash. Test: log in → take the refresh token → query the DB: only the hash is stored, not the raw value.',
+      refs: '<code>BE/auth-service/.../service/AuthService.java:95-109</code>',
+      tags: ['#security', '#token', '#storage'],
+    },
+    {
+      id: 'q15', cat: 'jwt-security', diff: 'junior',
+      catLabel: 'Security', difficulty: '★',
+      title: 'Why does the <code>Authorization</code> header have to be <code>Bearer </code> rather than parsing the token directly?',
+      tldr: 'It follows RFC 6750 OAuth 2.0. It allows other schemes (Basic, Digest, MAC, NTLM). It clearly identifies the authentication scheme. Some proxies/CDNs may strip the header if the format is unusual.',
+      flow: [
+        '<strong>RFC 6750 format</strong>:',
+        '<pre>Authorization: Bearer &lt;token&gt;\n                ^^^^^^ scheme name (case-insensitive per RFC)\n                       ^^^^^^ token (access_token, refresh_token, etc.)</pre>',
+      ],
+      tradeoff: [
+        '<strong>Basic</strong>: <code>Basic base64(user:pass)</code> — HTTP Basic Auth.',
+        '<strong>Digest</strong>: challenge-response, old.',
+        '<strong>Bearer</strong>: the most common for OAuth 2.0 / JWT.',
+        '<strong>MAC</strong>: HTTP Signatures, more complex.',
+        '<strong>NTLM, Negotiate</strong>: Windows auth.',
+      ],
+      pitfall: [
+        '1. <strong>Strip prefix</strong>: some libraries require an exact <code>Bearer </code> (space) — missing the space → 401. Ecom uses <code>startsWith("Bearer ")</code> → OK.',
+        '2. <strong>Case sensitivity</strong>: the scheme name is case-insensitive per RFC but the token after the scheme is case-sensitive. Ecom lowercases Bearer → OK.',
+        '3. <strong>Token in the URL</strong>: NEVER put tokens in query strings (they get logged in history). Always use a header.',
+      ],
+      verify: '<code>BE/api-gateway/.../security/JwtAuthenticationFilter.java:34-41</code> shows <code>header.substring(7)</code> after checking <code>startsWith("Bearer ")</code>. Test: send <code>Bearer</code> (no space) → 401.',
+      refs: '<code>BE/api-gateway/.../security/JwtAuthenticationFilter.java:34-41</code> · RFC 6750',
+      tags: ['#jwt', '#rfc', '#http'],
+    },
+
+    /* ============== 4.4 REDIS & CART (5) ============== */
+    {
+      id: 'q16', cat: 'redis-cart', diff: 'mid',
+      catLabel: 'Redis', difficulty: '★★',
+      title: 'The cart is stored as Redis JSON with a 30-day TTL. Why is it not stored in the DB? What are the drawbacks?',
+      tldr: 'Cart data is ephemeral; the user may abandon it. Redis is 10-100x faster than the DB for read/write (in-memory, single-threaded, no disk). TTL cleans up automatically → no GC job needed. Drawback: if Redis is down → cart is unavailable (no cache-aside fallback yet).',
+      flow: null,
+      flowPre: `CartService.addItem(userId, productId, qty):
+     │
+     ├─→ ProductClient.getProduct(productId) ← Feign
+     │
+     ├─→ Cart cart = cartRepo.findByUserIdOrCreate(userId)
+     │     │
+     │     ├─→ Redis: GET cart:{userId} → deserialize JSON
+     │     │
+     │     └─→ if null → lock lock:cart:{userId} (5s) → Lua GET or CREATE → unlock
+     │
+     ├─→ cart.addItem(productSnapshot, qty)
+     │
+     └─→ cartRepo.save(cart)  ← Redis: SETEX cart:{userId} 30days <JSON>`,
+      tradeoff: [
+        '<strong>Redis (Ecom)</strong>: 0.1-1ms read/write. Auto-expiry. Schema-less JSON → easy to evolve. But needs a backup if users complain about "lost cart".',
+        '<strong>Postgres JSONB</strong>: persistent, queryable (e.g. find a cart that contains product X). But 10x slower, needs a GC job, needs migration.',
+        '<strong>Hybrid</strong>: cart metadata in the DB, items cached in Redis. More complex.',
+      ],
+      pitfall: [
+        '1. <strong>Redis down</strong>: the entire cart-service stops. Need a fallback: (a) allow checkout with an empty cart (the user must re-add items), (b) async DB backup.',
+        '2. <strong>JSON serialization version</strong>: if a field is added to the <code>Cart</code> record → older Redis data lacks the field → deserialization OK (Jackson default) but the business logic may fail. Need <code>@JsonIgnoreProperties(ignoreUnknown=true)</code>.',
+        '3. <strong>Memory pressure</strong>: each cart is ~1-5KB. 1M users = 1-5GB. Include this in Redis capacity planning.',
+        '4. <strong>GDPR</strong>: if a user deletes their account → the cart must be deleted. Does Ecom have a mechanism? Needs checking.',
+      ],
+      verify: '<code>BE/cart-service/.../repository/CartRepository.java:21, 116-129</code> shows <code>Duration.ofDays(30)</code>. Test: add a cart → <code>redis-cli TTL cart:{userId}</code> → ~2.59M seconds.',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:21, 116-129</code> · <code>.claude/knowledge-map.md:148-160</code>',
+      tags: ['#redis', '#cart', '#performance'],
+    },
+    {
+      id: 'q17', cat: 'redis-cart', diff: 'senior',
+      catLabel: 'Redis', difficulty: '★★★',
+      title: '<code>findByUserIdOrCreate</code> uses <code>Thread.sleep(50)</code> + recursive retry on lock contention. What are the risks? How to fix?',
+      tldr: '<strong>Stack overflow</strong> if the lock is held longer than 5s (TTL). Tech-debt #2. Fix: bounded retry with exponential backoff (50ms → 100ms → 200ms → max 5 attempts → fail), or use a Redisson distributed lock with a watchdog that auto-renews.',
+      flow: null,
+      flowPre: `Thread A: GET cart:user1 → miss
+Thread A: SET lock:cart:user1 NX EX 5 → success (lock acquired)
+Thread A: ... (creating the cart, takes 6s due to a GC pause or network blip)
+
+Thread B: GET cart:user1 → miss
+Thread B: SET lock:cart:user1 NX EX 5 → fail (already locked)
+Thread B: Thread.sleep(50)
+Thread B: recursive call findByUserIdOrCreate(user1)
+
+... repeated 100 times in 5s ...
+
+Thread A: finally { DEL lock:cart:user1 } → release
+Thread B: GET cart:user1 → success → return`,
+      tradeoff: [
+        '<strong>Bounded retry with exponential backoff</strong>: 5 attempts, 50ms → 100ms → 200ms → 400ms → 800ms (about 1.5s total). Then fail with 503. Simple, enough for 95% of cases.',
+        '<strong>Redisson distributed lock</strong>: auto-renews the TTL (watchdog) → not afraid of GC pauses. Requires an extra dependency.',
+        '<strong>Lock-free with an atomic Lua script</strong>: <code>EVAL "if not exists then set; return end"</code> → atomic. But the Lua script must be written carefully.',
+        '<strong>Optimistic check via a version field</strong>: every cart has a <code>version</code> field. Update with <code>SET cart:user1 &lt;new&gt; XX GT &lt;version&gt;</code>. Retry on failure.',
+      ],
+      pitfall: [
+        '1. <strong>Unbounded recursive call</strong>: <code>BE/cart-service/.../repository/CartRepository.java:107-114</code> recurses without a limit → stack overflow.',
+        '2. <strong>Sleep inside the request thread</strong>: occupies a Tomcat thread, blocking other requests. Use async with <code>CompletableFuture</code> instead.',
+        '3. <strong>Lock does not auto-renew</strong>: if the business logic runs longer than the TTL → the lock expires → another thread enters the critical section at the same time → race.',
+      ],
+      verify: 'Reproduce: add <code>Thread.sleep(6000)</code> inside <code>findByUserIdOrCreate</code> (simulate GC) → fire 10 concurrent requests for the same new userId → check whether a StackOverflowError occurs.',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:107-114</code> · tech-debt #2',
+      tags: ['#redis', '#lock', '#distributed-systems'],
+    },
+    {
+      id: 'q18', cat: 'redis-cart', diff: 'senior',
+      catLabel: 'Redis', difficulty: '★★★',
+      title: 'The product cache uses <code>@Cacheable</code> without a TTL configuration. If an admin updates a product but forgets to call <code>changeStatus</code>, what happens? What are the consequences?',
+      tldr: 'The data is <strong>stale forever</strong> because there is no TTL → only evicted when <code>createProduct</code>/<code>updateProduct</code>/<code>changeStatus</code> calls <code>@CacheEvict(allEntries=true)</code>. Tech-debt #9. Fix: set a TTL of 5-10 minutes for <code>product-detail</code>, use the <code>@TimeToLive</code> annotation, or set a Redis <code>EXPIRE</code> on the key.',
+      flow: null,
+      flowPre: `T=0:    Admin updates product #5 (price 100 → 80) directly in the DB
+          (via a SQL client, a fix script, etc.) — NOT through the API → @CacheEvict is NOT called
+          Redis still contains: product-detail::5 = {price: 100}
+
+T=10:   User views product #5 → cache hit → sees 100 (WRONG, should be 80)
+
+T=∞:    Stale forever (no TTL, nobody evicts)`,
+      tradeoff: [
+        '<strong>TTL 5-10 minutes</strong>: simple. More cache misses → higher DB load. But OK for the catalog (read-heavy).',
+        '<strong>Cache invalidation via Kafka event</strong>: when an admin updates → publish <code>product.updated</code> → the consumer in product-service evicts the cache. Real-time, but adds infra.',
+        '<strong>Write-through</strong>: update DB + Redis atomically. More complex, requires a transaction.',
+        '<strong>Versioned cache</strong>: key = <code>product-detail::{id}:v{version}</code>. Update the version when the DB updates. Cache miss is natural, no explicit eviction needed.',
+      ],
+      pitfall: [
+        '1. <strong>DB direct update</strong>: a DBA runs <code>UPDATE products SET price=80 WHERE id=5</code> → bypasses the ORM → cache is stale.',
+        '2. <strong>Bulk import</strong>: an ETL script imports 1000 products via SQL → cache is stale for all of them.',
+        '3. <strong>Cache stampede</strong>: TTLs for 100 popular products expire at the same time → 100 requests hit the DB simultaneously → spike. Need a lock or pre-warming.',
+        '4. <strong>Memory leak</strong>: the cache never expires → Redis fills up → automatic eviction (LRU) → also stale.',
+      ],
+      verify: '<code>BE/product-service/.../service/ProductCatalogService.java:52-88</code> shows no <code>redisTemplate.expire(key, ...)</code>. Update a product → check Redis: <code>redis-cli TTL product-detail::5</code> → <code>-1</code> (forever). Recommendation: add <code>@Cacheable(value="product-detail", key="#id", sync=true)</code> + a custom TTL config.',
+      refs: 'Tech-debt #9 · <code>BE/product-service/.../service/ProductCatalogService.java:52-88</code>',
+      tags: ['#cache', '#redis', '#consistency'],
+    },
+    {
+      id: 'q19', cat: 'redis-cart', diff: 'mid',
+      catLabel: 'Redis', difficulty: '★★',
+      title: '<code>CartClient</code> in order-service calls <code>GET /api/cart</code> via OpenFeign. If cart-service is slow for 3s, how long does checkout take? How to improve?',
+      tldr: 'Sum it up: <code>getCart</code> 3s + <code>clearCart</code> ~50ms + reserve publish ~10ms + Kafka roundtrip ~100ms + DB write ~20ms ≈ <strong>~3.2s</strong> (just this part, not including payment). Improvements: Circuit Breaker + timeout fail-fast (already have Resilience4j), or cache the cart in order-service.',
+      flow: null,
+      flowPre: `POST /api/orders:
+  │ OrderController.createOrder()                  ~5ms
+  │ OrderService.createOrder()
+  │   ├─→ CartClient.getCart() [Feign HTTP]        ~3000ms  ← BOTTLENECK
+  │   ├─→ parse Cart → snapshot items              ~10ms
+  │   ├─→ orderRepo.save() [DB]                    ~20ms
+  │   ├─→ CartClient.clearCart() [Feign HTTP]      ~50ms
+  │   └─→ OrderEventProducer.publish... [Kafka]    ~10ms
+  │ Kafka consumer (async)                         ~100ms (background)
+  │                                                ─────────
+  │ TOTAL (user-perceived)                         ~3.2s`,
+      tradeoff: [
+        '<strong>Resilience4j Circuit Breaker (added in commit <code>caa52b6</code>)</strong>: 5s timeout, fail-fast when cart-service is down. The user sees 503 quickly instead of waiting 30s (the default Tomcat timeout).',
+        '<strong>Cache the cart in order-service</strong>: 1-2s checkout. But the cart may be stale → inconsistency when the user adds a new item. Needs a short TTL + invalidation when the cart is updated.',
+        '<strong>Async via Kafka</strong>: order-service publishes <code>checkout.requested</code> → cart-service + product-service + inventory-service react → finally aggregate → response. Loosely coupled but the user has to poll.',
+        '<strong>GraphQL/BFF</strong>: one endpoint gathers data from multiple services, parallel fetch → one round trip.',
+      ],
+      pitfall: [
+        '1. <strong>Default Feign timeout 10s</strong>: if not configured → the user waits 10s. Already fixed with CB timeout 5s (commit <code>caa52b6</code>).',
+        '2. <strong>Synchronous chain</strong>: Order → Cart → Product. If Product is also slow → total latency adds up. Need async or cache.',
+        '3. <strong>No retry</strong>: a single network blip → fail. Need <code>@Retry</code> (Resilience4j supports it).',
+      ],
+      verify: 'Measure with <code>k6</code> (already available in <code>BE/benchmark/</code>): <code>http_req_duration</code> for <code>POST /api/orders</code>. Compare before/after enabling the CB.',
+      refs: '<code>BE/order-service/.../service/OrderService.java:30-40</code> · commit <code>caa52b6</code>',
+      tags: ['#feign', '#latency', '#performance'],
+    },
+    {
+      id: 'q20', cat: 'redis-cart', diff: 'senior',
+      catLabel: 'Redis', difficulty: '★★★',
+      title: 'The cart Lua script <code>SET_IF_SAME_SCRIPT</code> only does a <code>GET</code>, with the create fallback in Java. Is there a race condition? How to fix it?',
+      tldr: '<strong>Yes, there is a race condition</strong>. Two simultaneous requests for a new user: both GET miss → both create a new cart → setIfAbsent lock only one wins → the other sleeps and retries, looping endlessly. Tech-debt #10. Fix: write an atomic <code>GET or CREATE</code> Lua script in a single call.',
+      flow: null,
+      flowPre: `Thread A: EVAL SET_IF_SAME_SCRIPT("cart:user1") → returns nil (miss)
+Thread B: EVAL SET_IF_SAME_SCRIPT("cart:user1") → returns nil (miss)
+
+Thread A: setIfAbsent("lock:cart:user1", "A", 5s) → success
+Thread B: setIfAbsent("lock:cart:user1", "B", 5s) → fail
+Thread B: Thread.sleep(50)
+Thread B: recursive findByUserIdOrCreate()  ← loops
+
+Thread A: create new Cart() in Java
+Thread A: SETEX "cart:user1" 30d <new_cart_json>
+Thread A: DEL "lock:cart:user1"
+
+Thread B (after sleep): EVAL GET → STILL NIL  (the lock was released BEFORE Thread A committed)
+Thread B: setIfAbsent lock → success (Thread A already DEL&apos;d it)
+Thread B: create another new Cart()  ← DUPLICATE OBJECT
+Thread B: SETEX "cart:user1" 30d <another_cart>  ← OVERWRITES`,
+      tradeoff: [
+        '<strong>Lua atomic GET-or-CREATE</strong>:<pre>local existing = redis.call(\'GET\', KEYS[1])\nif existing then return existing end\nredis.call(\'SET\', KEYS[1], ARGV[1], \'EX\', ARGV[2])\nreturn ARGV[1]</pre>1 round trip, atomic. Java only receives the JSON. Pros: clean. Cons: must serialize before eval.',
+        '<strong>SETNX with a value</strong>: <code>SET key value NX EX 30d</code> → atomic create-or-fail. If it fails → GET again. 2 round trips, with a small race between two SETs.',
+        '<strong>Redis HASH + version</strong>: <code>HSETNX key field value</code> → atomic per field. More complex.',
+      ],
+      pitfall: [
+        '1. <strong>Currently two steps</strong>: EVAL GET + Java logic + SET. 3 round trips, 2 race windows.',
+        '2. <strong>Lock TTL 5s but the business logic may take longer</strong>: the lock expires → another thread enters the critical section.',
+        '3. <strong>No deadlock detection</strong>: if a lock leaks (the process crashes without releasing it) → wait 5s.',
+      ],
+      verify: 'Read <code>BE/cart-service/.../repository/CartRepository.java:29-36</code> for <code>GET_OR_CREATE_SCRIPT</code>. Reproduce: 2 threads concurrently call <code>findByUserIdOrCreate("new-user")</code> → check whether Redis <code>cart:new-user</code> only has 1 entry (OK) or several entries in a row (BUG).',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:29-36, 107-114</code> · tech-debt #10',
+      tags: ['#redis', '#lua', '#race-condition'],
+    },
+
+    /* ============== 4.5 TECH-DEBT & TROUBLESHOOTING (6) ============== */
+    {
+      id: 'q21', cat: 'tech-debt', diff: 'senior',
+      catLabel: 'Debug', difficulty: '★★★',
+      title: 'An order has been in PENDING for over 10 minutes and has not moved to RESERVED. How do you debug it step by step?',
+      tldr: 'Use the correlation ID + Zipkin to trace the flow across 12 services. Check logs at every step: publish Kafka, consume, DB transaction, downstream response. Possible causes: (1) Kafka lag, (2) inventory out-of-stock, (3) a bug in the handler.',
+      flow: null,
+      flowPre: `1. Grab the correlation ID: response header "X-Correlation-Id: <uuid>"
+
+2. Zipkin UI (localhost:9411):
+   - Filter by serviceName: order-service, inventory-service
+   - Find the trace by orderId or correlationId
+   - Check the span tree: createOrder → publishReservationRequested → consumeReservationRequested → reserveStock → publishReserved → consumeReserved → markReserved
+   - Which span has duration > 5s or error? → root cause
+
+3. If Zipkin has no span: check logs for each service:
+   grep "orderId=<uuid>" /var/log/{order,inventory}-service/
+   # or in a container:
+   docker logs order-service | grep <uuid>
+   # log format: %5p [order-service,abc-123]
+
+4. Check Kafka lag:
+   docker exec -it kafka kafka-consumer-groups.sh \\
+     --bootstrap-server localhost:9092 \\
+     --describe --group inventory-service
+   # LAG > 0 → consumer is slow
+
+5. Check the outbox:
+   docker exec -it payment-db psql -U postgres -d payment_service \\
+     -c "SELECT id, event_type, status, created_at FROM outbox_events
+         WHERE aggregate_id='<paymentId>' ORDER BY created_at;"
+   # status=FAILED → publish bug
+
+6. Check the DB transaction log:
+   SELECT * FROM orders WHERE id='<orderId>';
+   SELECT * FROM stock_reservations WHERE order_id='<orderId>';
+   -- If stock_reservations does not exist → inventory has not processed it`,
+      tradeoff: [
+        '<strong>Zipkin (Ecom has it)</strong>: automatic end-to-end tracing via <code>X-Correlation-Id</code>. Great for cross-service flows.',
+        '<strong>Loki + Promtail (not yet)</strong>: aggregate logs by correlationId. Good for debugging specific errors.',
+        '<strong>Kafka UI / AKHQ (not yet)</strong>: browse topics, check lag, replay messages. Great for Kafka issues.',
+        '<strong>psql + manual query</strong>: slow but precise for DB issues.',
+      ],
+      pitfall: [
+        '1. <strong>Correlation ID is not propagated into the Kafka payload</strong>: MDC currently contains correlationId, but the Kafka event payload only contains orderId, not correlationId. The consumer log generates a new correlationId → hard to trace.',
+        '2. <strong>Sampling probability = 1.0</strong>: Zipkin records every span → a lot of data. Production should sample 0.1.',
+        '3. <strong>Logs do not include the full stack trace</strong>: handlers catch exceptions and log a short message → the root cause is lost.',
+      ],
+      verify: 'Reproduce: create an order → manually stop the inventory-service → order stays PENDING → debug with the checklist above. Each step should give a clear answer.',
+      refs: '<code>.claude/knowledge-map.md:237-259, 286-305</code> · <code>BE/common/.../web/CorrelationIdFilter.java:13-33</code>',
+      tags: ['#debug', '#observability', '#tracing'],
+    },
+    {
+      id: 'q22', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'Notification emails are not actually sent (the log only shows "Mock email to=..."). What is needed for production? What are the steps in order?',
+      tldr: 'Replace <code>MockEmailSender</code> (which only logs INFO) with <code>JavaMailSender</code> + SMTP credentials or the SendGrid SDK. Also need to look up the real email from <code>user-service</code> via Feign (tech-debt #1: currently hardcoded as <code>user-{uuid}@example.test</code>). Add retry, dead letter queue, and monitoring.',
+      flow: null,
+      flowPre: `1. Add the dependency:
+   <dependency>
+     <groupId>com.sendgrid</groupId>
+     <artifactId>sendgrid-java</artifactId>
+   </dependency>
+   # or spring-boot-starter-mail for SMTP
+
+2. Create a new bean:
+   @Service
+   @Profile("prod")
+   public class SendGridEmailSender implements EmailSender {
+     @Override
+     public void send(String to, String subject, String body) {
+       SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+       Request request = new Request();
+       request.setMethod(Method.POST);
+       request.setEndpoint("mail/send");
+       request.setBody(...);
+       Response response = sg.api(request);
+       if (response.getStatusCode() >= 400) throw new EmailSendException(...);
+     }
+   }
+
+3. Look up the real email from user-service:
+   @FeignClient("user-service")
+   public interface UserClient {
+     @GetMapping("/api/users/{id}/profile")
+     UserProfileResponse getProfile(@PathVariable UUID id);
+   }
+   # Replace the hardcode: recipient(userId) → userClient.getProfile(userId).email()
+
+4. Retry with Resilience4j:
+   @Retry(name = "email", fallbackMethod = "sendFailed")
+   public void send(...) { ... }
+
+5. DLQ: after 3 failures → save to a notification_failed table → cron job retries after 1h
+
+6. Monitoring: alert if notification_logs.status=FAILED exceeds a threshold`,
+      tradeoff: [
+        '<strong>SMTP (Gmail, AWS SES)</strong>: simple, uses <code>JavaMailSender</code>. But SES requires domain verification, Gmail needs an app password.',
+        '<strong>SendGrid</strong>: REST API, good for high volume, has templates. Free tier 100 emails/day.',
+        '<strong>Twilio SendGrid / Mailgun / Postmark</strong>: similar, choose by price and region.',
+        '<strong>AWS SNS</strong>: push notifications (mobile), not email.',
+      ],
+      pitfall: [
+        '1. <strong>Bounce / spam</strong>: must handle bounce emails → unsubscribe. Sending many bounces → IP gets blacklisted.',
+        '2. <strong>GDPR / CCPA</strong>: consent is required before sending marketing emails. Transactional emails (order confirmation) are OK.',
+        '3. <strong>Email deliverability</strong>: SPF, DKIM, DMARC records must be configured in DNS. Without them → emails land in spam.',
+        '4. <strong>Rate limit</strong>: SendGrid free tier is 100/day. A flash sale of 10K orders will fail. Need a paid plan.',
+      ],
+      verify: '<code>BE/notification-service/.../service/MockEmailSender.java:11-13</code> only shows <code>log.info</code>. Test: replace the bean → trigger an order confirmed event → check that a real email arrives in the inbox. Check <code>notification_logs.status=SENT</code>.',
+      refs: 'Tech-debt #1, #8 · <code>BE/notification-service/.../service/MockEmailSender.java:11-13</code>',
+      tags: ['#notification', '#production-readiness'],
+    },
+    {
+      id: 'q23', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'The Prometheus scrape config only lists 3 out of 11 services. The 8 business services have no metrics in Grafana. How to fix it?',
+      tldr: 'Add 8 jobs to <code>BE/infra/prometheus/prometheus.yml</code> for ports 8081-8088, each job scrapes <code>/actuator/prometheus</code> every 15s. Reload prometheus (no restart needed). Tech-debt #6. Verify with <code>curl http://localhost:8083/actuator/prometheus | grep jvm_memory_used</code>.',
+      flow: null,
+      flowPre: `# BE/infra/prometheus/prometheus.yml
+scrape_configs:
+  # existing 3 jobs (api-gateway, discovery-server, config-server)
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+  - job_name: 'user-service'
+    # ... port 8082
+  - job_name: 'product-service'
+    # ... port 8083
+  # ... 8084 cart, 8085 inventory, 8086 order, 8087 payment, 8088 notification
+
+Then:
+docker exec prometheus kill -HUP 1   # reload config
+# or: curl -X POST http://localhost:9090/-/reload`,
+      tradeoff: [
+        '<strong>Static config (Ecom)</strong>: simple, hard-coded IPs. Good when the number of services is fixed.',
+        '<strong>Service discovery (Consul, Eureka, K8s)</strong>: auto-detects when services are added/removed. Good for dynamic infra.',
+        '<strong>File-based SD</strong>: watch a file → update. More flexible than static.',
+      ],
+      pitfall: [
+        '1. <strong>Wrong host</strong>: <code>host.docker.internal</code> only works on Docker Desktop (Mac/Windows). On Linux you need <code>172.17.0.1</code> or <code>network_mode: host</code>.',
+        '2. <strong>Authentication</strong>: if actuator security is enabled → basic auth is required. Ecom currently permits <code>/actuator/prometheus</code> for any user.',
+        '3. <strong>Metric cardinality explosion</strong>: if a label is userId → 1M users = 1M series → Prometheus OOM. Only use bounded labels (status, endpoint).',
+        '4. <strong>Network</strong>: the Prometheus container must be able to reach the business services through the Docker network. In docker-compose use <code>network_mode: host</code> or share the network.',
+      ],
+      verify: 'After adding, <code>curl http://localhost:9090/api/v1/targets</code> → check the 8 new targets have state=UP. Query: <code>up{job="auth-service"}</code> → 1.',
+      refs: '<code>BE/infra/prometheus/prometheus.yml:5-17</code> · tech-debt #6',
+      tags: ['#prometheus', '#monitoring', '#observability'],
+    },
+    {
+      id: 'q24', cat: 'tech-debt', diff: 'senior',
+      catLabel: 'Debug', difficulty: '★★★',
+      title: 'cart-service has a memory leak after 24h. What do you suspect? How to debug?',
+      tldr: 'Suspects: (1) the <code>Thread.sleep(50)</code> recursion does not terminate → threads are blocked and hold connections; (2) Kafka listener container leak; (3) Feign client does not release the HTTP connection. How to debug: enable a heap dump (<code>-XX:+HeapDumpOnOutOfMemoryError</code>), VisualVM, jmap, jstack, pprof.',
+      flow: null,
+      flowPre: `1. Heap dump on OOM:
+   Add JVM option: -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap.hprof
+   # Trigger via load test or wait 24h
+
+2. Analyze the heap dump:
+   # Eclipse MAT or VisualVM
+   # Find the class that uses the most memory
+   # Many "java.lang.Thread" + "CartRepository$..." → thread leak
+   # Many "org.apache.http.Connection" → Feign connection leak
+
+3. Thread dump:
+   jstack <pid> > thread-dump.txt
+   # Find threads in BLOCKED or WAITING state with a cart-related stack trace
+   # 100 threads in "CartRepository.findByUserIdOrCreate" → busy-wait leak
+
+4. Profile in runtime:
+   # VisualVM → Sampler → CPU/Memory
+   # Run a load test, watch memory grow linearly → leak
+
+5. Check metrics:
+   curl http://cart-service:8084/actuator/metrics/jvm.threads.live
+   # Steadily increases over 24h → thread leak
+   curl http://cart-service:8084/actuator/metrics/jvm.memory.used
+   # Heap steadily grows → memory leak`,
+      tradeoff: [
+        '<strong>Eclipse MAT</strong>: powerful, parses heap dumps offline. Free.',
+        '<strong>VisualVM</strong>: live profiling + thread dump. Free.',
+        '<strong>YourKit / JProfiler</strong>: commercial, prettier, better sampling.',
+        '<strong>jcmd + jfr</strong>: built-in, low overhead, good for production.',
+      ],
+      pitfall: [
+        '1. <strong>Large heap dump</strong>: 4GB heap = 4GB dump file. Needs disk space. Disable auto-dump in production, only enable when suspected.',
+        '2. <strong>GC root unreachable</strong>: a leak from a static field will not be collected by GC. MAT will show it.',
+        '3. <strong>Native memory leak</strong>: DirectByteBuffer, JNI. Not visible in a heap dump. Use <code>jcmd &lt;pid&gt; VM.native_memory</code>.',
+        '4. <strong>Connection pool leak</strong>: HikariCP, Feign HTTP client. Symptom: thread "await" waiting for a pool connection.',
+      ],
+      verify: 'Reproduce: create a load test script <code>wrk -t10 -c100 -d24h ...</code> (impractical, use <code>k6</code> instead). Monitor memory every 5 minutes.',
+      refs: 'Tech-debt #2 · <code>BE/cart-service/.../repository/CartRepository.java:107-114</code>',
+      tags: ['#performance', '#memory-leak', '#debug'],
+    },
+    {
+      id: 'q25', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'A <code>GlobalExceptionHandler not found</code> error appears when starting a service. Why? What are the consequences? How to fix it?',
+      tldr: 'Tech-debt #5: <code>common.web.GlobalExceptionHandler</code> exists but is NOT scanned. Each service writes its own <code>*ExceptionHandler</code> → inconsistent error format. Fix: add <code>@Import(GlobalExceptionHandler.class)</code> to the main class OR <code>@SpringBootApplication(scanBasePackages = "com.ecom")</code>.',
+      flow: null,
+      flowPre: `BE/common/src/main/java/com/ecom/common/web/GlobalExceptionHandler.java:
+  @RestControllerAdvice
+  public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handle(...) { ... }
+  }
+
+# Comment in the file: "Must be imported by each service's component scan"
+# BUT: no service actually imports it → the bean is not created
+
+# Result: each service has its own handler
+BE/cart-service/.../exception/CartExceptionHandler.java  → format A
+BE/payment-service/.../exception/PaymentExceptionHandler.java → format B
+BE/order-service/.../exception/OrderExceptionHandler.java → format C
+
+# Clients must handle 3 different error formats`,
+      tradeoff: [
+        '<strong><code>@Import(GlobalExceptionHandler.class)</code> on the main class</strong>: simple, explicit. Must be added to 9 services.',
+        '<strong><code>@ComponentScan(basePackages = "com.ecom")</code></strong>: scan the whole tree. May pick up unwanted beans.',
+        '<strong><code>@SpringBootApplication(scanBasePackages = {...})</code></strong>: similar.',
+        '<strong>Create a <code>common-web-starter</code> sub-module with auto-config</strong>: uses <code>spring.factories</code> → automatic. The most complex, but the best.',
+      ],
+      pitfall: [
+        '1. <strong>Duplicate handler</strong>: if <code>@Import</code> GlobalExceptionHandler is used AND the service has its own <code>*ExceptionHandler</code> → 2 handlers match → Spring picks the more specific one (same class). Delete the old handler.',
+        '2. <strong>Order</strong>: <code>@Order(Ordered.HIGHEST_PRECEDENCE)</code> on GlobalExceptionHandler so it runs first.',
+        '3. <strong>Logging</strong>: GlobalExceptionHandler should log the full error (stack trace) before returning the response.',
+      ],
+      verify: 'Read the comment in <code>BE/common/.../web/GlobalExceptionHandler.java:21-96</code>. <code>grep -r "@Import" BE/*/src/main/java/com/ecom/*/EcomServiceApplication.java</code> → currently 0 results. After the fix: 9 results. Test: send an invalid request → check that the response format is consistent.',
+      refs: 'Tech-debt #5 · <code>BE/common/.../web/GlobalExceptionHandler.java:21-96</code>',
+      tags: ['#architecture', '#code-quality', '#consistency'],
+    },
+    {
+      id: 'q26', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'Random 500 errors after a deploy. How does the correlation ID help with debugging? Step by step?',
+      tldr: 'Log format <code>%5p [appName,correlationId]</code>. The client sends <code>X-Correlation-Id</code> (the gateway generates one if missing). MDC is propagated to every service via a filter. On error, the response has the <code>X-Correlation-Id</code> header → grep Kibana/Grafana Loki by ID → see the full trace across 12 services.',
+      flow: null,
+      flowPre: `Client request:
+  GET /api/products
+  X-Correlation-Id: abc-123-uuid  (or the gateway generates one)
+     │
+     ▼
+api-gateway.GatewayCorrelationIdFilter:
+  - Reads the "X-Correlation-Id" header
+  - If null → UUID.randomUUID()
+  - Sets MDC: MDC.put("correlationId", "abc-123")
+  - Mutates the request: header X-Correlation-Id = abc-123
+  - Echoes the response: header X-Correlation-Id = abc-123
+     │
+     ▼
+product-service.CorrelationIdFilter (servlet):
+  - Reads the "X-Correlation-Id" header
+  - Sets MDC: MDC.put("correlationId", "abc-123")
+  - Echoes the response
+     │
+     ▼
+All log statements:
+  log.info("Searching products keyword={}", keyword)
+  # → "INFO [product-service,abc-123] Searching products keyword=phone"
+     │
+     ▼
+Client receives response:
+  HTTP 500
+  X-Correlation-Id: abc-123
+  Body: { "code": "...", "message": "...", "correlationId": "abc-123" }
+     │
+     ▼
+Developer debugs:
+  1. Copy "abc-123"
+  2. Kibana query: correlationId:"abc-123" → all logs across 12 services
+  3. Zipkin query: traceId="abc-123" → span tree
+  4. Find the ERROR log → root cause`,
+      tradeoff: [
+        '<strong>MDC + log pattern (Ecom)</strong>: simple, no extra infra. Structured log via MDC.',
+        '<strong>Separate Trace ID (W3C tracecontext)</strong>: <code>traceparent</code> header, OpenTelemetry standard. Stronger, better cross-service tracing.',
+        '<strong>Centralized log (ELK, Loki)</strong>: requires the ELK stack. Good for search.',
+        '<strong>APM tool (Datadog, New Relic)</strong>: commercial, prettier but $$$.',
+      ],
+      pitfall: [
+        '1. <strong>MDC is lost in async</strong>: <code>@Async</code> creates a new thread → MDC is empty. Must wrap <code>Runnable</code> to copy MDC.',
+        '2. <strong>Kafka payload does not contain correlationId</strong>: the producer sets MDC, but when calling <code>kafkaTemplate.send()</code> in another thread → MDC is empty → log has no correlationId. Need to set <code>kafkaTemplate.setObservationEnabled(true)</code> (Spring 3+) or inject it manually.',
+        '3. <strong>Sampling</strong>: Zipkin sampling = 1.0 today → a lot of traces. Production should sample 0.1.',
+        '4. <strong>Log level</strong>: default is INFO. Enable DEBUG only when debugging a specific issue → produces a lot of logs → fills the disk.',
+      ],
+      verify: 'Trigger a 500 error (e.g. invalid payload). Grab the <code>X-Correlation-Id</code> from the response header. Grep the logs: <code>grep "abc-123" /var/log/*/app.log</code>. The log should appear in both the gateway and the downstream service.',
+      refs: '<code>.claude/knowledge-map.md:237-259</code> · <code>BE/common/.../web/CorrelationIdFilter.java:13-33</code> · <code>BE/api-gateway/.../filter/GatewayCorrelationIdFilter.java:17-58</code>',
+      tags: ['#observability', '#debug', '#logging'],
+    },
+
+    /* ============== 4.6 E-COMMERCE GENERAL (7) ============== */
+    {
+      id: 'q27', cat: 'ecom-general', diff: 'senior',
+      catLabel: 'E-com', difficulty: '★★★',
+      title: 'Flash sale: 1 million users click "Buy" at the same time within 1 second. How to design inventory reservation to avoid overselling? Can Ecom handle it today?',
+      tldr: 'No overselling = atomic check + atomic decrement. 5 approaches: (1) optimistic version, (2) pessimistic DB lock, (3) Redis atomic DECRBY, (4) queue-based serial, (5) pre-shard stock. Ecom currently uses (2) via a DB transaction → <strong>bottleneck</strong> during flash sales.',
+      flow: null,
+      flowPre: `┌─────────────────────┬──────────────┬────────────┬──────────────┐
+│ Approach            │ Throughput   │ Complexity │ Ecom uses?   │
+├─────────────────────┼──────────────┼────────────┼──────────────┤
+│ 1. Optimistic check │ High         │ Low        │ No           │
+│    (version field)  │ (retry on    │            │              │
+│                     │  conflict)   │            │              │
+│ 2. Pessimistic DB   │ Low          │ Low        │ YES          │
+│    (SELECT FOR      │ (serialize   │            │ (transaction │
+│     UPDATE)         │  per row)    │            │  in          │
+│                     │              │            │  reserve)    │
+│ 3. Redis atomic     │ Very High    │ Medium     │ No           │
+│    DECRBY           │ (in-memory)  │            │ (only used   │
+│                     │              │            │  for cart)   │
+│ 4. Queue-based      │ Medium       │ High       │ No           │
+│    (Kafka serial)   │ (single      │            │              │
+│                     │  consumer)   │            │              │
+│ 5. Pre-shard stock  │ High         │ High       │ No           │
+│    (10 shards       │ (parallel)   │            │              │
+│     per product)    │              │            │              │
+└─────────────────────┴──────────────┴────────────┴──────────────┘
+
+Ecom today: approach 2 → with 1M concurrent:
+  - 1M requests → 1M Postgres transactions
+  - 1M SELECT FOR UPDATE on the same product_id
+  - All serialized → 1 thread processes at a time
+  - Avg latency 5s × 1M = throughput ~200 req/s
+  - → COLLAPSE`,
+      tradeoff: [
+        '<strong>Approach 2 (Ecom)</strong>: 1M requests × 1 transaction × 5ms = ~80 minutes. Way too slow.',
+        '<strong>Approach 3 (Redis DECRBY)</strong>: 1M atomic DECRBY on key <code>stock:product:5</code> = 1M ops in ~5s. OK. But needs Redis → DB sync (eventual).',
+        '<strong>Approach 5 (Pre-shard)</strong>: 10 shards <code>stock:product:5:shard1..10</code> → each shard has 100K stock. 10 consumers in parallel → 10x throughput. The most complex but the best scaling.',
+        '<strong>Approach 4 (Queue)</strong>: 1M requests → 1M Kafka messages → 1 consumer processes serially → ~5 minutes for 1M. The user has to poll the status.',
+      ],
+      pitfall: [
+        '1. <strong>Overselling</strong>: 2 users both read stock=1 → both reserve → both succeed → selling 2 while only 1 is available.',
+        '2. <strong>Underselling</strong>: wrong locking, too many failures → selling 0 while stock is still available.',
+        '3. <strong>Hot key</strong>: 1 hot product → 1M ops on 1 key → Redis single-threaded → bottleneck. Needs sharding or pre-warming multiple instances.',
+        '4. <strong>Cart hold vs inventory reserve</strong>: Ecom reserves at checkout, not at "add to cart". Flash sales need to reserve at "Add to cart" or "Notify me" to prevent flooding.',
+      ],
+      verify: 'Estimate: 1M users, 1s peak, 100K stock. Ecom = 100K × 5s transactions = bottleneck. Recommendation: pre-shard Redis for hot products.',
+      refs: '<code>BE/inventory-service/.../service/InventoryService.java:56-127</code>',
+      tags: ['#flash-sale', '#scalability', '#inventory'],
+    },
+    {
+      id: 'q28', cat: 'ecom-general', diff: 'junior',
+      catLabel: 'E-com', difficulty: '★',
+      title: 'Payment idempotency: the client retries 3 times due to timeouts. How does the server guarantee only one charge? Compare Ecom with Stripe.',
+      tldr: '5 steps: (1) the client provides an <code>Idempotency-Key</code> (UUID), (2) the server checks the key in the DB before charging, (3) if present → return the previous response, (4) if not → charge + save the key + return the response, (5) UNIQUE constraint in the DB. Stripe follows this pattern. Ecom also does it correctly in Q9.',
+      flow: null,
+      flowPre: `1. Client generates a UUID as soon as the user clicks "Pay":
+   const idempotencyKey = crypto.randomUUID();
+
+2. Send the request with the header:
+   POST /api/payments
+   Idempotency-Key: <uuid>
+   Body: {orderId, amount, currency}
+
+3. Server checks the DB:
+   SELECT * FROM payments WHERE idempotency_key = '<uuid>';
+   │
+   ├─ found → return the stored response (status, paymentId, etc.)
+   └─ null  ↓
+
+4. Process the payment (charge the provider):
+   INSERT INTO payments (..., idempotency_key='<uuid>', status='PENDING')
+   -- UNIQUE constraint → safety net
+
+5. Return the response to the client, the client stores the idempotencyKey
+
+--- Retry (network timeout, 5xx) ---
+
+Client sends AGAIN with the SAME idempotencyKey
+Server checks → found → return the SAME response
+→ No second charge`,
+      tradeoff: [
+        '<strong>Ecom</strong>: <code>pay-{orderId}</code> key (deterministic), TTL forever, does not verify the body matches.',
+        '<strong>Stripe</strong>: UUID per attempt, TTL 24h, verifies the body matches (if different → 422). Production-grade.',
+      ],
+      pitfall: [
+        '1. <strong>Lost key</strong>: the client crashes before receiving the response → the key is lost → the user retries with a new key → double charge. Mitigation: store the key on the client as soon as it is generated.',
+        '2. <strong>Different body, same key</strong>: the client retries but changes the amount (e.g. tip) → the server still returns the old response. Ecom does not check. Stripe returns 422.',
+        '3. <strong>TTL too short</strong>: retry after 25h with the old key → no longer idempotent. Stripe TTL 24h, then the key expires.',
+      ],
+      verify: 'Read the flow in <code>BE/payment-service/.../service/PaymentService.java:36-41</code>. Test: send 3 requests with the same key → verify only 1 charge occurred.',
+      refs: '<code>BE/payment-service/.../service/PaymentService.java:36-41</code> · Stripe API docs',
+      tags: ['#payment', '#idempotency', '#best-practice'],
+    },
+    {
+      id: 'q29', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'Cart abandonment is 70% at the checkout step. How to reduce it? What could Ecom improve?',
+      tldr: '7 strategies: guest checkout, save cart for guests, one-click, auto-fill, progress indicator, email reminders, real-time shipping. Ecom currently requires login from the start → high friction. Recommendation: add a guest flow + cart persistence via a cookie.',
+      flow: null,
+      flowPre: `┌────────────────────────┬────────────────────────┬──────────────┐
+│ Strategy               │ Implementation        │ Impact est.  │
+├────────────────────────┼────────────────────────┼──────────────┤
+│ 1. Guest checkout      │ No login required      │ -20% abandon │
+│    (Ecom does not have)│ → keep 2 fields (email)│              │
+│ 2. Save cart for guest │ Cart in cookie/local   │ -10% abandon │
+│    (Ecom Redis has it, │ → after login merge    │              │
+│     but requires login)│   with user cart       │              │
+│ 3. One-click checkout  │ Save payment + address │ -15% abandon │
+│    (Amazon patent)     │ 1 click = order        │              │
+│ 4. Auto-fill address   │ Google Places API      │ -5% abandon  │
+│ 5. Progress indicator  │ "Step 2/3: Payment"    │ -5% abandon  │
+│ 6. Email reminder      │ After 24h, 72h         │ -10% abandon │
+│ 7. Real-time shipping  │ Calculated on cart page│ -8% abandon  │
+└────────────────────────┴────────────────────────┴──────────────┘`,
+      tradeoff: [
+        '<strong>Guest checkout</strong>: increases conversion but loses user data (email is optional). Need to consider GDPR consent.',
+        '<strong>One-click</strong>: must store payment info → increases security risk (PCI DSS). Need tokenization (Stripe Elements).',
+        '<strong>Email reminder</strong>: needs an ESP (SendGrid). May be flagged as spam.',
+        '<strong>Real-time shipping</strong>: needs the GHN/GHTK API → costs money per request.',
+      ],
+      pitfall: [
+        '1. <strong>High friction at auth</strong>: Ecom <code>POST /api/orders</code> requires a Bearer token right away. The user must register first → increases abandon by 30-40%.',
+        '2. <strong>Cart expires too early</strong>: TTL 30 days is OK, but Redis may evict it sooner if memory is full.',
+        '3. <strong>Email reminder spam</strong>: sending 3 times a day → users unsubscribe → higher bounce rate.',
+        '4. <strong>Mobile UX</strong>: Ecom&apos;s FE is not yet optimized for mobile. 60% of users are on mobile.',
+      ],
+      verify: 'Measure the funnel: <code>Add to cart</code> → <code>Checkout start</code> → <code>Payment</code> → <code>Success</code>. Where is the drop-off → prioritize the fix. Tools: Google Analytics funnel, Hotjar session recording.',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:21, 116-129</code> · <code>FE/</code>',
+      tags: ['#ux', '#conversion', '#best-practice'],
+    },
+    {
+      id: 'q30', cat: 'ecom-general', diff: 'senior',
+      catLabel: 'E-com', difficulty: '★★★',
+      title: 'Distributed transaction between Order + Inventory + Payment. Why not use 2PC? What does Ecom use?',
+      tldr: '2PC is strict (sync, blocking) → reduces availability, does not scale, coordinator is a SPOF. Ecom uses <strong>Saga</strong> (eventual consistency, each step has compensation). Alternatives: TCC, Event Sourcing. Trade-off of Saga: hard to debug, requires distributed tracing.',
+      flow: null,
+      flowPre: `2PC (XA transaction):
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│  Order   │     │Inventory │     │ Payment  │
+│  Service │     │ Service  │     │ Service  │
+└────┬─────┘     └────┬─────┘     └────┬─────┘
+     │                │                │
+     └────────────────┼────────────────┘
+                      │
+                ┌─────▼──────┐
+                │ Coordinator │  ← SPOF, sync block
+                └────────────┘
+
+Flow:
+  1. Coordinator → All: PREPARE
+  2. All: lock resource, write to log, vote YES/NO
+  3. If all YES → Coordinator: COMMIT → All: commit
+     If any NO → Coordinator: ROLLBACK → All: rollback
+  4. Lock held until step 3 → blocking, slow
+
+Saga (Ecom uses):
+┌──────────┐  event   ┌──────────┐  event   ┌──────────┐
+│  Order   │ ───────▶ │Inventory │ ───────▶ │ Payment  │
+│  Service │          │ Service  │          │ Service  │
+└──────────┘          └──────────┘          └──────────┘
+     │                     │                     │
+     │  if fail            │  if fail            │
+     ▼                     ▼                     ▼
+compensate           compensate            compensate
+(cancel order)       (release stock)       (refund)
+
+Flow:
+  1. Order create → publish event
+  2. Inventory reserve → publish event
+  3. Payment charge → publish event
+  4. If step 2 fails → Order cancel (compensation)
+  5. Eventual consistency, no lock`,
+      tradeoff: [
+        '<strong>2PC</strong>: strong consistency, simple to reason about. But: (a) blocking, (b) coordinator is a SPOF, (c) does not scale horizontally, (d) DB lock is held for a long time → low throughput.',
+        '<strong>Saga (Ecom)</strong>: eventual consistency (eventually correct). Loose coupling, good scaling. But: (a) must write compensation for every step, (b) hard to debug, (c) business must accept "temporarily inconsistent".',
+        '<strong>TCC (Try-Confirm-Cancel)</strong>: 3 phases. Clearer than Saga but more complex. Used for finance (Alibaba).',
+        '<strong>Event Sourcing</strong>: store events, derive state. Best for audit but the most complex.',
+      ],
+      pitfall: [
+        '1. <strong>Compensation fails</strong>: if compensation also fails (e.g. inventory-service down during release) → data is inconsistent. Need retry + manual intervention.',
+        '2. <strong>Long-running saga</strong>: the user waits 30s for payment → bad UX. Need async + webhook.',
+        '3. <strong>Idempotency</strong>: every step must be idempotent because events can be delivered multiple times. Ecom already does this.',
+        '4. <strong>Trace</strong>: need correlation ID + Zipkin. Ecom has them.',
+      ],
+      verify: 'Ecom = Saga via Kafka. <code>BE/order-service/.../messaging/*EventConsumer.java</code> demonstrates it. Test: create an order → stop payment-service → check that inventory is released (compensation).',
+      refs: '<code>.claude/knowledge-map.md:126-142</code> · <code>BE/.../messaging/*EventConsumer.java</code>',
+      tags: ['#distributed-systems', '#saga', '#consistency'],
+    },
+    {
+      id: 'q31', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'SQL injection: searching products by keyword. Is Ecom safe? How to verify?',
+      tldr: 'It is safe. It uses JPA <code>Specification</code> with <code>criteriaBuilder.like(...)</code> → bind parameter (PreparedStatement) → no string concatenation. It does NOT use <code>LIKE \'%" + userInput + "%\'</code>. Verify by trying an injection payload: <code>\' OR \'1\'=\'1</code>.',
+      flow: null,
+      flowPre: `// BE/product-service/.../service/ProductCatalogService.java
+public Page<ProductSummaryResponse> search(ProductSearchCriteria criteria, ...) {
+  Specification<Product> spec = (root, query, cb) -> {
+    List<Predicate> predicates = new ArrayList<>();
+    predicates.add(cb.equal(root.get("active"), true));
+
+    if (criteria.keyword() != null) {
+      String pattern = "%" + criteria.keyword().toLowerCase() + "%";
+      predicates.add(cb.like(cb.lower(root.get("name")), pattern));
+      //                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      //                      JPA binds the parameter → PreparedStatement
+    }
+    // ...
+    return cb.and(predicates.toArray(new Predicate[0]));
+  };
+  return productRepo.findAll(spec, pageable);
+}
+
+When executed, Hibernate generates:
+SELECT * FROM products WHERE active = true AND LOWER(name) LIKE ?
+--                          bind: %phone%
+-- NOT: LOWER(name) LIKE '%phone%' (concatenated)`,
+      tradeoff: [
+        '<strong>PreparedStatement / Parameterized query (Ecom)</strong>: best practice. User input is treated as data, not code.',
+        '<strong>ORM (Hibernate, JPA)</strong>: auto-escapes. Safe when using the standard API.',
+        '<strong>Whitelist input</strong>: only allow alphanumeric, strip special characters.',
+        '<strong>WAF (Web Application Firewall)</strong>: Cloudflare, ModSecurity. Defense in depth.',
+        '<strong>Escape function</strong>: MySQL <code>mysql_real_escape_string</code>. Easy to forget, not recommended.',
+      ],
+      pitfall: [
+        '1. <strong>Native query with string concat</strong>: <code>em.createNativeQuery("SELECT * FROM products WHERE name LIKE \'%" + input + "%\'")</code> → VULNERABLE. Ecom does not do this.',
+        '2. <strong>Order BY injection</strong>: <code>ORDER BY ${userInput}</code> → cannot be bound. Must whitelist: <code>if (sortBy in ["name", "price"])</code>.',
+        '3. <strong>JPA <code>@Query</code> with concat</strong>: <code>@Query("SELECT p FROM Product p WHERE p.name LIKE %:keyword%")</code> → OK when using <code>:keyword</code>. But <code>LIKE \'%" + kw + "%\'"</code> (Java concat inside JPQL) → VULNERABLE.',
+        '4. <strong>JSON field injection</strong>: <code>preferences->>\'key\' = \'value\'</code> (Postgres) → still OK when bound.',
+      ],
+      verify: 'Test payload: <code>keyword = "\' OR \'1\'=\'1"</code>. If it returns all products → vulnerable. If it returns 0 (no match for special chars) → OK. Also test <code>keyword = "phone\'; DROP TABLE products;--"</code> → if the table is dropped → VULNERABLE.',
+      refs: '<code>BE/product-service/.../service/ProductCatalogService.java:94-113</code>',
+      tags: ['#security', '#sql-injection', '#best-practice'],
+    },
+    {
+      id: 'q32', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'Rate limiting for <code>POST /api/auth/login</code> to prevent brute force. Has Ecom done it? Compare approaches?',
+      tldr: '<strong>Yes</strong> (commit <code>0340f03</code> in June): a RequestRateLimiter STRICT at the gateway, 5 req/min/IP for login/register, NORMAL for refresh/products. Uses the Redis token bucket via <code>spring-cloud-gateway</code>. Partially addresses tech-debt #12.',
+      flow: null,
+      flowPre: `# BE/config-repo/api-gateway.yml (commit 0340f03)
+routes:
+  - id: auth-login
+    uri: lb://auth-service
+    predicates:
+      - Path=/api/auth/login
+    filters:
+      - name: RequestRateLimiter
+        args:
+          redis-rate-limiter.replenishRate: 5    # 5 tokens / second? minute?
+          redis-rate-limiter.burstCapacity: 10   # max burst
+          redis-rate-limiter.requestedTokens: 1
+          key-resolver: "#{@ipKeyResolver}"     # rate per IP`,
+      tradeoff: [
+        '<strong>Per-IP (Ecom)</strong>: simple, prevents brute force from a single IP. But an attacker using a botnet (1M IPs) can bypass it.',
+        '<strong>Per-user</strong>: after login, rate by userId. Good for authenticated APIs.',
+        '<strong>Per-API-key</strong>: for B2B. Each customer has its own quota.',
+        '<strong>Global rate</strong>: protects the backend globally. Production should have both global + per-endpoint.',
+        '<strong>Token bucket vs Sliding window</strong>: token bucket allows bursts, sliding window is more precise.',
+      ],
+      pitfall: [
+        '1. <strong>Behind a proxy</strong>: the real IP is in the <code>X-Forwarded-For</code> header, not the remote IP. Need to configure <code>setTrustedProxies</code>.',
+        '2. <strong>Shared IP (NAT)</strong>: a company or a school → 100 users share one IP → one user spams → 99 users get blocked. Need a combination of per-IP + per-user.',
+        '3. <strong>Redis down</strong>: if Redis is down, does the rate limiter fail-open (allow) or fail-closed (block)? Ecom defaults to fail-open → brute-force risk when Redis is down.',
+        '4. <strong>Distributed attack</strong>: 1M IPs brute-forcing at once → per-IP is not enough. Need CAPTCHA or device fingerprinting.',
+      ],
+      verify: 'Read the config in <code>BE/config-repo/api-gateway.yml</code>. Test: <code>for i in {1..20}; do curl -X POST /api/auth/login; done</code> → requests 6+ return 429 Too Many Requests.',
+      refs: '<code>BE/config-repo/api-gateway.yml</code> · commit <code>0340f03</code> · tech-debt #12',
+      tags: ['#security', '#rate-limiting', '#brute-force'],
+    },
+    {
+      id: 'q33', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'When one service is down (e.g. payment) and an order is being processed, what happens? What does the user experience? What issues does Ecom have?',
+      tldr: 'The Circuit Breaker opens (Resilience4j is already in place) → fail-fast → the user sees 503 "Service temporarily unavailable". The cart is still kept, the order stays in PENDING. When the service recovers → the user retries. Better UX: queue the order asynchronously, process via Kafka, email when done. Ecom is currently sync → the user has to wait or retry.',
+      flow: null,
+      flowPre: `User clicks "Place order"
+     │
+     ▼
+OrderService.createOrder()
+     │
+     ├─→ CartClient.getCart()  ── 200ms ✓
+     │
+     ├─→ InventoryClient.reserve()  ── 5000ms ✗ (payment-service down)
+     │     │
+     │     └─→ Resilience4j Circuit Breaker
+     │           ├─ count failures: 1, 2, 3, 4, 5 → 5 failures in 10s
+     │           ├─ CB open → fail-fast (1ms)
+     │           ├─ Wait 30s (slidingWindow)
+     │           ├─ Half-open: allow 1 request to try
+     │           │   ├─ success → close CB
+     │           │   └─ fail → open again for 30s
+     │
+     └─→ throw ServiceUnavailableException
+          │
+          ▼
+  OrderController → 503 Service Unavailable
+  Body: { "code": "SVC_DOWN", "message": "Payment service is temporarily unavailable" }
+       │
+       ▼
+  User sees a toast "Order failed, please try again in 1 minute"`,
+      tradeoff: [
+        '<strong>Sync fail-fast (Ecom today)</strong>: the user knows immediately, can retry. But the cart is still kept → the user retries manually. Not automatic.',
+        '<strong>Async queue + email</strong>: POST order → returns 202 Accepted immediately, queue processes, emails when done. Better UX but more complex.',
+        '<strong>Degraded mode</strong>: allow checkout without payment (pay later) → business risk.',
+        '<strong>Cached fallback</strong>: return the old response (if any) → consistency risk.',
+      ],
+      pitfall: [
+        '1. <strong>Stale cart</strong>: the user holds the cart for 30 minutes, retries → the cart may be out of stock (inventory changed). Need to re-check on retry.',
+        '2. <strong>Payment retry</strong>: if the user retries with a new key (Ecom <code>pay-{orderId}</code>) → fails because the order already has a PENDING payment.',
+        '3. <strong>CB config too sensitive</strong>: 5 failures in 10s → CB opens → a single false positive (network blip) blocks the service for 30s. Need to tune the threshold.',
+        '4. <strong>No graceful degradation</strong>: the user sees 503 → does not know when to retry. Need a <code>Retry-After</code> header.',
+      ],
+      verify: 'Stop payment-service → create an order → check the log for <code>CircuitBreaker \'payment\' is OPEN</code>. Response time < 100ms (fail-fast). Add a <code>Retry-After: 30</code> header.',
+      refs: 'Commits <code>f047a92</code>, <code>caa52b6</code>, <code>4c94a1d</code> (Resilience4j)',
+      tags: ['#resilience', '#ux', '#circuit-breaker'],
+    },
+  ];
+
+  const list = document.getElementById('qa-list');
+
+  function escPre(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderBody(q) {
+    let html = '';
+    if (q.tldr) {
+      html += '<div class="ans-tldr"><span class="ans-section-label">🎯 TL;DR:</span>' + q.tldr + '</div>';
+    }
+    if (q.flow && q.flow.length) {
+      html += '<div class="ans-flow"><span class="ans-section-label">🔁 Flow:</span>';
+      q.flow.forEach(p => { html += '<p>' + p + '</p>'; });
+      html += '</div>';
+    }
+    if (q.flowPre) {
+      html += '<div class="ans-flow"><span class="ans-section-label">🔁 Flow:</span><pre><code>' + escPre(q.flowPre) + '</code></pre></div>';
+    }
+    if (q.tradeoff) {
+      html += '<div class="ans-tradeoff"><span class="ans-section-label">⚖️ Trade-off:</span>';
+      if (Array.isArray(q.tradeoff)) {
+        q.tradeoff.forEach(p => { html += '<p>' + p + '</p>'; });
+      } else {
+        html += '<p>' + q.tradeoff + '</p>';
+      }
+      html += '</div>';
+    }
+    if (q.pitfall) {
+      html += '<div class="ans-pitfall"><span class="ans-section-label">⚠️ Pitfall:</span>';
+      if (Array.isArray(q.pitfall)) {
+        q.pitfall.forEach(p => { html += '<p>' + p + '</p>'; });
+      } else {
+        html += '<p>' + q.pitfall + '</p>';
+      }
+      html += '</div>';
+    }
+    if (q.verify) {
+      html += '<div class="ans-verify"><span class="ans-section-label">🔍 Verify:</span><p>' + q.verify + '</p></div>';
+    }
+    html += '<div class="qa-refs"><strong>📎 References:</strong> ' + q.refs;
+    html += '<div class="qa-tags">🏷️ ';
+    q.tags.forEach(t => { html += '<span class="qa-tag">' + t + '</span>'; });
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderCard(q) {
+    return `
+      <article class="qa-card" data-category="${q.cat}" data-difficulty="${q.diff}" data-id="${q.id}">
+        <button class="qa-question" aria-expanded="false">
+          <span class="qa-num">${q.id.toUpperCase()}</span>
+          <span class="qa-title">${q.title}</span>
+          <span class="qa-meta">
+            <span class="qa-cat cat-${q.cat}">${q.catLabel}</span>
+            <span class="qa-difficulty">${q.difficulty}</span>
+            <span class="qa-toggle">▼</span>
+          </span>
+        </button>
+        <div class="qa-answer" hidden>
+          ${renderBody(q)}
+        </div>
+      </article>
+    `;
+  }
+
+  list.innerHTML = Q.map(renderCard).join('');
+
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle');
+  const openedCountEl = document.getElementById('opened-count');
+  const STORAGE_THEME = 'ecom-qa-theme-en';
+  const STORAGE_OPENED = 'ecom-qa-opened-en';
+
+  const savedTheme = localStorage.getItem(STORAGE_THEME) || 'dark';
+  html.dataset.theme = savedTheme;
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    localStorage.setItem(STORAGE_THEME, next);
+  });
+
+  const cards = document.querySelectorAll('.qa-card');
+  let opened = new Set();
+  try { opened = new Set(JSON.parse(localStorage.getItem(STORAGE_OPENED) || '[]')); } catch (e) {}
+
+  cards.forEach(card => {
+    const id = card.dataset.id;
+    const btn = card.querySelector('.qa-question');
+    const ans = card.querySelector('.qa-answer');
+    if (opened.has(id)) {
+      ans.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+    }
+    btn.addEventListener('click', () => {
+      const isOpen = !ans.hidden;
+      ans.hidden = isOpen;
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      if (!isOpen) opened.add(id); else opened.delete(id);
+      localStorage.setItem(STORAGE_OPENED, JSON.stringify([...opened]));
+      updateProgress();
+    });
+  });
+
+  function updateProgress() {
+    const count = [...document.querySelectorAll('.qa-question')]
+      .filter(b => b.getAttribute('aria-expanded') === 'true').length;
+    openedCountEl.textContent = count;
+  }
+  updateProgress();
+
+  const chips = document.querySelectorAll('.chip');
+  const baseLabels = {};
+  chips.forEach(c => { baseLabels[c.dataset.filter] = c.textContent.split(' (')[0]; });
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const f = chip.dataset.filter;
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      let visible = 0;
+      cards.forEach(card => {
+        const match = f === 'all' || card.dataset.category === f;
+        card.hidden = !match;
+        card.dataset.hiddenByFilter = !match ? 'true' : 'false';
+        if (match) visible++;
+      });
+      chips.forEach(c => {
+        const k = c.dataset.filter;
+        c.textContent = baseLabels[k] + ` (${k === 'all' ? cards.length : [...cards].filter(x => x.dataset.category === k).length})`;
+      });
+    });
+  });
+
+  const search = document.getElementById('search');
+  search.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    if (!q) {
+      cards.forEach(c => { c.hidden = c.dataset.hiddenByFilter === 'true'; });
+      return;
+    }
+    cards.forEach(card => {
+      const match = card.textContent.toLowerCase().includes(q);
+      card.hidden = !match || card.dataset.hiddenByFilter === 'true';
+    });
+  });
+
+  cards.forEach(card => { card.dataset.hiddenByFilter = 'false'; });
+
+})();
+</script>
+
+</body>
+</html>
