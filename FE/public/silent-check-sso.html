@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <head><title>SSO Check</title></head>
+  <body>
+    <script>
+      // Used by keycloak-js for silent SSO check via iframe.
+      // Posts the location.href (which contains the auth code) back
+      // to the parent window so keycloak.init() can complete.
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>
