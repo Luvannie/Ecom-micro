@@ -1,11 +1,12 @@
 package com.ecom.order.service;
 
-import com.ecom.order.client.CartClient;
-import com.ecom.order.client.CartItemResponse;
-import com.ecom.order.client.CartResponse;
-import com.ecom.order.client.InventoryClient;
 import com.ecom.order.domain.Order;
 import com.ecom.order.domain.OrderStatus;
+import com.ecom.order.port.CartQueryPort;
+import com.ecom.order.port.EventPublishPort;
+import com.ecom.order.port.InventoryCommandPort;
+import com.ecom.order.port.dto.CartItemView;
+import com.ecom.order.port.dto.CartView;
 import com.ecom.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,25 +34,27 @@ class OrderServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private CartClient cartClient;
+    private CartQueryPort cartQueryPort;
 
     @Mock
-    private InventoryClient inventoryClient;
+    private InventoryCommandPort inventoryCommandPort;
+
+    @Mock
+    private EventPublishPort eventPublishPort;
 
     private OrderService orderService;
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderRepository, cartClient, inventoryClient);
+        orderService = new OrderService(orderRepository, cartQueryPort, inventoryCommandPort, eventPublishPort);
     }
 
     @Test
     void createOrderFromCartStoresSnapshots() {
         UUID userId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
-        when(cartClient.getCart(userId, "customer@example.com")).thenReturn(new CartResponse(userId, List.of(
-                new CartItemResponse(productId, "Margherita", new BigDecimal("12.50"), 2, null,
-                        new BigDecimal("25.00"))), new BigDecimal("25.00"), Instant.now()));
+        when(cartQueryPort.getCart(userId, "customer@example.com")).thenReturn(new CartView(userId, List.of(
+                new CartItemView(productId, "Margherita", new BigDecimal("12.50"), 2))));
         when(orderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var response = orderService.createOrder(userId, "customer@example.com");
@@ -66,18 +68,19 @@ class OrderServiceTest {
             assertThat(item.quantity()).isEqualTo(2);
             assertThat(item.subtotal()).isEqualByComparingTo("25.00");
         });
-        verify(cartClient).clearCart(userId, "customer@example.com");
+        verify(cartQueryPort).clearCart(userId, "customer@example.com");
+        verify(eventPublishPort).publishReservationRequested(any());
     }
 
     @Test
     void emptyCartRejectsCreateOrder() {
         UUID userId = UUID.randomUUID();
-        when(cartClient.getCart(userId, "customer@example.com"))
-                .thenReturn(new CartResponse(userId, List.of(), BigDecimal.ZERO, Instant.now()));
+        when(cartQueryPort.getCart(userId, "customer@example.com"))
+                .thenReturn(new CartView(userId, List.of()));
 
         assertThatThrownBy(() -> orderService.createOrder(userId, "customer@example.com"))
                 .isInstanceOf(EmptyCartException.class);
-        verifyNoInteractions(inventoryClient);
+        verifyNoInteractions(inventoryCommandPort);
     }
 
     @Test
@@ -102,7 +105,8 @@ class OrderServiceTest {
         var response = orderService.cancelOrder(userId, order.getId());
 
         assertThat(response.status()).isEqualTo(OrderStatus.CANCELLED);
-        verify(inventoryClient).release(reservationId);
+        verify(inventoryCommandPort).release(reservationId);
+        verify(eventPublishPort).publishOrderCancelled(any());
     }
 
     @Test

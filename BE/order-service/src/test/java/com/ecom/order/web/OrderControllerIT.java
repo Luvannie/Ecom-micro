@@ -1,11 +1,11 @@
 package com.ecom.order.web;
 
-import com.ecom.order.client.CartClient;
-import com.ecom.order.client.CartItemResponse;
-import com.ecom.order.client.CartResponse;
-import com.ecom.order.client.InventoryClient;
 import com.ecom.order.domain.Order;
 import com.ecom.order.messaging.OrderEventProducer;
+import com.ecom.order.port.CartQueryPort;
+import com.ecom.order.port.InventoryCommandPort;
+import com.ecom.order.port.dto.CartItemView;
+import com.ecom.order.port.dto.CartView;
 import com.ecom.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,10 +41,10 @@ class OrderControllerIT {
     private OrderRepository orderRepository;
 
     @MockBean
-    private CartClient cartClient;
+    private CartQueryPort cartQueryPort;
 
     @MockBean
-    private InventoryClient inventoryClient;
+    private InventoryCommandPort inventoryCommandPort;
 
     @MockBean
     private OrderEventProducer eventProducer;
@@ -66,7 +65,7 @@ class OrderControllerIT {
     @Test
     void createOrderEmitsReservationRequest() throws Exception {
         UUID productId = UUID.randomUUID();
-        when(cartClient.getCart(userId, "customer@example.com")).thenReturn(cart(productId));
+        when(cartQueryPort.getCart(userId, "customer@example.com")).thenReturn(cart(productId));
 
         mockMvc.perform(post("/api/orders")
                         .header("X-User-Id", userId)
@@ -106,9 +105,9 @@ class OrderControllerIT {
         verify(eventProducer).publishOrderCancelled(any());
     }
 
-    private CartResponse cart(UUID productId) {
-        return new CartResponse(userId, List.of(new CartItemResponse(productId, "Margherita",
-                new BigDecimal("12.50"), 2, null, new BigDecimal("25.00"))), new BigDecimal("25.00"), Instant.now());
+    private CartView cart(UUID productId) {
+        return new CartView(userId, List.of(new CartItemView(productId, "Margherita",
+                new BigDecimal("12.50"), 2)));
     }
 
     private Order order(UUID userId) {

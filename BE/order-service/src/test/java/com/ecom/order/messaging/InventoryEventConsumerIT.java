@@ -1,9 +1,9 @@
 package com.ecom.order.messaging;
 
-import com.ecom.order.client.CartClient;
-import com.ecom.order.client.InventoryClient;
 import com.ecom.order.domain.Order;
 import com.ecom.order.domain.OrderStatus;
+import com.ecom.order.port.CartQueryPort;
+import com.ecom.order.port.InventoryCommandPort;
 import com.ecom.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,10 +27,10 @@ class InventoryEventConsumerIT {
     private OrderRepository orderRepository;
 
     @MockBean
-    private CartClient cartClient;
+    private CartQueryPort cartQueryPort;
 
     @MockBean
-    private InventoryClient inventoryClient;
+    private InventoryCommandPort inventoryCommandPort;
 
     @MockBean
     private OrderEventProducer eventProducer;
