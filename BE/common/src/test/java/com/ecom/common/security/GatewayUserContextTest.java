@@ -33,4 +33,14 @@ class GatewayUserContextTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("userId");
     }
+
+    @Test
+    void from_request_throws_when_email_missing() {
+        HttpServletRequest req = new MockHttpServletRequest();
+        req.setAttribute(GatewayUserContextFilter.USER_ID_ATTRIBUTE, UUID.randomUUID().toString());
+
+        assertThatThrownBy(() -> GatewayUserContext.from(req))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("userEmail");
+    }
 }
