@@ -1,7 +1,7 @@
 package com.ecom.order.web;
 
 import com.ecom.order.messaging.OrderEventProducer;
-import com.ecom.order.security.GatewayUserContext;
+import com.ecom.common.security.GatewayUserContext;
 import com.ecom.order.service.OrderService;
 import com.ecom.order.web.dto.OrderResponse;
 import com.ecom.order.web.dto.OrderSummaryResponse;
