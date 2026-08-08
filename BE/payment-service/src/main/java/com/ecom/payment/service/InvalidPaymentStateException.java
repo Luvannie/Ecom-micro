@@ -1,6 +1,8 @@
 package com.ecom.payment.service;
 
-public class InvalidPaymentStateException extends RuntimeException {
+import com.ecom.common.web.ConflictException;
+
+public class InvalidPaymentStateException extends ConflictException {
     public InvalidPaymentStateException(String message) {
         super(message);
     }
