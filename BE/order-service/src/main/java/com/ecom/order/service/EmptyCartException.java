@@ -1,6 +1,8 @@
 package com.ecom.order.service;
 
-public class EmptyCartException extends RuntimeException {
+import com.ecom.common.web.ConflictException;
+
+public class EmptyCartException extends ConflictException {
     public EmptyCartException() {
         super("Cart is empty");
     }

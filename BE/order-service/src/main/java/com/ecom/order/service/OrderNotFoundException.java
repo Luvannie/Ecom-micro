@@ -1,9 +1,11 @@
 package com.ecom.order.service;
 
+import com.ecom.common.web.NotFoundException;
+
 import java.util.UUID;
 
-public class OrderNotFoundException extends RuntimeException {
+public class OrderNotFoundException extends NotFoundException {
     public OrderNotFoundException(UUID orderId) {
-        super("Order not found: " + orderId);
+        super("Order", orderId);
     }
 }
