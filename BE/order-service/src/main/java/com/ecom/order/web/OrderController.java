@@ -1,7 +1,6 @@
 package com.ecom.order.web;
 
-import com.ecom.order.messaging.OrderEventProducer;
-import com.ecom.order.security.GatewayUserContext;
+import com.ecom.common.security.GatewayUserContext;
 import com.ecom.order.service.OrderService;
 import com.ecom.order.web.dto.OrderResponse;
 import com.ecom.order.web.dto.OrderSummaryResponse;
@@ -21,18 +20,15 @@ import java.util.UUID;
 @RestController
 public class OrderController {
     private final OrderService orderService;
-    private final OrderEventProducer eventProducer;
 
-    public OrderController(OrderService orderService, OrderEventProducer eventProducer) {
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
-        this.eventProducer = eventProducer;
     }
 
     @PostMapping("/api/orders")
     public ResponseEntity<OrderResponse> create(HttpServletRequest request) {
         GatewayUserContext context = GatewayUserContext.from(request);
         OrderResponse order = orderService.createOrder(context.userId(), context.email());
-        eventProducer.publishReservationRequested(order);
         return ResponseEntity.created(URI.create("/api/orders/" + order.id())).body(order);
     }
 
@@ -49,7 +45,6 @@ public class OrderController {
     @PostMapping("/api/orders/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancel(HttpServletRequest request, @PathVariable("orderId") UUID orderId) {
         OrderResponse order = orderService.cancelOrder(GatewayUserContext.from(request).userId(), orderId);
-        eventProducer.publishOrderCancelled(order);
         return ResponseEntity.ok(order);
     }
 }

@@ -65,9 +65,9 @@ class ProductCatalogServiceTest {
     @Test
     void searchReturnsOnlyActiveProducts() {
         var category = catalogService.createCategory(new CreateCategoryRequest("Pizza", "pizza"));
-        catalogService.createProduct(product(category.id(), "Margherita", "margherita"));
-        var inactive = catalogService.createProduct(product(category.id(), "Inactive Pizza", "inactive-pizza"));
-        catalogService.changeStatus(inactive.id(), false);
+        catalogService.createProduct(product(category.getId(), "Margherita", "margherita"));
+        var inactive = catalogService.createProduct(product(category.getId(), "Inactive Pizza", "inactive-pizza"));
+        catalogService.changeStatus(inactive.getId(), false);
 
         var results = catalogService.search(ProductSearchCriteria.empty(), PageRequest.of(0, 10));
 
@@ -79,26 +79,26 @@ class ProductCatalogServiceTest {
     @Test
     void inactiveProductDetailReturnsNotFound() {
         var category = catalogService.createCategory(new CreateCategoryRequest("Drinks", "drinks"));
-        var product = catalogService.createProduct(product(category.id(), "Cola", "cola"));
-        catalogService.changeStatus(product.id(), false);
+        var product = catalogService.createProduct(product(category.getId(), "Cola", "cola"));
+        catalogService.changeStatus(product.getId(), false);
 
-        assertThatThrownBy(() -> catalogService.getProduct(product.id()))
+        assertThatThrownBy(() -> catalogService.getProduct(product.getId()))
                 .isInstanceOf(ProductNotFoundException.class);
     }
 
     @Test
     void updateProductEvictsCachedDetail() {
         var category = catalogService.createCategory(new CreateCategoryRequest("Sides", "sides"));
-        var product = catalogService.createProduct(product(category.id(), "Fries", "fries"));
+        var product = catalogService.createProduct(product(category.getId(), "Fries", "fries"));
 
-        assertThat(catalogService.getProduct(product.id()).name()).isEqualTo("Fries");
-        assertThat(catalogService.getProduct(product.id()).name()).isEqualTo("Fries");
+        assertThat(catalogService.getProduct(product.getId()).getName()).isEqualTo("Fries");
+        assertThat(catalogService.getProduct(product.getId()).getName()).isEqualTo("Fries");
 
-        catalogService.updateProduct(product.id(), new UpdateProductRequest(
-                category.id(), "Curly Fries", "curly-fries", "Crispy", new BigDecimal("4.50"), null, null));
+        catalogService.updateProduct(product.getId(), new UpdateProductRequest(
+                category.getId(), "Curly Fries", "curly-fries", "Crispy", new BigDecimal("4.50"), null, null));
 
-        assertThat(catalogService.getProduct(product.id()).name()).isEqualTo("Curly Fries");
-        verify(productRepository, atLeast(2)).findByIdAndActiveTrue(product.id());
+        assertThat(catalogService.getProduct(product.getId()).getName()).isEqualTo("Curly Fries");
+        verify(productRepository, atLeast(2)).findByIdAndActiveTrue(product.getId());
     }
 
     private CreateProductRequest product(UUID categoryId, String name, String slug) {

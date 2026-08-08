@@ -1,6 +1,6 @@
 package com.ecom.user.web;
 
-import com.ecom.user.security.GatewayUserContext;
+import com.ecom.common.security.GatewayUserContext;
 import com.ecom.user.service.UserProfileService;
 import com.ecom.user.web.dto.AddressResponse;
 import com.ecom.user.web.dto.CreateAddressRequest;

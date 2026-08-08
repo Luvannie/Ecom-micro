@@ -1,0 +1,1699 @@
+<!doctype html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ecom Q&A — Phỏng vấn Microservices</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    transition: background-color .2s, color .2s;
+  }
+  html[data-theme="dark"] body { background: #0d1117; color: #e6edf3; }
+  html[data-theme="light"] body { background: #ffffff; color: #1f2328; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  header { padding: 32px 0 16px; border-bottom: 1px solid; margin-bottom: 24px; }
+  html[data-theme="dark"] header { border-color: #30363d; }
+  html[data-theme="light"] header { border-color: #d0d7de; }
+
+  h1 { margin: 0 0 4px; font-size: 28px; font-weight: 700; }
+  .subtitle { margin: 0 0 20px; opacity: .7; font-size: 14px; }
+
+  .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  #search {
+    flex: 1; min-width: 240px; padding: 10px 14px;
+    border-radius: 8px; border: 1px solid;
+    font-size: 14px; outline: none; transition: border-color .15s;
+  }
+  html[data-theme="dark"] #search { background: #0d1117; color: #e6edf3; border-color: #30363d; }
+  html[data-theme="dark"] #search:focus { border-color: #58a6ff; }
+  html[data-theme="light"] #search { background: #ffffff; color: #1f2328; border-color: #d0d7de; }
+  html[data-theme="light"] #search:focus { border-color: #0969da; }
+
+  #theme-toggle {
+    padding: 10px 14px; border-radius: 8px; border: 1px solid;
+    cursor: pointer; font-size: 14px; transition: background-color .15s;
+  }
+  html[data-theme="dark"] #theme-toggle { background: #161b22; color: #e6edf3; border-color: #30363d; }
+  html[data-theme="dark"] #theme-toggle:hover { background: #21262d; }
+  html[data-theme="light"] #theme-toggle { background: #f6f8fa; color: #1f2328; border-color: #d0d7de; }
+  html[data-theme="light"] #theme-toggle:hover { background: #eaeef2; }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip {
+    padding: 6px 12px; border-radius: 999px; border: 1px solid;
+    font-size: 13px; cursor: pointer; user-select: none;
+    transition: background-color .15s, border-color .15s, color .15s;
+  }
+  html[data-theme="dark"] .chip { background: #161b22; color: #e6edf3; border-color: #30363d; }
+  html[data-theme="light"] .chip { background: #f6f8fa; color: #1f2328; border-color: #d0d7de; }
+  .chip.active { font-weight: 600; }
+  html[data-theme="dark"] .chip.active { background: #1f6feb; color: #ffffff; border-color: #1f6feb; }
+  html[data-theme="light"] .chip.active { background: #0969da; color: #ffffff; border-color: #0969da; }
+  .chip:not(.active):hover { border-color: #58a6ff; }
+
+  .progress { font-size: 13px; opacity: .75; }
+  .progress strong { color: #58a6ff; }
+  html[data-theme="light"] .progress strong { color: #0969da; }
+
+  .qa-card {
+    border: 1px solid; border-radius: 10px;
+    margin-bottom: 14px; overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  html[data-theme="dark"] .qa-card { background: #161b22; border-color: #30363d; }
+  html[data-theme="light"] .qa-card { background: #ffffff; border-color: #d0d7de; }
+  .qa-card:hover { border-color: #58a6ff; }
+  html[data-theme="light"] .qa-card:hover { border-color: #0969da; }
+
+  .qa-question {
+    width: 100%; display: flex; align-items: flex-start; gap: 12px;
+    padding: 16px 20px; border: 0; background: transparent;
+    text-align: left; cursor: pointer; font-size: 15px;
+    color: inherit; font-family: inherit; line-height: 1.5;
+  }
+  .qa-question:hover { background: rgba(88, 166, 255, .08); }
+  html[data-theme="light"] .qa-question:hover { background: rgba(9, 105, 218, .06); }
+
+  .qa-num {
+    flex-shrink: 0; min-width: 44px; padding: 2px 8px;
+    background: #58a6ff; color: #0d1117; font-weight: 700; font-size: 12px;
+    border-radius: 4px; text-align: center;
+  }
+  html[data-theme="light"] .qa-num { background: #0969da; color: #ffffff; }
+
+  .qa-title { flex: 1; font-weight: 500; }
+
+  .qa-meta {
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+    font-size: 12px; opacity: .8;
+  }
+  .qa-cat {
+    padding: 2px 8px; border-radius: 4px;
+    font-weight: 500; font-size: 11px;
+  }
+  .cat-kafka-saga       { background: #6e40c9; color: #fff; }
+  .cat-outbox-idempotency { background: #bf3989; color: #fff; }
+  .cat-jwt-security     { background: #d29922; color: #fff; }
+  .cat-redis-cart       { background: #db6d28; color: #fff; }
+  .cat-tech-debt        { background: #f85149; color: #fff; }
+  .cat-ecom-general     { background: #2ea043; color: #fff; }
+
+  .qa-difficulty { font-size: 12px; letter-spacing: 1px; }
+  .qa-toggle { margin-left: 4px; font-size: 12px; transition: transform .2s; }
+  .qa-question[aria-expanded="true"] .qa-toggle { transform: rotate(180deg); }
+
+  .qa-answer {
+    padding: 0 20px 20px 76px;
+    font-size: 14px; line-height: 1.7;
+    border-top: 1px solid;
+  }
+  html[data-theme="dark"] .qa-answer { border-color: #21262d; }
+  html[data-theme="light"] .qa-answer { border-color: #eaeef2; }
+
+  .qa-answer p { margin: 12px 0; }
+  .qa-answer strong { font-weight: 600; }
+
+  .ans-tldr    { background: rgba(63, 185, 80, .1);  border-left: 3px solid #3fb950; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-flow    { background: rgba(88, 166, 255, .08); border-left: 3px solid #58a6ff; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-tradeoff{ background: rgba(210, 153, 34, .08); border-left: 3px solid #d29922; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-pitfall { background: rgba(248, 81, 73, .08);  border-left: 3px solid #f85149; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  .ans-verify  { background: rgba(110, 64, 201, .08); border-left: 3px solid #6e40c9; padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+  html[data-theme="light"] .ans-tldr    { background: rgba(46, 160, 67, .08); }
+  html[data-theme="light"] .ans-flow    { background: rgba(9, 105, 218, .06); }
+  html[data-theme="light"] .ans-tradeoff{ background: rgba(210, 153, 34, .06); }
+  html[data-theme="light"] .ans-pitfall { background: rgba(248, 81, 73, .06); }
+  html[data-theme="light"] .ans-verify  { background: rgba(110, 64, 201, .06); }
+
+  .ans-section-label { font-weight: 700; margin-right: 6px; }
+  .ans-tldr .ans-section-label    { color: #3fb950; }
+  .ans-flow .ans-section-label    { color: #58a6ff; }
+  .ans-tradeoff .ans-section-label{ color: #d29922; }
+  .ans-pitfall .ans-section-label { color: #f85149; }
+  .ans-verify .ans-section-label  { color: #6e40c9; }
+
+  .qa-refs {
+    margin-top: 16px; padding-top: 12px;
+    border-top: 1px dashed;
+    font-size: 13px;
+  }
+  html[data-theme="dark"] .qa-refs { border-color: #30363d; }
+  html[data-theme="light"] .qa-refs { border-color: #d0d7de; }
+
+  .qa-refs code, .qa-answer code {
+    font-family: "SF Mono", "Monaco", "Cascadia Code", "Consolas", monospace;
+    font-size: 12.5px; padding: 1px 5px; border-radius: 3px;
+  }
+  html[data-theme="dark"] code { background: #21262d; color: #79c0ff; }
+  html[data-theme="light"] code { background: #eaeef2; color: #0969da; }
+
+  .qa-tags { margin-top: 8px; font-size: 12px; opacity: .8; }
+  .qa-tag {
+    display: inline-block; padding: 1px 7px; margin-right: 4px;
+    border-radius: 3px; font-size: 11px;
+  }
+  html[data-theme="dark"] .qa-tag { background: #21262d; color: #79c0ff; }
+  html[data-theme="light"] .qa-tag { background: #eaeef2; color: #0969da; }
+
+  .qa-answer pre {
+    overflow-x: auto; padding: 12px 14px; border-radius: 6px;
+    font-size: 12.5px; line-height: 1.5; margin: 10px 0;
+  }
+  html[data-theme="dark"] .qa-answer pre { background: #010409; }
+  html[data-theme="light"] .qa-answer pre { background: #f6f8fa; }
+  .qa-answer pre code { background: transparent; padding: 0; color: inherit; }
+
+  footer {
+    margin-top: 40px; padding-top: 20px;
+    border-top: 1px solid; text-align: center;
+    font-size: 12px; opacity: .65;
+  }
+  html[data-theme="dark"] footer { border-color: #30363d; }
+  html[data-theme="light"] footer { border-color: #d0d7de; }
+
+  .empty { padding: 40px; text-align: center; opacity: .5; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>📚 Ecom Q&amp;A — Phỏng vấn Microservices</h1>
+  <p class="subtitle">70% project Ecom · 30% e-commerce · 33 câu scenario-based với đáp án depth (5 phần: TL;DR · Flow · Trade-off · Pitfall · Verify)</p>
+  <div class="toolbar">
+    <input id="search" type="text" placeholder="🔍 Tìm trong câu hỏi / đáp án...">
+    <button id="theme-toggle">🌗 Theme</button>
+  </div>
+  <div class="filters">
+    <button class="chip active" data-filter="all">Tất cả (33)</button>
+    <button class="chip" data-filter="kafka-saga">Saga &amp; Kafka (6)</button>
+    <button class="chip" data-filter="outbox-idempotency">Outbox &amp; Idempotency (5)</button>
+    <button class="chip" data-filter="jwt-security">JWT &amp; Security (4)</button>
+    <button class="chip" data-filter="redis-cart">Redis &amp; Cart (5)</button>
+    <button class="chip" data-filter="tech-debt">Tech-debt &amp; Debug (6)</button>
+    <button class="chip" data-filter="ecom-general">E-commerce tổng quát (7)</button>
+  </div>
+  <div class="progress">Đã mở: <strong id="opened-count">0</strong> / 33</div>
+</header>
+
+<main id="qa-list"></main>
+
+<footer>
+  <p>📚 <strong>Ecom Q&amp;A</strong> — 33 câu hỏi phỏng vấn microservices · Tham chiếu: <code>.claude/knowledge-map.md</code> · Spec: <code>docs/superpowers/specs/2026-07-04-qa-scenarios-design.md</code></p>
+  <p>Mở file này offline. Tất cả CSS/JS inline, không phụ thuộc CDN.</p>
+</footer>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ============================================================
+  // DATA — 33 câu hỏi/đáp án
+  // Mỗi section là 1 phần đáp án: tldr / flow / tradeoff / pitfall / verify
+  // Mỗi phần có thể là string (HTML) hoặc array các <p>/<pre>
+  // ============================================================
+
+  const Q = [
+    /* ============== 4.1 SAGA & KAFKA (6) ============== */
+    {
+      id: 'q1', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Order publish <code>inventory.reservation-requested</code> xuống Kafka. Nếu inventory consume xong nhưng CHƯA kịp publish <code>inventory.reserved</code> mà client order timeout thì sao? Compensation chạy thế nào?',
+      tldr: 'Order vẫn ở <code>PENDING</code>. Client retry an toàn (idempotent nhờ <code>order_id</code>). Compensation tự động qua Kafka retry; chỉ chạy tường minh khi <code>payment.failed</code>.',
+      flow: [
+        '1. Order POST <code>/api/orders</code> → tạo order PENDING + publish <code>inventory.reservation-requested</code> (key=orderId).',
+        '2. Inventory consume → reserve stock trong DB transaction (giảm <code>available_quantity</code>, tăng <code>reserved_quantity</code>, tạo <code>stock_reservations</code> row status=RESERVED).',
+        '3. Inventory publish <code>inventory.reserved</code> (key=orderId) — <strong>điểm dễ fail</strong> vì commit DB xong nhưng Kafka send fail.',
+        '4. Order consumer nhận → set order RESERVED.',
+        '5. Nếu bước 3 fail 3 lần (<code>FixedBackOff(1000ms, 2 retries)</code>) → <code>DefaultErrorHandler</code> log error, <strong>KHÔNG commit offset</strong> → message re-deliver khi consumer restart.',
+      ],
+      tradeoff: 'Spring Kafka <code>ack-mode: RECORD</code> + retry là <strong>at-least-once</strong>, không phải exactly-once. Nếu publish <code>inventory.reserved</code> thành công nhưng consumer order-service xử lý fail → nhận 2 lần → handler phải idempotent (check status trước khi update). Hiện tại <code>InventoryEventConsumer.handleReserved</code> có check status → OK.',
+      pitfall: 'Client retry trong lúc inventory vẫn đang xử lý → tạo order thứ 2 với cùng cart (cart đã clear nhưng order vẫn còn). Ecom <strong>chưa check duplicate request từ client</strong> (không có request signature / nonce). Đề xuất: idempotency-key ở <code>POST /api/orders</code> tương tự payment.',
+      verify: 'Mở Zipkin <code>localhost:9411</code> filter <code>orderId=&lt;uuid&gt;</code> → thấy span <code>publish-reservation-requested</code> → <code>inventory-service.handleReservationRequested</code> → <code>publishReserved</code>. Nếu span cuối missing → bug. Hoặc <code>kafka-console-consumer.sh --topic inventory.reserved --from-beginning --property print.timestamp=true</code>.',
+      refs: '<code>BE/common/.../config/KafkaErrorHandler.java:19-55</code> · <code>BE/order-service/.../messaging/OrderEventProducer.java:19-29</code> · <code>BE/inventory-service/.../messaging/InventoryEventProducer.java:17-24</code>',
+      tags: ['#kafka', '#saga', '#compensation', '#timeout'],
+      flowPre: null,
+    },
+    {
+      id: 'q2', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Tại sao partition key của <code>inventory.reservation-requested</code> là <code>order.id()</code> chứ không phải <code>product.id()</code>? Nếu chọn khác đi được không?',
+      tldr: 'Partition key = <code>orderId</code> đảm bảo tất cả event của 1 order vào cùng partition → xử lý tuần tự (in-order) bởi 1 consumer instance → tránh race condition giữa các item cùng order.',
+      flow: null,
+      flowPre: `Order #123 (2 items: A x3, B x2)
+     │
+     ▼ publish "inventory.reservation-requested" với key=orderId="123"
+┌──────────┐
+│ Kafka    │  Partition 0: order 123 (A, B tuần tự)
+│ Partition│  Partition 1: order 124, 125, ...
+│ Strategy │
+└──────────┘
+     │
+     ▼
+Inventory-Consumer-Instance-0 (chỉ đọc Partition 0)
+     → reserve(A x3) xong → reserve(B x2) xong
+     → publish "inventory.reserved" key=orderId="123"`,
+      tradeoff: [
+        '<strong>Chọn <code>orderId</code></strong> (hiện tại): Mỗi order xử lý tuần tự. Nhưng 1 product hot (iPhone) có N order khác nhau → phân tán đều các partition → parallelism cao. <strong>Tốt cho throughput</strong>.',
+        '<strong>Chọn <code>productId</code></strong>: Tất cả event cho cùng product vào 1 partition → serialize. Flash sale iPhone, 10K order cùng product → tất cả dồn vào 1 partition → 1 consumer xử lý → <strong>bottleneck</strong>.',
+        '<strong>Chọn <code>userId</code></strong>: Cũng OK nhưng ít intuitive hơn <code>orderId</code> vì 1 user có nhiều order.',
+      ],
+      pitfall: 'Nếu sau này cần scale, <strong>KHÔNG được đổi partition key</strong> của topic đang có data (Kafka không cho phép change key cho partitioner mặc định nếu đã có partition assignment). Phải tạo topic mới.',
+      verify: '<code>BE/order-service/.../messaging/OrderEventProducer.java:19-29</code> thấy <code>RecordMetadata(key=order.id().toString(), ...)</code>. Test bằng <code>kafka-console-producer.sh --property "parse.key=true" --property "key.separator=:"</code> produce 2 event cùng key → check cùng partition.',
+      refs: '<code>BE/order-service/.../messaging/OrderEventProducer.java:19-29</code> · <code>.claude/knowledge-map.md:128-142</code>',
+      tags: ['#kafka', '#partitioning', '#performance'],
+    },
+    {
+      id: 'q3', cat: 'kafka-saga', diff: 'mid',
+      catLabel: 'Kafka', difficulty: '★★',
+      title: '<code>ack-mode: RECORD</code> nghĩa là gì? Nếu handler throw exception ở giữa thì offset có commit không? Event có bị mất không?',
+      tldr: '<code>RECORD</code> = commit offset ngay sau khi handler return thành công. Throw exception → retry 3 lần (1s fixed back-off) → fail cuối → log error, <strong>KHÔNG commit</strong>. Event re-deliver khi consumer restart. Có thể mất event trong edge case.',
+      flow: null,
+      flowPre: `Consumer poll batch
+     │
+     ▼ for each record
+┌────────────┐
+│ handler()  │ ← business logic
+└─────┬──────┘
+      │ success → commit offset
+      │
+      │ exception → DefaultErrorHandler
+      │             → retry attempt 1 (after 1s)
+      │             → retry attempt 2 (after 1s)
+      │             → retry attempt 3 (after 1s)
+      │             → fail final: log.error() + KHÔNG commit
+      │             → message sẽ re-deliver ở lần poll tiếp`,
+      tradeoff: [
+        '<strong>RECORD</strong> (hiện tại): Latency thấp (commit ngay). Nhưng nếu commit xong rồi handler mới throw exception ở bước downstream (vd publish Kafka phản hồi) → offset đã commit → <strong>mất event</strong>.',
+        '<strong>BATCH</strong>: Commit cuối batch → an toàn hơn nhưng throughput giảm.',
+        '<strong>MANUAL</strong>: Tự quản lý <code>Acknowledgment.acknowledge()</code> → max control, code phức tạp hơn.',
+        '<strong>COUNT, TIME</strong>: Commit theo số lượng hoặc thời gian.',
+      ],
+      pitfall: 'Khi handler gọi <code>kafkaTemplate.send().get()</code> (sync wait) để đảm bảo message đã gửi trước khi commit → tăng latency. Code hiện tại dùng fire-and-forget → <strong>có thể tối ưu</strong>.',
+      verify: '<code>BE/config-repo/*-service.yml</code> thấy <code>spring.kafka.listener.ack-mode: record</code>. Trigger lỗi: stop DB giữa consume → check log có 3 retry + 1 error final.',
+      refs: '<code>BE/common/.../config/KafkaErrorHandler.java:19-55</code> · <code>BE/config-repo/order-service.yml:29-42</code>',
+      tags: ['#kafka', '#reliability', '#at-least-once'],
+    },
+    {
+      id: 'q4', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Order state machine: PENDING → RESERVED → CONFIRMED. Nếu <code>payment.failed</code> nhận được khi order đang ở RESERVED thì xử lý release inventory thế nào? Có thể rơi vào inconsistent state không?',
+      tldr: '<code>PaymentEventConsumer.handleFailed</code> → <code>OrderService.cancelAfterPaymentFailure(orderId)</code> → gọi <code>InventoryClient.release(reservationId)</code> qua Feign → DB update order=CANCELLED → publish <code>order.cancelled</code>.',
+      flow: null,
+      flowPre: `payment-service → Kafka "payment.failed" key=paymentId
+     │
+     ▼
+order-service.PaymentEventConsumer.handleFailed
+     │
+     ├─→ OrderService.cancelAfterPaymentFailure(orderId)
+     │     │
+     │     ├─→ OrderRepo.findById(orderId) → order.status=RESERVED
+     │     ├─→ InventoryClient.release(reservationId) ← Feign HTTP
+     │     ├─→ OrderRepo.save(status=CANCELLED) ← DB
+     │     └─→ OrderEventProducer.publishOrderCancelled()
+     │              │
+     │              ▼
+     │         Kafka "order.cancelled" key=orderId
+     │              │
+     │              ▼
+     │         notification-service.OrderEventConsumer.handleCancelled
+     │              → send email + SMS
+     │
+     └─→ (parallel) notification-service.PaymentEventConsumer.handleFailed
+          → send email "thanh toán thất bại"`,
+      tradeoff: 'Compensation qua Feign (sync HTTP) — nhanh, có thể trả lỗi rõ ràng. Alternative: gửi Kafka event <code>inventory.release-requested</code> (async) — loose coupling hơn nhưng phải chờ. Hiện tại sync vì cancel là critical path user đang chờ.',
+      pitfall: [
+        '1. Nếu <code>InventoryClient.release</code> fail (inventory-service down) → <code>OrderService</code> vẫn set CANCELLED → <strong>inconsistent state</strong> (order CANCELLED nhưng stock vẫn RESERVED). Hiện tại chưa có retry cho compensation step.',
+        '2. Nếu <code>publishOrderCancelled</code> fail sau khi DB commit → notification không gửi. Tech-debt chung: không có transactional outbox ở order-service.',
+        '3. Nếu nhận <code>payment.failed</code> 2 lần (duplicate Kafka) → <code>cancelAfterPaymentFailure</code> check order.status; nếu đã CANCELLED → return no-op. OK.',
+      ],
+      verify: 'Test bằng integration test: tạo order, mock payment.failed, kiểm tra stock trở về available. Hoặc manual: trigger webhook <code>POST /api/payments/webhooks/mock</code> với eventType=FAILED → grep log <code>cancelAfterPaymentFailure</code>.',
+      refs: '<code>BE/order-service/.../messaging/PaymentEventConsumer.java:39-54</code> · <code>BE/order-service/.../service/OrderService.java:91-101</code>',
+      tags: ['#saga', '#compensation', '#state-machine'],
+    },
+    {
+      id: 'q5', cat: 'kafka-saga', diff: 'mid',
+      catLabel: 'Kafka', difficulty: '★★',
+      title: 'Nếu Kafka broker down giữa lúc order-service đang publish <code>order.confirmed</code>, event có bị mất không? Config nào cần thêm?',
+      tldr: 'Có nguy cơ mất event. Default <code>acks=1</code> (leader ghi xong là báo success) → nếu leader fail trước khi replicate → event mất. Fix: set <code>acks=all</code> + <code>enable.idempotence=true</code> + retry config.',
+      flow: null,
+      flowPre: `OrderEventProducer.publishOrderConfirmed(order)
+     │
+     ▼
+KafkaTemplate.send(topic, key, value)
+     │
+     ├─→ Producer batch record → gửi đến broker leader
+     │
+     ▼ (acks=1, current config)
+Leader ghi vào log → return success ngay
+     │
+     ▼
+Nếu leader crash ngay sau → record chưa replicate → mất`,
+      tradeoff: [
+        '<strong>acks=1</strong> (hiện tại): Latency thấp nhất (1 RTT). Nhưng chỉ leader, không replicate. Phù hợp non-critical event.',
+        '<strong>acks=all</strong> + <code>min.insync.replicas=2</code>: Đợi tất cả in-sync replica ghi xong → an toàn. Latency cao hơn. Phù hợp critical event (payment, order).',
+        '<strong>enable.idempotence=true</strong>: Producer đảm bảo không gửi trùng sequence number. Ngăn duplicate khi retry.',
+        '<strong>transactional.id</strong>: Exactly-once across producer/consumer (đắt nhất).',
+      ],
+      pitfall: [
+        '1. Hiện tại project <strong>CHƯA config</strong> <code>acks=all</code> ở order-service / payment-service. Gap cần bổ sung.',
+        '2. <code>acks=all</code> chỉ an toàn nếu <code>min.insync.replicas ≥ 2</code> ở broker. Nếu chỉ 1 broker (KRaft single-broker ở dev) → <code>min.insync.replicas=1</code> để tránh "Not enough replicas".',
+        '3. Cần test: stop 1 broker, publish event, verify không mất.',
+      ],
+      verify: 'Check <code>BE/config-repo/order-service.yml</code> tìm <code>spring.kafka.producer.acks</code> — hiện không có → default <code>acks=1</code>. Đề xuất: thêm <code>acks: all</code>, <code>enable.idempotence: true</code>, <code>retries: 3</code>.',
+      refs: '<code>BE/config-repo/order-service.yml:29-42</code> · <code>BE/config-repo/payment-service.yml:29-33</code>',
+      tags: ['#kafka', '#reliability', '#durability'],
+    },
+    {
+      id: 'q6', cat: 'kafka-saga', diff: 'senior',
+      catLabel: 'Kafka', difficulty: '★★★',
+      title: 'Saga pattern trong Ecom có phải là Orchestration hay Choreography? Tại sao? Khi nào nên dùng loại nào?',
+      tldr: '<strong>Choreography</strong>. Mỗi service tự react với Kafka event, không có central orchestrator. Pros: loose coupling, dễ scale. Cons: khó trace, phải có distributed tracing tool (Zipkin).',
+      flow: null,
+      flowPre: `Orchestration (KHÔNG dùng trong Ecom):
+┌─────────────────┐
+│ Saga Orchestrator│ ← biết toàn bộ flow
+└────────┬────────┘
+         ▼
+Order → Inventory (RPC) → Payment (RPC) → Notification (RPC)
+
+Choreography (Ecom dùng):
+OrderService publish "order.created" → Kafka
+     │
+     ├→ InventoryService consume → reserve → publish "inventory.reserved"
+     │     │
+     │     └→ OrderService consume → mark RESERVED → publish "order.confirmed"
+     │           │
+     │           └→ NotificationService consume → send email
+     │
+     └→ (parallel) PaymentService có thể listen "order.confirmed" để charge`,
+      tradeoff: [
+        '<strong>Choreography</strong> (Ecom): Mỗi service độc lập, thêm service mới chỉ cần listen event. Nhưng flow phân tán → debug khó, phải correlate qua <code>X-Correlation-Id</code> + Zipkin. Risk: cycle (A trigger B, B trigger A).',
+        '<strong>Orchestration</strong> (vd Camunda, Temporal): 1 service điều khiển toàn bộ, biết rõ step nào đang chạy. Debug dễ. Nhưng coupling cao, orchestrator thành single point of failure.',
+        '<strong>Hybrid</strong>: Core flow orchestration (order saga), side-effect choreography (notification, analytics).',
+      ],
+      pitfall: [
+        '1. Event versioning: Khi thêm field mới vào <code>OrderConfirmedEvent</code>, consumer cũ chưa update có thể crash. Ecom dùng <code>JsonDeserializer</code> trusted packages <code>"*"</code> → nguy hiểm. Cần schema registry cho production.',
+        '2. Cycle: <code>order.confirmed</code> → notification.email → user click → <code>payment.created</code> → <code>order.updated</code> → ... → loop.',
+        '3. Lost event: Nếu 1 service down khi event được publish → retry hết → event mất. Cần DLQ + monitoring.',
+      ],
+      verify: '<code>grep -r "@KafkaListener" BE/*/src/</code>. Hiện tại Ecom có ~7 listener, OK.',
+      refs: '<code>BE/.../messaging/*EventConsumer.java</code> · <code>.claude/knowledge-map.md:126-142</code>',
+      tags: ['#saga', '#architecture', '#choreography'],
+    },
+
+    /* ============== 4.2 OUTBOX & IDEMPOTENCY (5) ============== */
+    {
+      id: 'q7', cat: 'outbox-idempotency', diff: 'senior',
+      catLabel: 'Outbox', difficulty: '★★★',
+      title: 'Giải thích Transactional Outbox pattern. Tại sao payment-service dùng mà order-service thì không? Có nhược điểm gì?',
+      tldr: 'Outbox lưu event vào bảng <code>outbox_events</code> <strong>trong cùng transaction</strong> với business write → đảm bảo atomic "DB + event". Scheduler đọc PENDING rows → publish Kafka. Order-service publish trực tiếp trong handler → có thể mất event nếu Kafka down sau DB commit.',
+      flow: null,
+      flowPre: `PaymentService.markSucceeded(paymentId)  [trong 1 @Transactional]
+     │
+     ├─→ paymentsRepo.save(status=SUCCEEDED)
+     │
+     └─→ outboxRepo.save(
+            OutboxEvent(
+              aggregateType="Payment",
+              aggregateId=paymentId,
+              eventType="payment.succeeded",
+              payload=Map<...>,
+              status=PENDING,
+              createdAt=now()
+            )
+          )  ← CÙNG transaction → commit cùng lúc
+
+--- sau vài ms/giây ---
+
+OutboxPublisher @Scheduled(fixedDelay=5000ms)
+     │
+     ├─→ SELECT * FROM outbox_events WHERE status='PENDING' ORDER BY created_at LIMIT 100
+     │
+     ├─→ for each event: kafkaTemplate.send(eventType, key, payload)
+     │
+     └─→ on success → status=PUBLISHED, published_at=now() [NGOÀI transaction → tech-debt #3]`,
+      tradeoff: [
+        '<strong>Outbox (Ecom payment)</strong>: Đảm bảo at-least-once delivery. Latency publish = 0-5s. Cần thêm bảng + scheduler.',
+        '<strong>Direct publish (Ecom order)</strong>: Latency thấp (ms). Nhưng nếu Kafka down → mất event. Cần retry queue hoặc message buffer.',
+        '<strong>CDC-based (Debezium)</strong>: Đọc WAL Postgres → publish Kafka. Zero code change. Nhưng cần Debezium connector + overhead.',
+      ],
+      pitfall: [
+        '1. <strong>Dual-write problem</strong>: Nếu publish Kafka xong rồi mới update DB (hoặc ngược lại) → 1 bên fail → inconsistent. Outbox giải quyết bằng cách đảm bảo cả 2 cùng commit.',
+        '2. <strong>Outbox bloat</strong>: Nếu scheduler fail liên tục → bảng <code>outbox_events</code> phình → query chậm. Cần partition theo tháng hoặc TTL.',
+        '3. <strong>Outbox không có DLQ</strong>: Event fail publish 3 lần → status=FAILED → log only. Cần alert + manual replay tool.',
+      ],
+      verify: 'Query <code>SELECT count(*), status FROM outbox_events GROUP BY status;</code> — nếu FAILED &gt; 0 → cần check.',
+      refs: '<code>BE/payment-service/.../outbox/OutboxPublisher.java:22-36</code> · <code>BE/payment-service/.../service/PaymentService.java:43-53, 107-115</code>',
+      tags: ['#outbox', '#reliability', '#eventual-consistency'],
+    },
+    {
+      id: 'q8', cat: 'outbox-idempotency', diff: 'senior',
+      catLabel: 'Outbox', difficulty: '★★★',
+      title: 'OutboxPublisher chạy <code>fixedDelay 5s</code>. Nếu scheduler restart giữa lúc gửi Kafka thì event có bị trùng không? Làm sao fix?',
+      tldr: '<strong>Có thể bị trùng</strong>. <code>repository.save(event)</code> được gọi bên ngoài transaction (sau khi Kafka send return). Nếu app crash giữa <code>send()</code> và <code>save()</code> → status vẫn PENDING → scheduler kế tiếp gửi lại. Tech-debt #3.',
+      flow: null,
+      flowPre: `t=0ms:    Scheduler poll → lấy event #1 (status=PENDING)
+t=10ms:   kafkaTemplate.send(...) → fire-and-forget, return Future
+t=20ms:   ── APP CRASH ──
+          (send có thể đã reach broker hoặc chưa)
+t=5s:     Scheduler restart → poll lại event #1 (status=PENDING)
+          → gửi lại
+          → DUPLICATE nếu send trước đó thực sự đã tới broker`,
+      tradeoff: [
+        '<strong>Optimistic update với version field</strong>: Thêm <code>version</code> column, update <code>SET status=PUBLISHED, version=version+1 WHERE id=? AND version=?</code>. An toàn, lock-free.',
+        '<strong>Pessimistic lock <code>SELECT ... FOR UPDATE SKIP LOCKED</code></strong>: Mỗi scheduler instance chỉ lấy rows chưa lock → scale được.',
+        '<strong>Kafka idempotent producer + consumer</strong>: Consumer check <code>eventId</code> đã xử lý chưa (qua Redis set hoặc DB).',
+        '<strong>WAL-based outbox (Debezium)</strong>: Loại bỏ scheduler, dùng CDC.',
+      ],
+      pitfall: [
+        '1. Hiện tại <code>OutboxPublisher.java:33-36</code> gọi <code>kafkaTemplate.send(...).whenComplete((result, ex) -&gt; { if (ex == null) repository.save(event); })</code> — save ở callback, không atomic với send.',
+        '2. <code>fixedDelay=5000ms</code> không có jitter → nhiều instance cùng poll → DB spike. Thêm <code>initialDelay</code> random.',
+        '3. Không có max retry → event poison (luôn fail) → scheduler loop vô tận.',
+      ],
+      verify: 'Reproduce bằng <code>kill -9</code> Java process trong khi scheduler đang publish, restart, check duplicate event trong Kafka topic.',
+      refs: '<code>BE/payment-service/.../outbox/OutboxPublisher.java:22-36</code> · tech-debt #3 trong <code>.claude/knowledge-map.md:286-305</code>',
+      tags: ['#outbox', '#race-condition', '#at-least-once'],
+    },
+    {
+      id: 'q9', cat: 'outbox-idempotency', diff: 'mid',
+      catLabel: 'Idempotency', difficulty: '★★',
+      title: 'Idempotency-Key <code>pay-{orderId}</code> ở <code>POST /api/payments</code>. Nếu client gọi 2 lần với cùng key thì sao? Trade-off với cách generate key thế nào?',
+      tldr: 'Lần 1 tạo Payment mới (status=PENDING). Lần 2 <code>findByIdempotencyKey</code> trả về record cũ → trả lại response cũ. UNIQUE constraint ở DB chống race. Client phải tự generate key ổn định qua các retry.',
+      flow: null,
+      flowPre: `POST /api/payments {orderId, amount, currency}
+Header: Idempotency-Key: pay-uuid-123
+
+PaymentService.createPayment(req, key):
+     │
+     ├─→ paymentsRepo.findByIdempotencyKey(key)
+     │     │
+     │     ├─ found → return existing PaymentResponse  ← idempotent
+     │     └─ null  ↓
+     │
+     ├─→ mockProvider.createPayment() → providerPaymentId
+     │
+     ├─→ paymentsRepo.save(Payment(id, ..., idempotencyKey=key, status=PENDING))
+     │     [UNIQUE constraint idempotency_key]
+     │
+     └─→ return new PaymentResponse
+
+--- retry với CÙNG key ---
+
+PaymentService.createPayment(req, key):
+     │
+     ├─→ findByIdempotencyKey(key) → found → return same response
+     │
+     └─→ KHÔNG tạo record mới, KHÔNG charge lại`,
+      tradeoff: [
+        '<strong>Key = <code>pay-{orderId}</code></strong> (Ecom dùng): Stable, dễ debug. Nhưng nếu user muốn retry với amount khác (vd đổi tip) → phải đổi key → fail.',
+        '<strong>Key = client UUID</strong>: Mỗi retry sinh key mới → không idempotent. <strong>SAI</strong>.',
+        '<strong>Key = UUID cho mỗi "logical attempt"</strong>: User click "Pay" 1 lần → sinh UUID → tất cả retry cùng UUID. Đúng pattern của Stripe.',
+      ],
+      pitfall: [
+        '1. <strong>Idempotency ở create nhưng KHÔNG ở webhook</strong>: Nếu webhook gửi 2 lần với cùng <code>providerEventId</code> → xử lý 2 lần → 2 lần mark SUCCEEDED + 2 outbox events. Ecom có xử lý ở Q10 — OK.',
+        '2. <strong>Idempotency chỉ check exact match body</strong>: Nếu client retry với cùng key nhưng body khác (amount thay đổi) → vẫn trả response cũ. Có thể silent bug. Stripe trả 422 "key reused with different params".',
+        '3. <strong>Idempotency window chưa set</strong>: Ecom lưu key vĩnh viễn ở DB. Nên expire sau 24h.',
+      ],
+      verify: '<code>BE/payment-service/.../service/PaymentService.java:36-41</code> thấy check <code>findByIdempotencyKey</code>. Test: gọi 2 lần <code>curl -X POST -H "Idempotency-Key: test-123"</code> → check <code>payments</code> table chỉ có 1 row.',
+      refs: '<code>BE/payment-service/.../service/PaymentService.java:36-41</code> · <code>BE/database/payment-service/V1__create_payment_tables.sql:10</code>',
+      tags: ['#idempotency', '#payment', '#reliability'],
+    },
+    {
+      id: 'q10', cat: 'outbox-idempotency', diff: 'mid',
+      catLabel: 'Idempotency', difficulty: '★★',
+      title: 'Mock webhook <code>POST /api/payments/webhooks/mock</code> xử lý duplicate <code>providerEventId</code> thế nào? So sánh với cách xử lý ở Stripe.',
+      tldr: '<code>PaymentWebhookService.handle</code> gọi <code>existsById(providerEventId)</code> → nếu có, return ngay (no-op). Nếu chưa → xử lý + save <code>payment_webhook_events</code> với <code>provider_event_id</code> PK. Idempotent ở DB layer.',
+      flow: null,
+      flowPre: `POST /api/payments/webhooks/mock
+Body: {providerEventId, providerPaymentId, eventType}
+
+PaymentWebhookService.handle(event):
+     │
+     ├─→ paymentWebhookEventRepo.existsById(event.providerEventId())
+     │     │
+     │     ├─ true → log.info("already processed") + return  ← DEDUP
+     │     └─ false ↓
+     │
+     ├─→ paymentService.markSucceeded(paymentId)
+     │     hoặc markFailed(paymentId) [dựa trên eventType]
+     │     │
+     │     └─→ @Transactional:
+     │           ├─ paymentsRepo.save(status=...)
+     │           └─ outboxRepo.save(...)
+     │
+     └─→ paymentWebhookEventRepo.save(
+            PaymentWebhookEvent(providerEventId=PK, processedAt=now())
+          ) ← trong cùng transaction với markSucceeded`,
+      tradeoff: [
+        '<strong>Ecom</strong>: Idempotency ở application layer (check exists trước). DB unique constraint ở <code>payment_webhook_events.provider_event_id</code> PK → safety net cuối cùng.',
+        '<strong>Stripe</strong>: Dùng signed webhook + idempotency key riêng. Request có header <code>Stripe-Signature</code> verify bằng secret. Mỗi event có UUID. Stripe lưu 30 ngày.',
+        '<strong>Ecom hiện tại KHÔNG verify signature</strong> (mock provider) → production phải bổ sung. Tech-debt #7.',
+      ],
+      pitfall: [
+        '1. <strong>Race condition existsById + save</strong>: 2 webhook cùng <code>providerEventId</code> đến cùng lúc → cả 2 existsById=false → cả 2 save → 1 fail vì PK constraint → exception. Hiện tại chưa catch. Cần <code>try/catch DataIntegrityViolationException</code> → return 200.',
+        '2. <strong>Outbox event bị duplicate</strong>: Nếu webhook dedup fail → 2 outbox event → 2 Kafka <code>payment.succeeded</code> → idempotent check ở consumer.',
+        '3. <strong>Provider retry storm</strong>: Provider (Stripe, Adyen) retry webhook nếu không nhận 2xx trong vài giây. Cần respond nhanh + xử lý async.',
+      ],
+      verify: '<code>BE/payment-service/.../service/PaymentWebhookService.java:24-38</code> đọc flow. Test: gửi 2 webhook cùng <code>providerEventId</code> → check log chỉ "processed" 1 lần.',
+      refs: '<code>BE/payment-service/.../service/PaymentWebhookService.java:24-38</code> · <code>BE/payment-service/.../web/MockPaymentWebhookController.java:19-23</code>',
+      tags: ['#webhook', '#idempotency', '#payment'],
+    },
+    {
+      id: 'q11', cat: 'outbox-idempotency', diff: 'mid',
+      catLabel: 'Idempotency', difficulty: '★★',
+      title: 'Nếu 2 client cùng <code>POST /api/payments</code> đồng thời với 2 <code>idempotency_key</code> khác nhau cho cùng 1 order? Điều gì xảy ra?',
+      tldr: 'Cả 2 đều tạo Payment, nhưng <code>payments.order_id</code> UNIQUE → request thứ 2 fail với <code>DataIntegrityViolationException</code> → trả 409 Conflict. Phòng chống double-charge ở DB layer.',
+      flow: null,
+      flowPre: `Client A: POST /api/payments {orderId: 100, amount: 50}
+          Header: Idempotency-Key: key-A
+Client B: POST /api/payments {orderId: 100, amount: 50}  (cùng order)
+          Header: Idempotency-Key: key-B
+──────────────── concurrent ────────────────
+
+Thread A: findByIdempotencyKey(key-A) → null
+Thread B: findByIdempotencyKey(key-B) → null  (key khác nhau)
+
+Thread A: save(Payment(orderId=100, key=key-A, status=PENDING)) → SUCCESS
+Thread B: save(Payment(orderId=100, key=key-B, status=PENDING))
+          → DataIntegrityViolationException (order_id UNIQUE)
+          → catch → return 409 Conflict`,
+      tradeoff: [
+        '<strong>UNIQUE trên <code>order_id</code></strong> (Ecom dùng): Đơn giản, chắc chắn, không có race. Trade-off: 1 order chỉ có 1 payment attempt. Nếu fail → user phải tạo order mới hoặc cancel order cũ.',
+        '<strong>UNIQUE trên <code>(order_id, status)</code></strong>: Cho phép nhiều payment attempt với status khác (vd PENDING + FAILED), chỉ chặn 2 SUCCEEDED. Phức tạp hơn nhưng linh hoạt.',
+        '<strong>Không có constraint</strong>: Có thể double-charge. <strong>Tuyệt đối không dùng</strong>.',
+      ],
+      pitfall: [
+        '1. <strong>Exception handling chưa rõ ràng</strong>: Cần catch <code>DataIntegrityViolationException</code> ở controller hoặc <code>GlobalExceptionHandler</code> → trả 409. Nếu để bubble up → 500 Internal Server Error → user retry → confusion.',
+        '2. <strong>Cùng 1 user mở 2 tab browser</strong>: Cùng 1 cart → cùng 1 order → 1 trong 2 tab bị 409. Frontend cần handle.',
+        '3. <strong>Refund flow</strong>: Sau khi refund, nếu user mua lại cùng order? Phải tạo order mới (order_id khác). OK.',
+      ],
+      verify: '<code>BE/database/payment-service/V1__create_payment_tables.sql:7</code> thấy <code>order_id UUID UNIQUE NOT NULL</code>. Test: tạo 2 Payment cùng order_id → 1 thành công, 1 fail.',
+      refs: '<code>BE/database/payment-service/V1__create_payment_tables.sql:7</code> · <code>BE/payment-service/.../service/PaymentService.java</code>',
+      tags: ['#payment', '#double-charge', '#constraint'],
+    },
+
+    /* ============== 4.3 JWT & SECURITY (4) ============== */
+    {
+      id: 'q12', cat: 'jwt-security', diff: 'senior',
+      catLabel: 'Security', difficulty: '★★★',
+      title: 'JWT HS256 dùng secret chung giữa auth-service và api-gateway. Nếu secret leak thì sao? Cách mitigate? So sánh HS256 vs RS256.',
+      tldr: 'Attacker forge được token với role bất kỳ (CUSTOMER/ADMIN) → truy cập mọi API. Mitigate: rotate secret thường xuyên, dùng RS256 với private key chỉ auth-service giữ, public key gateway verify, lưu secret ở Vault/KMS. Tech-debt #11: gateway không enforce độ dài secret ≥ 32 bytes.',
+      flow: null,
+      flowPre: `Attacker lấy được JWT_SECRET (qua env var leak, log dump, git history)
+     │
+     ▼
+Tạo JWT tùy ý:
+eyJhbGciOiJIUzI1NiJ9
+.eyJzdWIiOiJmYWtlLXVzZXItaWQiLCJyb2xlcyI6WyJBRE1JTiJdLCJleHAiOjQ4MDAwMDAwMDB9
+.<signature với secret đã biết>
+     │
+     ▼
+GET /api/admin/products -H "Authorization: Bearer <fake-token>"
+     │
+     ▼
+Gateway verify → valid → pass
+Downstream tin header X-User-Roles=ADMIN → trả data
+     │
+     ▼
+Attacker: full admin access`,
+      tradeoff: [
+        '<strong>HS256 (Ecom dùng)</strong>: Symmetric, 1 secret cho cả sign + verify. Pros: nhanh, đơn giản. Cons: tất cả service phải biết secret → rủi ro leak.',
+        '<strong>RS256</strong>: Asymmetric. auth-service giữ private key (sign), gateway chỉ có public key (verify). Pros: gateway không thể tạo token, chỉ verify. Cons: chậm hơn (~10ms), key management phức tạp hơn.',
+        '<strong>ES256</strong>: Elliptic curve, nhanh hơn RS256, key ngắn hơn.',
+      ],
+      pitfall: [
+        '1. <strong>Tech-debt #11</strong>: <code>GatewayJwtTokenService.java:73-75</code> lấy <code>secret.getBytes(UTF_8)</code> không check ≥ 32 bytes. Auth-service có check ở <code>JwtTokenService.java:85-91</code>. Nếu set secret ngắn → auth fail nhưng gateway verify vẫn pass → inconsistent.',
+        '2. <strong>Secret in env file</strong>: <code>BE/.env</code> có <code>JWT_SECRET=xxx</code>. Nếu commit nhầm hoặc log in container → leak. Dùng Docker secret hoặc Vault.',
+        '3. <strong>Token revocation</strong>: Ecom chỉ có refresh token revocation, access token (15 phút) <strong>không thể revoke</strong>. Nếu leak → attacker dùng đến hết 15 phút. Mitigate: blacklist Redis, giảm TTL xuống 5 phút, hoặc dùng short-lived + refresh.',
+      ],
+      verify: 'Set <code>JWT_SECRET=test</code> (4 chars) trong <code>.env</code> → start gateway → có warning/error không? Hiện tại <strong>KHÔNG có</strong> (tech-debt). Đề xuất: thêm <code>if (secret.length &lt; 32) throw</code>.',
+      refs: '<code>BE/auth-service/.../security/JwtTokenService.java:40-57, 85-91</code> · <code>BE/api-gateway/.../security/GatewayJwtTokenService.java:54-75</code> · tech-debt #11',
+      tags: ['#jwt', '#security', '#secret-management'],
+    },
+    {
+      id: 'q13', cat: 'jwt-security', diff: 'senior',
+      catLabel: 'Security', difficulty: '★★★',
+      title: 'Gateway set 3 header <code>X-User-Id/Email/Roles</code> xuống downstream. Nếu attacker gửi thẳng <code>X-User-Roles: ADMIN</code> đến payment-service (bypass gateway) thì sao? Mức độ nghiêm trọng?',
+      tldr: '<strong>Lỗ hổng nghiêm trọng (P0)</strong>. Downstream <code>GatewayUserContextFilter</code> chỉ đọc header, KHÔNG verify chữ ký. Mitigate: (1) network policy chỉ cho phép request từ gateway IP, (2) mỗi service verify lại JWT qua public key, (3) bind header ở TLS terminator.',
+      flow: null,
+      flowPre: `Attacker discover port payment-service :8087 (qua nmap scan nội bộ)
+     │
+     ▼
+curl -X POST http://payment-service:8087/api/payments/123/refund \\
+     -H "X-User-Id: any-uuid" \\
+     -H "X-User-Email: hacker@evil.com" \\
+     -H "X-User-Roles: ADMIN"
+     │
+     ▼
+GatewayUserContextFilter: parse headers → set attribute
+GatewayRoleFilter: check X-User-Roles contains ADMIN → pass
+PaymentController.refund: execute refund logic
+     │
+     ▼
+Refund thành công mà KHÔNG CẦN login`,
+      tradeoff: [
+        '<strong>Network policy (Kubernetes NetworkPolicy)</strong>: Chỉ gateway pod được gọi payment-service. Đơn giản, hiệu quả. Nhưng dev/test local khó enforce.',
+        '<strong>Verify lại JWT</strong>: Mỗi service có public key → verify <code>Authorization</code> header. Tốn thêm ~5-10ms.',
+        '<strong>mTLS</strong>: Service-to-service TLS + client cert. An toàn nhất. Cần Istio/Linkerd.',
+        '<strong>Bind header tại TLS terminator</strong>: Envoy/Istio strip client header, chỉ chấp nhận từ gateway. Phức tạp.',
+      ],
+      pitfall: [
+        '1. <strong>Service exposed trong Docker network</strong>: docker-compose expose port <code>:8087</code> ra <code>localhost:8087</code> → dev có thể curl trực tiếp từ máy host. Trong production, dùng internal network + ingress chỉ cho gateway.',
+        '2. <strong>Kubernetes Service</strong>: Mỗi service có ClusterIP → pod khác cluster có thể gọi. Cần NetworkPolicy chặn.',
+        '3. <strong>Audit log chỉ ghi sau khi đã pass filter</strong>: Nếu attack thành công, log không có cảnh báo. Cần ghi cả "denied" request.',
+      ],
+      verify: 'Test: tắt gateway, chạy payment-service độc lập, gửi request với <code>X-User-Roles: ADMIN</code> → check có pass không. Hiện tại Ecom <strong>SẼ PASS</strong> (lỗ hổng). Đề xuất P0: thêm NetworkPolicy + verify JWT.',
+      refs: '<code>BE/cart-service/.../security/GatewayUserContextFilter.java:13-34</code> · <code>BE/payment-service/.../security/GatewayRoleFilter.java:14-32</code>',
+      tags: ['#security', '#authorization', '#spoofing'],
+    },
+    {
+      id: 'q14', cat: 'jwt-security', diff: 'mid',
+      catLabel: 'Security', difficulty: '★★',
+      title: 'Refresh token lưu DB dạng SHA-256 hash, không lưu plaintext. Tại sao? So sánh với việc lưu trực tiếp.',
+      tldr: 'Nếu DB leak (SQL injection, backup lộ, insider), attacker không dùng được refresh token để lấy access token mới. Hash 1 chiều → chỉ verify được, không reverse. Kèm UNIQUE constraint + <code>revoked_at</code> cho invalidation.',
+      flow: null,
+      flowPre: `AuthService.register/login:
+     │
+     ├─→ generateRefreshToken():
+     │     raw = base64url(16 random bytes)
+     │     hash = SHA-256(raw)
+     │     save RefreshToken(id, userId, tokenHash=hash, expiresAt=now+30d)
+     │     return raw  ← chỉ trả raw 1 lần cho client
+     │
+AuthService.refresh(rawToken):
+     │
+     ├─→ hash = SHA-256(rawToken)
+     │
+     ├─→ refreshTokenRepo.findByTokenHash(hash)
+     │     │
+     │     ├─ not found → 401 invalid
+     │     ├─ revoked_at != null → 401 revoked
+     │     ├─ expires_at < now → 401 expired
+     │     └─ valid ↓
+     │
+     ├─→ revoke old (set revoked_at)
+     │
+     └─→ issue new access + refresh token`,
+      tradeoff: [
+        '<strong>SHA-256 hash (Ecom)</strong>: Nhanh, đủ cho mục đích (không phải password). Trade-off: SHA-256 nhanh → nếu attacker lấy DB có thể brute force nếu token yếu. Nhưng token 16 random bytes = 128 bit entropy → không brute force được.',
+        '<strong>BCrypt</strong>: Chậm hơn (~100ms), designed cho password. Overkill cho random token.',
+        '<strong>HMAC-SHA256 với server secret</strong>: Hash với secret, cùng secret để verify. An toàn hơn SHA-256 thuần vì attacker cần cả DB + secret.',
+        '<strong>Argon2</strong>: State-of-art, chống GPU attack. Chưa cần cho refresh token.',
+      ],
+      pitfall: [
+        '1. <strong>Token rotation</strong>: Mỗi lần refresh → revoke old, issue new. Ecom làm đúng. Nếu KHÔNG rotate → attacker có thể dùng song song.',
+        '2. <strong>Detection stolen token</strong>: Nếu user A dùng refresh token cũ (đã revoke) → có thể là dấu hiệu token bị đánh cắp → force logout tất cả session của user A. Ecom chưa implement.',
+        '3. <strong>Long expiry</strong>: 30 ngày khá dài. Best practice: 7-14 ngày, kèm absolute timeout.',
+      ],
+      verify: '<code>BE/auth-service/.../service/AuthService.java:95-109</code> thấy <code>sha256(token)</code> → save hash. Test: login → lấy refresh token → query DB: chỉ thấy hash, không có raw.',
+      refs: '<code>BE/auth-service/.../service/AuthService.java:95-109</code>',
+      tags: ['#security', '#token', '#storage'],
+    },
+    {
+      id: 'q15', cat: 'jwt-security', diff: 'junior',
+      catLabel: 'Security', difficulty: '★',
+      title: 'Tại sao <code>Authorization</code> header phải <code>Bearer </code> mà không parse trực tiếp token?',
+      tldr: 'Theo RFC 6750 OAuth 2.0. Cho phép mở rộng scheme (Basic, Digest, MAC, NTLM). Phân biệt rõ authentication scheme. Một số proxy/CDN có thể strip header nếu format lạ.',
+      flow: [
+        '<strong>RFC 6750 format</strong>:',
+        '<pre>Authorization: Bearer &lt;token&gt;\n                ^^^^^^ scheme name (case-insensitive per RFC)\n                       ^^^^^^ token (access_token, refresh_token, etc.)</pre>',
+      ],
+      tradeoff: [
+        '<strong>Basic</strong>: <code>Basic base64(user:pass)</code> — HTTP Basic Auth.',
+        '<strong>Digest</strong>: Challenge-response, cũ.',
+        '<strong>Bearer</strong>: Phổ biến nhất cho OAuth 2.0 / JWT.',
+        '<strong>MAC</strong>: HTTP Signatures, phức tạp hơn.',
+        '<strong>NTLM, Negotiate</strong>: Windows auth.',
+      ],
+      pitfall: [
+        '1. <strong>Strip prefix</strong>: Một số library yêu cầu đúng <code>Bearer </code> (space) — nếu thiếu space → 401. Ecom dùng <code>startsWith("Bearer ")</code> → OK.',
+        '2. <strong>Case sensitivity</strong>: Scheme name theo RFC là case-insensitive nhưng token sau scheme là case-sensitive. Ecom lowercase Bearer → OK.',
+        '3. <strong>Token trong URL</strong>: KHÔNG bao giờ đặt token trong query string (log, history). Luôn header.',
+      ],
+      verify: '<code>BE/api-gateway/.../security/JwtAuthenticationFilter.java:34-41</code> thấy extract <code>header.substring(7)</code> sau khi check <code>startsWith("Bearer ")</code>. Test: gửi <code>Bearer</code> (không có space) → 401.',
+      refs: '<code>BE/api-gateway/.../security/JwtAuthenticationFilter.java:34-41</code> · RFC 6750',
+      tags: ['#jwt', '#rfc', '#http'],
+    },
+
+    /* ============== 4.4 REDIS & CART (5) ============== */
+    {
+      id: 'q16', cat: 'redis-cart', diff: 'mid',
+      catLabel: 'Redis', difficulty: '★★',
+      title: 'Cart lưu Redis JSON với TTL 30 ngày. Tại sao không lưu DB? Nhược điểm là gì?',
+      tldr: 'Cart là data ephemeral, user có thể abandon. Redis read/write nhanh hơn DB 10-100x (in-memory, single-thread, no disk). TTL tự động cleanup → không cần GC job. Nhược: Redis down → cart unavailable (cache-aside fallback chưa có).',
+      flow: null,
+      flowPre: `CartService.addItem(userId, productId, qty):
+     │
+     ├─→ ProductClient.getProduct(productId) ← Feign
+     │
+     ├─→ Cart cart = cartRepo.findByUserIdOrCreate(userId)
+     │     │
+     │     ├─→ Redis: GET cart:{userId} → JSON deserialize
+     │     │
+     │     └─→ if null → lock lock:cart:{userId} (5s) → Lua GET or CREATE → unlock
+     │
+     ├─→ cart.addItem(productSnapshot, qty)
+     │
+     └─→ cartRepo.save(cart)  ← Redis: SETEX cart:{userId} 30days <JSON>`,
+      tradeoff: [
+        '<strong>Redis (Ecom)</strong>: 0.1-1ms read/write. Tự expire. Schema-less JSON → dễ evolve. Nhưng cần backup nếu user complaint "mất cart".',
+        '<strong>Postgres JSONB</strong>: Persistent, query được (vd tìm cart có product X). Nhưng chậm hơn 10x, cần GC job, cần migration.',
+        '<strong>Hybrid</strong>: Cart metadata ở DB, items cache ở Redis. Phức tạp.',
+      ],
+      pitfall: [
+        '1. <strong>Redis down</strong>: Toàn bộ cart-service ngừng. Cần fallback: (a) cho phép checkout với cart rỗng (user phải add lại), (b) lưu DB backup async.',
+        '2. <strong>JSON serialization version</strong>: Nếu thêm field vào <code>Cart</code> record → Redis có data cũ thiếu field → deserialize OK (Jackson default) nhưng business logic có thể fail. Cần <code>@JsonIgnoreProperties(ignoreUnknown=true)</code>.',
+        '3. <strong>Memory pressure</strong>: Mỗi cart ~1-5KB. 1M user = 1-5GB. Tính vào Redis capacity.',
+        '4. <strong>GDPR</strong>: User xóa account → phải xóa cart. Hiện tại Ecom có cơ chế? Cần check.',
+      ],
+      verify: '<code>BE/cart-service/.../repository/CartRepository.java:21, 116-129</code> thấy <code>Duration.ofDays(30)</code>. Test: thêm cart → <code>redis-cli TTL cart:{userId}</code> → ~2.59M seconds.',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:21, 116-129</code> · <code>.claude/knowledge-map.md:148-160</code>',
+      tags: ['#redis', '#cart', '#performance'],
+    },
+    {
+      id: 'q17', cat: 'redis-cart', diff: 'senior',
+      catLabel: 'Redis', difficulty: '★★★',
+      title: '<code>findByUserIdOrCreate</code> dùng <code>Thread.sleep(50)</code> + retry đệ quy khi lock contention. Rủi ro là gì? Fix thế nào?',
+      tldr: '<strong>Stack overflow</strong> nếu lock bị giữ quá 5s (TTL). Tech-debt #2. Fix: bounded retry với exponential backoff (50ms → 100ms → 200ms → max 5 lần → fail), hoặc dùng Redisson distributed lock với watchdog tự renew.',
+      flow: null,
+      flowPre: `Thread A: GET cart:user1 → miss
+Thread A: SET lock:cart:user1 NX EX 5 → success (lock acquired)
+Thread A: ... (đang tạo cart, lâu 6s do GC pause, network blip)
+
+Thread B: GET cart:user1 → miss
+Thread B: SET lock:cart:user1 NX EX 5 → fail (already locked)
+Thread B: Thread.sleep(50)
+Thread B: recursive call findByUserIdOrCreate(user1)
+
+... repeat 100 lần trong 5s ...
+
+Thread A: finally { DEL lock:cart:user1 } → release
+Thread B: GET cart:user1 → success → return`,
+      tradeoff: [
+        '<strong>Bounded retry với exponential backoff</strong>: 5 lần, 50ms → 100ms → 200ms → 400ms → 800ms (tổng ~1.5s). Sau đó fail với 503. Đơn giản, đủ cho 95% case.',
+        '<strong>Redisson distributed lock</strong>: Tự renew TTL (watchdog) → không sợ GC pause. Cần thêm dependency.',
+        '<strong>Lock-free với Lua atomic</strong>: <code>EVAL "if not exists then set; return end"</code> → atomic. Nhưng phải viết Lua cẩn thận.',
+        '<strong>Optimistic check qua version</strong>: Mỗi cart có <code>version</code> field. Update với <code>SET cart:user1 &lt;new&gt; XX GT &lt;version&gt;</code>. Retry khi fail.',
+      ],
+      pitfall: [
+        '1. <strong>Recursive call không bounded</strong>: <code>BE/cart-service/.../repository/CartRepository.java:107-114</code> gọi đệ quy không giới hạn → stack overflow.',
+        '2. <strong>Sleep trong request thread</strong>: Tốn Tomcat thread, không phục vụ request khác. Nên dùng async với <code>CompletableFuture</code>.',
+        '3. <strong>Lock không tự renew</strong>: Nếu business logic lâu hơn TTL → lock expire → thread khác cùng lúc vào critical section → race.',
+      ],
+      verify: 'Reproduce: trong <code>findByUserIdOrCreate</code> thêm <code>Thread.sleep(6000)</code> (giả lập GC) → fire 10 concurrent request cho cùng userId mới → check có StackOverflowError không.',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:107-114</code> · tech-debt #2',
+      tags: ['#redis', '#lock', '#distributed-systems'],
+    },
+    {
+      id: 'q18', cat: 'redis-cart', diff: 'senior',
+      catLabel: 'Redis', difficulty: '★★★',
+      title: 'Product cache dùng <code>@Cacheable</code> KHÔNG cấu hình TTL. Nếu admin update product nhưng quên gọi <code>changeStatus</code> thì sao? Hậu quả?',
+      tldr: 'Stale data <strong>vĩnh viễn</strong> vì không có TTL → chỉ evict khi <code>createProduct</code>/<code>updateProduct</code>/<code>changeStatus</code> gọi <code>@CacheEvict(allEntries=true)</code>. Tech-debt #9. Fix: set TTL 5-10 phút cho <code>product-detail</code>, dùng <code>@TimeToLive</code> annotation, hoặc dùng Redis <code>EXPIRE</code> trên key.',
+      flow: null,
+      flowPre: `T=0:    Admin sửa product #5 (price 100 → 80) trực tiếp ở DB (qua SQL client, fix bug, etc.)
+          KHÔNG qua API → @CacheEvict KHÔNG chạy
+          Redis vẫn còn: product-detail::5 = {price: 100}
+
+T=10:   User xem product #5 → cache hit → thấy 100 (SAI, phải là 80)
+
+T=∞:    Stale vĩnh viễn (no TTL, không ai evict)`,
+      tradeoff: [
+        '<strong>TTL 5-10 phút</strong>: Đơn giản. Cache miss nhiều hơn → tăng tải DB. Nhưng OK cho catalog (read-heavy).',
+        '<strong>Cache invalidation qua Kafka event</strong>: Khi admin update → publish <code>product.updated</code> → consumer ở product-service evict cache. Realtime, nhưng thêm infra.',
+        '<strong>Write-through</strong>: Update DB + Redis atomic. Phức tạp, cần transaction.',
+        '<strong>Versioned cache</strong>: Key = <code>product-detail::{id}:v{version}</code>. Update version khi DB update. Cache miss tự nhiên, không cần evict explicit.',
+      ],
+      pitfall: [
+        '1. <strong>DB direct update</strong>: DBA chạy <code>UPDATE products SET price=80 WHERE id=5</code> → bypass ORM → cache stale.',
+        '2. <strong>Bulk import</strong>: Script ETL import 1000 products qua SQL → cache stale cho tất cả.',
+        '3. <strong>Cache stampede</strong>: TTL hết hạn cùng lúc cho 100 popular products → 100 request đồng thời vào DB → spike. Cần lock hoặc pre-warm.',
+        '4. <strong>Memory leak</strong>: Cache không expire → Redis đầy → eviction tự động (LRU) → cũng stale.',
+      ],
+      verify: '<code>BE/product-service/.../service/ProductCatalogService.java:52-88</code> không thấy <code>redisTemplate.expire(key, ...)</code>. Update product → check Redis: <code>redis-cli TTL product-detail::5</code> → <code>-1</code> (vĩnh viễn). Đề xuất: thêm <code>@Cacheable(value="product-detail", key="#id", sync=true)</code> + custom TTL config.',
+      refs: 'Tech-debt #9 · <code>BE/product-service/.../service/ProductCatalogService.java:52-88</code>',
+      tags: ['#cache', '#redis', '#consistency'],
+    },
+    {
+      id: 'q19', cat: 'redis-cart', diff: 'mid',
+      catLabel: 'Redis', difficulty: '★★',
+      title: '<code>CartClient</code> trong order-service gọi <code>GET /api/cart</code> qua OpenFeign. Nếu cart-service chậm 3s thì checkout mất bao lâu? Cách cải thiện?',
+      tldr: 'Cộng dồn: <code>getCart</code> 3s + <code>clearCart</code> ~50ms + reserve publish ~10ms + Kafka roundtrip ~100ms + DB write ~20ms ≈ <strong>~3.2s</strong> (chỉ phần này, chưa tính payment). Cải thiện: Circuit Breaker + Timeout fail-fast (đã có Resilience4j), hoặc cache cart ở order-service.',
+      flow: null,
+      flowPre: `POST /api/orders:
+  │ OrderController.createOrder()                  ~5ms
+  │ OrderService.createOrder()
+  │   ├─→ CartClient.getCart() [Feign HTTP]        ~3000ms  ← BOTTLENECK
+  │   ├─→ parse Cart → snapshot items              ~10ms
+  │   ├─→ orderRepo.save() [DB]                    ~20ms
+  │   ├─→ CartClient.clearCart() [Feign HTTP]      ~50ms
+  │   └─→ OrderEventProducer.publish... [Kafka]    ~10ms
+  │ Kafka consumer (async)                         ~100ms (background)
+  │                                                ─────────
+  │ TOTAL (user-perceived)                         ~3.2s`,
+      tradeoff: [
+        '<strong>Resilience4j Circuit Breaker (đã có ở commit <code>caa52b6</code>)</strong>: Timeout 5s, fail-fast khi cart-service down. User thấy 503 nhanh thay vì đợi 30s (default Tomcat timeout).',
+        '<strong>Cache cart ở order-service</strong>: 1-2s checkout. Nhưng cart có thể đã cũ → inconsistency khi user add item mới. Cần TTL ngắn + invalidation khi cart update.',
+        '<strong>Async qua Kafka</strong>: Order-service publish <code>checkout.requested</code> → cart-service + product-service + inventory-service react → cuối cùng aggregate → response. Loose coupling nhưng user phải poll.',
+        '<strong>GraphQL/BFF</strong>: 1 endpoint gom data từ nhiều service, parallel fetch → 1 round trip.',
+      ],
+      pitfall: [
+        '1. <strong>Default Feign timeout 10s</strong>: Nếu không config → user đợi 10s. Đã fix bằng CB timeout 5s (commit <code>caa52b6</code>).',
+        '2. <strong>Synchronous chain</strong>: Order → Cart → Product. Nếu Product cũng chậm → tổng latency cộng dồn. Cần async hoặc cache.',
+        '3. <strong>No retry</strong>: Nếu network blip 1 lần → fail. Cần <code>@Retry</code> (Resilience4j hỗ trợ).',
+      ],
+      verify: 'Measure bằng <code>k6</code> (đã có trong <code>BE/benchmark/</code>): <code>http_req_duration</code> cho <code>POST /api/orders</code>. So sánh trước/sau khi bật CB.',
+      refs: '<code>BE/order-service/.../service/OrderService.java:30-40</code> · commit <code>caa52b6</code>',
+      tags: ['#feign', '#latency', '#performance'],
+    },
+    {
+      id: 'q20', cat: 'redis-cart', diff: 'senior',
+      catLabel: 'Redis', difficulty: '★★★',
+      title: 'Lua script <code>SET_IF_SAME_SCRIPT</code> trong cart chỉ <code>GET</code>, fallback tạo mới bằng Java. Có race condition không? Fix thế nào?',
+      tldr: '<strong>Có race condition</strong>. 2 request cùng lúc cho user mới: cả 2 GET miss → cả 2 tạo cart mới → setIfAbsent lock chỉ 1 thắng → 1 sleep retry, loop vô tận. Tech-debt #10. Fix: viết Lua atomic <code>GET or CREATE</code> trong 1 script.',
+      flow: null,
+      flowPre: `Thread A: EVAL SET_IF_SAME_SCRIPT("cart:user1") → returns nil (miss)
+Thread B: EVAL SET_IF_SAME_SCRIPT("cart:user1") → returns nil (miss)
+
+Thread A: setIfAbsent("lock:cart:user1", "A", 5s) → success
+Thread B: setIfAbsent("lock:cart:user1", "B", 5s) → fail
+Thread B: Thread.sleep(50)
+Thread B: recursive findByUserIdOrCreate()  ← lặp
+
+Thread A: create new Cart() in Java
+Thread A: SETEX "cart:user1" 30d <new_cart_json>
+Thread A: DEL "lock:cart:user1"
+
+Thread B (sau sleep): EVAL GET → STILL NIL  (vì lock đã release TRƯỚC khi Thread A commit)
+Thread B: setIfAbsent lock → success (Thread A đã DEL)
+Thread B: create another new Cart()  ← DUPLICATE OBJECT
+Thread B: SETEX "cart:user1" 30d <another_cart>  ← GHI ĐÈ`,
+      tradeoff: [
+        '<strong>Lua atomic GET-or-CREATE</strong>:<pre>local existing = redis.call(\'GET\', KEYS[1])\nif existing then return existing end\nredis.call(\'SET\', KEYS[1], ARGV[1], \'EX\', ARGV[2])\nreturn ARGV[1]</pre>1 round trip, atomic. Java chỉ nhận JSON. Pros: clean. Cons: phải serialize trước khi eval.',
+        '<strong>SETNX with value</strong>: <code>SET key value NX EX 30d</code> → atomic create-or-fail. Nếu fail → GET lại. 2 round trip, có race nhỏ giữa 2 SET.',
+        '<strong>Redis HASH + version</strong>: <code>HSETNX key field value</code> → atomic per field. Phức tạp hơn.',
+      ],
+      pitfall: [
+        '1. <strong>Hiện tại dùng 2 bước</strong>: EVAL GET + Java logic + SET. 3 round trip, 2 race window.',
+        '2. <strong>Lock TTL 5s nhưng business logic có thể lâu hơn</strong>: Lock expire → thread khác vào critical section.',
+        '3. <strong>Không có deadlock detection</strong>: Nếu lock leak (process crash không release) → đợi 5s.',
+      ],
+      verify: '<code>BE/cart-service/.../repository/CartRepository.java:29-36</code> đọc <code>GET_OR_CREATE_SCRIPT</code>. Reproduce: 2 thread đồng thời <code>findByUserIdOrCreate("new-user")</code> → check Redis <code>cart:new-user</code> chỉ có 1 entry (OK) hay nhiều entry liên tiếp (BUG).',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:29-36, 107-114</code> · tech-debt #10',
+      tags: ['#redis', '#lua', '#race-condition'],
+    },
+
+    /* ============== 4.5 TECH-DEBT & TROUBLESHOOTING (6) ============== */
+    {
+      id: 'q21', cat: 'tech-debt', diff: 'senior',
+      catLabel: 'Debug', difficulty: '★★★',
+      title: 'Order PENDING quá 10 phút không chuyển RESERVED. Debug từng bước thế nào?',
+      tldr: 'Dùng correlation ID + Zipkin để trace flow 12 service. Check log ở từng bước: publish Kafka, consume, DB transaction, downstream response. Có thể do (1) Kafka lag, (2) inventory out-of-stock, (3) bug trong handler.',
+      flow: null,
+      flowPre: `1. Lấy correlation ID: response header "X-Correlation-Id: <uuid>"
+
+2. Zipkin UI (localhost:9411):
+   - Filter by serviceName: order-service, inventory-service
+   - Tìm trace theo orderId hoặc correlationId
+   - Check span tree: createOrder → publishReservationRequested → consumeReservationRequested → reserveStock → publishReserved → consumeReserved → markReserved
+   - Span nào có duration > 5s hoặc error? → root cause
+
+3. Nếu Zipkin không có span: check log từng service:
+   grep "orderId=<uuid>" /var/log/{order,inventory}-service/
+   # hoặc trong container:
+   docker logs order-service | grep <uuid>
+   # log format: %5p [order-service,abc-123]
+
+4. Check Kafka lag:
+   docker exec -it kafka kafka-consumer-groups.sh \\
+     --bootstrap-server localhost:9092 \\
+     --describe --group inventory-service
+   # LAG > 0 → consumer chậm
+
+5. Check outbox:
+   docker exec -it payment-db psql -U postgres -d payment_service \\
+     -c "SELECT id, event_type, status, created_at FROM outbox_events
+         WHERE aggregate_id='<paymentId>' ORDER BY created_at;"
+   # status=FAILED → bug publish
+
+6. Check DB transaction log:
+   SELECT * FROM orders WHERE id='<orderId>';
+   SELECT * FROM stock_reservations WHERE order_id='<orderId>';
+   -- Nếu stock_reservations chưa có → inventory chưa xử lý`,
+      tradeoff: [
+        '<strong>Zipkin (Ecom có)</strong>: Trace end-to-end tự động qua <code>X-Correlation-Id</code>. Tốt cho flow liên service.',
+        '<strong>Loki + Promtail (chưa có)</strong>: Aggregate log theo correlationId. Tốt cho debug lỗi cụ thể.',
+        '<strong>Kafka UI / AKHQ (chưa có)</strong>: Browse topic, check lag, replay message. Tốt cho Kafka issue.',
+        '<strong>psql + manual query</strong>: Chậm nhưng chính xác cho DB issue.',
+      ],
+      pitfall: [
+        '1. <strong>Correlation ID chưa propagate đến Kafka payload</strong>: Hiện tại MDC có correlationId, nhưng Kafka event payload chỉ có orderId, không có correlationId. Consumer log sẽ sinh correlationId mới → khó trace.',
+        '2. <strong>Sampling probability = 1.0</strong>: Zipkin ghi tất cả span → nhiều data. Production nên sample 0.1.',
+        '3. <strong>Log không có stack trace đầy đủ</strong>: Handler catch exception rồi log message ngắn → mất root cause.',
+      ],
+      verify: 'Reproduce: tạo order → manually stop inventory-service → order PENDING → debug bằng checklist trên. Mỗi bước nên ra câu trả lời rõ ràng.',
+      refs: '<code>.claude/knowledge-map.md:237-259, 286-305</code> · <code>BE/common/.../web/CorrelationIdFilter.java:13-33</code>',
+      tags: ['#debug', '#observability', '#tracing'],
+    },
+    {
+      id: 'q22', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'Notification email không gửi thật (log chỉ thấy "Mock email to=..."). Production cần làm gì? Các bước theo thứ tự?',
+      tldr: 'Replace <code>MockEmailSender</code> (chỉ log INFO) bằng <code>JavaMailSender</code> + SMTP credentials hoặc SendGrid SDK. Cũng cần lookup email thật từ <code>user-service</code> qua Feign (tech-debt #1: hiện hardcode <code>user-{uuid}@example.test</code>). Thêm retry, dead letter queue, monitoring.',
+      flow: null,
+      flowPre: `1. Thêm dependency:
+   <dependency>
+     <groupId>com.sendgrid</groupId>
+     <artifactId>sendgrid-java</artifactId>
+   </dependency>
+   # hoặc spring-boot-starter-mail cho SMTP
+
+2. Tạo bean mới:
+   @Service
+   @Profile("prod")
+   public class SendGridEmailSender implements EmailSender {
+     @Override
+     public void send(String to, String subject, String body) {
+       SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+       Request request = new Request();
+       request.setMethod(Method.POST);
+       request.setEndpoint("mail/send");
+       request.setBody(...);
+       Response response = sg.api(request);
+       if (response.getStatusCode() >= 400) throw new EmailSendException(...);
+     }
+   }
+
+3. Lookup email thật từ user-service:
+   @FeignClient("user-service")
+   public interface UserClient {
+     @GetMapping("/api/users/{id}/profile")
+     UserProfileResponse getProfile(@PathVariable UUID id);
+   }
+   # Replace hardcode: recipient(userId) → userClient.getProfile(userId).email()
+
+4. Retry với Resilience4j:
+   @Retry(name = "email", fallbackMethod = "sendFailed")
+   public void send(...) { ... }
+
+5. DLQ: Nếu fail 3 lần → save vào notification_failed table → cron job retry sau 1h
+
+6. Monitoring: alert nếu notification_logs.status=FAILED > threshold`,
+      tradeoff: [
+        '<strong>SMTP (Gmail, AWS SES)</strong>: Đơn giản, dùng <code>JavaMailSender</code>. Nhưng SES yêu cầu verify domain, Gmail cần app password.',
+        '<strong>SendGrid</strong>: API REST, tốt cho high volume, có template. Free tier 100 email/ngày.',
+        '<strong>Twilio SendGrid / Mailgun / Postmark</strong>: Tương tự, chọn theo giá & region.',
+        '<strong>AWS SNS</strong>: Push notification (mobile), không phải email.',
+      ],
+      pitfall: [
+        '1. <strong>Bounce / spam</strong>: Cần handle bounce email → unsubscribe. Nếu gửi nhiều bounce → IP bị blacklist.',
+        '2. <strong>GDPR / CCPA</strong>: Cần consent trước khi gửi marketing email. Transactional email (order confirmation) OK.',
+        '3. <strong>Email deliverability</strong>: SPF, DKIM, DMARC record cần config DNS. Không có → vào spam.',
+        '4. <strong>Rate limit</strong>: SendGrid free tier 100/ngày. Flash sale 10K order = fail. Cần paid plan.',
+      ],
+      verify: '<code>BE/notification-service/.../service/MockEmailSender.java:11-13</code> chỉ thấy <code>log.info</code>. Test: thay bean → trigger order confirmed → check email thật đến inbox. Check <code>notification_logs.status=SENT</code>.',
+      refs: 'Tech-debt #1, #8 · <code>BE/notification-service/.../service/MockEmailSender.java:11-13</code>',
+      tags: ['#notification', '#production-readiness'],
+    },
+    {
+      id: 'q23', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'Prometheus scrape config chỉ list 3/11 service. 8 business service không có metric trong Grafana. Fix thế nào?',
+      tldr: 'Thêm 8 job vào <code>BE/infra/prometheus/prometheus.yml</code> cho port 8081-8088, mỗi job scrape <code>/actuator/prometheus</code> mỗi 15s. Reload prometheus (không cần restart). Tech-debt #6. Verify bằng <code>curl http://localhost:8083/actuator/prometheus | grep jvm_memory_used</code>.',
+      flow: null,
+      flowPre: `# BE/infra/prometheus/prometheus.yml
+scrape_configs:
+  # existing 3 jobs (api-gateway, discovery-server, config-server)
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+  - job_name: 'user-service'
+    # ... port 8082
+  - job_name: 'product-service'
+    # ... port 8083
+  # ... 8084 cart, 8085 inventory, 8086 order, 8087 payment, 8088 notification
+
+Sau đó:
+docker exec prometheus kill -HUP 1   # reload config
+# hoặc: curl -X POST http://localhost:9090/-/reload`,
+      tradeoff: [
+        '<strong>Static config (Ecom dùng)</strong>: Đơn giản, list IP cứng. Phù hợp khi số service cố định.',
+        '<strong>Service discovery (Consul, Eureka, K8s)</strong>: Auto-detect khi service thêm/xoá. Tốt cho dynamic infra.',
+        '<strong>File-based SD</strong>: Watch file → update. Linh hoạt hơn static.',
+      ],
+      pitfall: [
+        '1. <strong>Sai host</strong>: <code>host.docker.internal</code> chỉ work trên Docker Desktop (Mac/Windows). Trên Linux cần <code>172.17.0.1</code> hoặc <code>network_mode: host</code>.',
+        '2. <strong>Authentication</strong>: Nếu actuator bật security → cần basic auth. Hiện tại Ecom permit <code>/actuator/prometheus</code> cho mọi user.',
+        '3. <strong>Metric cardinality explosion</strong>: Nếu label = userId → 1M user = 1M series → Prometheus OOM. Chỉ dùng bounded labels (status, endpoint).',
+        '4. <strong>Network</strong>: Prometheus container phải reach được business service qua Docker network. Trong docker-compose, dùng <code>network_mode: host</code> hoặc share network.',
+      ],
+      verify: 'Sau khi thêm, <code>curl http://localhost:9090/api/v1/targets</code> → check 8 target mới state=UP. Query: <code>up{job="auth-service"}</code> → 1.',
+      refs: '<code>BE/infra/prometheus/prometheus.yml:5-17</code> · tech-debt #6',
+      tags: ['#prometheus', '#monitoring', '#observability'],
+    },
+    {
+      id: 'q24', cat: 'tech-debt', diff: 'senior',
+      catLabel: 'Debug', difficulty: '★★★',
+      title: 'Memory leak cart-service sau 24h. Nghi ngờ gì? Debug thế nào?',
+      tldr: 'Nghi ngờ: (1) <code>Thread.sleep(50)</code> recursion không terminate → thread bị block giữ connection; (2) Kafka listener container leak; (3) Feign client không release HTTP connection. Cách debug: enable heap dump (<code>-XX:+HeapDumpOnOutOfMemoryError</code>), VisualVM, jmap, jstack, pprof.',
+      flow: null,
+      flowPre: `1. Heap dump khi OOM:
+   Add JVM option: -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap.hprof
+   # Trigger bằng load test hoặc đợi 24h
+
+2. Analyze heap dump:
+   # Eclipse MAT hoặc VisualVM
+   # Tìm class chiếm nhiều memory nhất
+   # Nếu thấy nhiều "java.lang.Thread" + "CartRepository$..." → thread leak
+   # Nếu thấy nhiều "org.apache.http.Connection" → Feign connection leak
+
+3. Thread dump:
+   jstack <pid> > thread-dump.txt
+   # Tìm thread ở state BLOCKED hoặc WAITING với stack trace cart-related
+   # 100 thread "CartRepository.findByUserIdOrCreate" → busy-wait leak
+
+4. Profile trong runtime:
+   # VisualVM →Sampler → CPU/Memory
+   # Chạy load test, watch memory tăng tuyến tính → leak
+
+5. Check metrics:
+   curl http://cart-service:8084/actuator/metrics/jvm.threads.live
+   # Tăng đều qua 24h → thread leak
+   curl http://cart-service:8084/actuator/metrics/jvm.memory.used
+   # Heap tăng đều → memory leak`,
+      tradeoff: [
+        '<strong>Eclipse MAT</strong>: Powerful, parse heap dump offline. Free.',
+        '<strong>VisualVM</strong>: Live profiling + thread dump. Free.',
+        '<strong>YourKit / JProfiler</strong>: Commercial, đẹp hơn, sampling tốt hơn.',
+        '<strong>jcmd + jfr</strong>: Built-in, low overhead, good cho production.',
+      ],
+      pitfall: [
+        '1. <strong>Heap dump lớn</strong>: 4GB heap = 4GB dump file. Cần disk space. Tắt auto dump trong prod, chỉ bật khi nghi ngờ.',
+        '2. <strong>GC root unreachable</strong>: Leak do static field thì GC không collect được. MAT sẽ chỉ.',
+        '3. <strong>Native memory leak</strong>: DirectByteBuffer, JNI. Không thấy trong heap dump. Dùng <code>jcmd &lt;pid&gt; VM.native_memory</code>.',
+        '4. <strong>Connection pool leak</strong>: HikariCP, Feign HTTP client. Symptom: thread "await" pool connection.',
+      ],
+      verify: 'Reproduce: tạo script load test <code>wrk -t10 -c100 -d24h ...</code> (không thực tế, dùng <code>k6</code> thay). Monitor memory mỗi 5 phút.',
+      refs: 'Tech-debt #2 · <code>BE/cart-service/.../repository/CartRepository.java:107-114</code>',
+      tags: ['#performance', '#memory-leak', '#debug'],
+    },
+    {
+      id: 'q25', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'Lỗi <code>GlobalExceptionHandler not found</code> khi start service. Tại sao? Hậu quả? Fix?',
+      tldr: 'Tech-debt #5: <code>common.web.GlobalExceptionHandler</code> tồn tại nhưng KHÔNG được scan. Mỗi service tự viết <code>*ExceptionHandler</code> riêng → format lỗi không đồng nhất. Fix: thêm <code>@Import(GlobalExceptionHandler.class)</code> vào main class HOẶC <code>@SpringBootApplication(scanBasePackages = "com.ecom")</code>.',
+      flow: null,
+      flowPre: `BE/common/src/main/java/com/ecom/common/web/GlobalExceptionHandler.java:
+  @RestControllerAdvice
+  public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handle(...) { ... }
+  }
+
+# Comment trong file: "Must be imported by each service's component scan"
+# NHƯNG: không có service nào thực sự import → bean không được tạo
+
+# Kết quả: mỗi service có handler riêng
+BE/cart-service/.../exception/CartExceptionHandler.java  → format A
+BE/payment-service/.../exception/PaymentExceptionHandler.java → format B
+BE/order-service/.../exception/OrderExceptionHandler.java → format C
+
+# Client phải handle 3 format error khác nhau`,
+      tradeoff: [
+        '<strong><code>@Import(GlobalExceptionHandler.class)</code> ở main class</strong>: Đơn giản, explicit. Phải thêm vào 9 service.',
+        '<strong><code>@ComponentScan(basePackages = "com.ecom")</code></strong>: Scan toàn bộ. Có thể pick up bean không mong muốn.',
+        '<strong><code>@SpringBootApplication(scanBasePackages = {...})</code></strong>: Tương tự.',
+        '<strong>Tạo module con <code>common-web-starter</code> với auto-config</strong>: Dùng <code>spring.factories</code> → tự động. Phức tạp nhất, tốt nhất.',
+      ],
+      pitfall: [
+        '1. <strong>Duplicate handler</strong>: Nếu <code>@Import</code> GlobalExceptionHandler + service có <code>*ExceptionHandler</code> riêng → 2 handler match → Spring chọn specific hơn (cùng class). Nên xóa handler cũ.',
+        '2. <strong>Order</strong>: <code>@Order(Ordered.HIGHEST_PRECEDENCE)</code> cho GlobalExceptionHandler để nó chạy trước.',
+        '3. <strong>Logging</strong>: GlobalExceptionHandler nên log error đầy đủ (stack trace) trước khi trả response.',
+      ],
+      verify: '<code>BE/common/.../web/GlobalExceptionHandler.java:21-96</code> đọc comment. <code>grep -r "@Import" BE/*/src/main/java/com/ecom/*/EcomServiceApplication.java</code> → hiện tại 0 kết quả. Sau fix: 9 kết quả. Test: gửi invalid request → check response format đồng nhất.',
+      refs: 'Tech-debt #5 · <code>BE/common/.../web/GlobalExceptionHandler.java:21-96</code>',
+      tags: ['#architecture', '#code-quality', '#consistency'],
+    },
+    {
+      id: 'q26', cat: 'tech-debt', diff: 'mid',
+      catLabel: 'Debug', difficulty: '★★',
+      title: 'Lỗi 500 random. Correlation ID giúp debug thế nào? Từng bước?',
+      tldr: 'Log format <code>%5p [appName,correlationId]</code>. Client gửi <code>X-Correlation-Id</code> (gateway tự generate nếu thiếu). MDC propagate xuống mọi service qua filter. Khi lỗi, response có header <code>X-Correlation-Id</code> → grep Kibana/Grafana Loki theo ID → xem full trace 12 service.',
+      flow: null,
+      flowPre: `Client request:
+  GET /api/products
+  X-Correlation-Id: abc-123-uuid  (hoặc gateway tự sinh)
+     │
+     ▼
+api-gateway.GatewayCorrelationIdFilter:
+  - Read header "X-Correlation-Id"
+  - Nếu null → UUID.randomUUID()
+  - Set MDC: MDC.put("correlationId", "abc-123")
+  - Mutate request: header X-Correlation-Id = abc-123
+  - Echo response: header X-Correlation-Id = abc-123
+     │
+     ▼
+product-service.CorrelationIdFilter (servlet):
+  - Read header "X-Correlation-Id"
+  - Set MDC: MDC.put("correlationId", "abc-123")
+  - Echo response
+     │
+     ▼
+All log statements:
+  log.info("Searching products keyword={}", keyword)
+  # → "INFO [product-service,abc-123] Searching products keyword=phone"
+     │
+     ▼
+Client nhận response:
+  HTTP 500
+  X-Correlation-Id: abc-123
+  Body: { "code": "...", "message": "...", "correlationId": "abc-123" }
+     │
+     ▼
+Dev debug:
+  1. Copy "abc-123"
+  2. Kibana query: correlationId:"abc-123" → tất cả log 12 service
+  3. Zipkin query: traceId="abc-123" → span tree
+  4. Tìm log ERROR → root cause`,
+      tradeoff: [
+        '<strong>MDC + log pattern (Ecom)</strong>: Đơn giản, không cần infra. Log structured qua MDC.',
+        '<strong>Trace ID riêng (W3C tracecontext)</strong>: <code>traceparent</code> header, OpenTelemetry standard. Mạnh hơn, cross-service trace tốt hơn.',
+        '<strong>Centralized log (ELK, Loki)</strong>: Cần ELK stack. Tốt cho search.',
+        '<strong>APM tool (Datadog, New Relic)</strong>: Commercial, đẹp nhưng $$.',
+      ],
+      pitfall: [
+        '1. <strong>MDC bị mất khi async</strong>: <code>@Async</code> thread mới → MDC empty. Phải wrap <code>Runnable</code> để copy MDC.',
+        '2. <strong>Kafka payload chưa có correlationId</strong>: Producer tạo MDC, nhưng khi gọi <code>kafkaTemplate.send()</code> ở thread khác → MDC empty → log không có correlationId. Cần set <code>kafkaTemplate.setObservationEnabled(true)</code> (Spring 3+) hoặc tự inject.',
+        '3. <strong>Sampling</strong>: Zipkin sampling = 1.0 hiện tại → nhiều trace. Production nên 0.1.',
+        '4. <strong>Log level</strong>: Mặc định INFO. Bật DEBUG chỉ khi cần debug cụ thể → log nhiều → tốn disk.',
+      ],
+      verify: 'Trigger lỗi 500 (vd invalid payload). Lấy <code>X-Correlation-Id</code> từ response header. Grep log: <code>grep "abc-123" /var/log/*/app.log</code>. Phải thấy log ở cả gateway + downstream service.',
+      refs: '<code>.claude/knowledge-map.md:237-259</code> · <code>BE/common/.../web/CorrelationIdFilter.java:13-33</code> · <code>BE/api-gateway/.../filter/GatewayCorrelationIdFilter.java:17-58</code>',
+      tags: ['#observability', '#debug', '#logging'],
+    },
+
+    /* ============== 4.6 E-COMMERCE TỔNG QUÁT (7) ============== */
+    {
+      id: 'q27', cat: 'ecom-general', diff: 'senior',
+      catLabel: 'E-com', difficulty: '★★★',
+      title: 'Flash sale 1 triệu user cùng click "Mua" trong 1 giây. Thiết kế inventory reservation thế nào để không oversell? Ecom hiện tại có handle được không?',
+      tldr: 'Không oversell = atomic check + atomic decrement. 5 cách: (1) optimistic version, (2) pessimistic DB lock, (3) Redis atomic DECRBY, (4) queue-based serial, (5) pre-shard stock. Ecom hiện dùng (2) qua DB transaction → <strong>bottleneck</strong> khi flash sale.',
+      flow: null,
+      flowPre: `┌─────────────────────┬──────────────┬────────────┬──────────────┐
+│ Cách                │ Throughput   │ Complexity │ Ecom dùng?   │
+├─────────────────────┼──────────────┼────────────┼──────────────┤
+│ 1. Optimistic check │ High         │ Low        │ Không        │
+│    (version field)  │ (retry on    │            │              │
+│                     │  conflict)   │            │              │
+│ 2. Pessimistic DB   │ Low          │ Low        │ CÓ           │
+│    (SELECT FOR      │ (serialize   │            │ (transaction │
+│     UPDATE)         │  per row)    │            │  trong       │
+│                     │              │            │  reserve)    │
+│ 3. Redis atomic     │ Very High    │ Medium     │ Không        │
+│    DECRBY           │ (in-memory)  │            │ (chỉ dùng    │
+│                     │              │            │  cho cart)   │
+│ 4. Queue-based      │ Medium       │ High       │ Không        │
+│    (Kafka serial)   │ (single      │            │              │
+│                     │  consumer)   │            │              │
+│ 5. Pre-shard stock  │ High         │ High       │ Không        │
+│    (10 shards       │ (parallel)   │            │              │
+│     per product)    │              │            │              │
+└─────────────────────┴──────────────┴────────────┴──────────────┘
+
+Ecom hiện tại: cách 2 → với 1M concurrent:
+  - 1M request → 1M transaction Postgres
+  - 1M SELECT FOR UPDATE trên cùng product_id
+  - Tất cả serialize → 1 thread xử lý tại 1 thời điểm
+  - Avg latency 5s × 1M = throughput ~200 req/s
+  - → SỤP`,
+      tradeoff: [
+        '<strong>Cách 2 (Ecom)</strong>: 1M request × 1 transaction × 5ms = ~80 phút. Quá tệ.',
+        '<strong>Cách 3 (Redis DECRBY)</strong>: 1M atomic DECRBY trên key <code>stock:product:5</code> = 1M ops trong ~5s. OK. Nhưng cần sync Redis → DB (eventual).',
+        '<strong>Cách 5 (Pre-shard)</strong>: 10 shard <code>stock:product:5:shard1..10</code> → mỗi shard 100K stock. 10 consumer parallel → 10x throughput. Phức tạp nhất nhưng scale tốt nhất.',
+        '<strong>Cách 4 (Queue)</strong>: 1M request → 1M Kafka message → 1 consumer process tuần tự → ~5 phút cho 1M. User phải poll trạng thái.',
+      ],
+      pitfall: [
+        '1. <strong>Oversell</strong>: 2 user cùng read stock=1 → cả 2 reserve → cả 2 success → bán 2 dù chỉ có 1.',
+        '2. <strong>Undersell</strong>: Lock sai, fail quá nhiều → bán 0 dù stock còn.',
+        '3. <strong>Hot key</strong>: 1 product hot → 1M ops trên 1 key → Redis single-threaded → bottleneck. Cần sharding hoặc pre-warm nhiều instance.',
+        '4. <strong>Cart hold vs inventory reserve</strong>: Ecom reserve khi checkout, không phải khi add to cart. Flash sale cần reserve khi "Add to cart" hoặc "Notify me" để chống flood.',
+      ],
+      verify: 'Estimate: 1M user, 1s peak, 100K stock. Ecom = 100K × 5s transaction = bottleneck. Đề xuất: pre-shard Redis cho hot products.',
+      refs: '<code>BE/inventory-service/.../service/InventoryService.java:56-127</code>',
+      tags: ['#flash-sale', '#scalability', '#inventory'],
+    },
+    {
+      id: 'q28', cat: 'ecom-general', diff: 'junior',
+      catLabel: 'E-com', difficulty: '★',
+      title: 'Payment idempotency: client retry 3 lần do timeout. Server đảm bảo chỉ charge 1 lần thế nào? So sánh Ecom với Stripe.',
+      tldr: '5 bước: (1) Client cung cấp <code>Idempotency-Key</code> (UUID), (2) Server check key trong DB trước khi charge, (3) Nếu có → trả response cũ, (4) Nếu chưa → charge + lưu key + response, (5) UNIQUE constraint ở DB. Stripe làm đúng pattern này. Ecom cũng làm đúng ở Q9.',
+      flow: null,
+      flowPre: `1. Client sinh UUID ngay khi user click "Pay":
+   const idempotencyKey = crypto.randomUUID();
+
+2. Send request với header:
+   POST /api/payments
+   Idempotency-Key: <uuid>
+   Body: {orderId, amount, currency}
+
+3. Server check DB:
+   SELECT * FROM payments WHERE idempotency_key = '<uuid>';
+   │
+   ├─ found → return stored response (status, paymentId, etc.)
+   └─ null  ↓
+
+4. Process payment (charge provider):
+   INSERT INTO payments (..., idempotency_key='<uuid>', status='PENDING')
+   -- UNIQUE constraint → safety net
+
+5. Trả response cho client, client lưu kèm idempotencyKey
+
+--- Retry (network timeout, 5xx) ---
+
+Client gửi LẠI với CÙNG idempotencyKey
+Server check → found → return SAME response
+→ Không charge lần 2`,
+      tradeoff: [
+        '<strong>Ecom</strong>: <code>pay-{orderId}</code> key (deterministic), TTL vĩnh viễn, không verify body match.',
+        '<strong>Stripe</strong>: UUID per attempt, TTL 24h, verify body match (nếu khác → 422). Production-grade.',
+      ],
+      pitfall: [
+        '1. <strong>Lost key</strong>: Client crash trước khi nhận response → key mất → user retry với key mới → double charge. Mitigate: lưu key ở client ngay khi generate.',
+        '2. <strong>Different body same key</strong>: Client retry nhưng đổi amount (vd tip) → server vẫn trả response cũ. Ecom không check. Stripe trả 422.',
+        '3. <strong>TTL quá ngắn</strong>: Retry sau 25h với key cũ → không idempotent. Stripe TTL 24h, sau đó key expire.',
+      ],
+      verify: '<code>BE/payment-service/.../service/PaymentService.java:36-41</code> đọc flow. Test: gửi 3 request cùng key → check 1 charge duy nhất.',
+      refs: '<code>BE/payment-service/.../service/PaymentService.java:36-41</code> · Stripe API docs',
+      tags: ['#payment', '#idempotency', '#best-practice'],
+    },
+    {
+      id: 'q29', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'Cart abandonment 70% ở bước checkout. Cách giảm? Ecom có thể cải thiện gì?',
+      tldr: '7 chiến lược: guest checkout, save cart for guest, one-click, auto-fill, progress indicator, email reminder, real-time shipping. Ecom hiện bắt login ngay từ đầu → friction cao. Đề xuất: guest flow + cart persistence qua cookie.',
+      flow: null,
+      flowPre: `┌────────────────────────┬────────────────────────┬──────────────┐
+│ Strategy               │ Implementation        │ Impact est.  │
+├────────────────────────┼────────────────────────┼──────────────┤
+│ 1. Guest checkout      │ Không bắt login        │ -20% abandon │
+│    (Ecom chưa có)      │ → trừ 2 field (email)  │              │
+│ 2. Save cart for guest │ Cart trong cookie/local │ -10% abandon │
+│    (Ecom Redis có,     │ → sau login merge với  │              │
+│     nhưng phải login)  │   user cart            │              │
+│ 3. One-click checkout  │ Lưu payment + address  │ -15% abandon │
+│    (Amazon patent)     │ 1 click = order        │              │
+│ 4. Auto-fill address   │ Google Places API      │ -5% abandon  │
+│ 5. Progress indicator  │ "Step 2/3: Payment"    │ -5% abandon  │
+│ 6. Email reminder      │ Sau 24h, 72h           │ -10% abandon │
+│ 7. Real-time shipping  │ Tính ngay ở cart page  │ -8% abandon  │
+└────────────────────────┴────────────────────────┴──────────────┘`,
+      tradeoff: [
+        '<strong>Guest checkout</strong>: Tăng conversion nhưng mất user data (email optional). Cần cân nhắc GDPR consent.',
+        '<strong>One-click</strong>: Phải lưu payment info → tăng security risk (PCI DSS). Cần tokenization (Stripe Elements).',
+        '<strong>Email reminder</strong>: Phải có ESP (SendGrid). Có thể bị spam complaint.',
+        '<strong>Real-time shipping</strong>: Cần API GHN/GHTK → tốn cost per request.',
+      ],
+      pitfall: [
+        '1. <strong>Friction cao ở auth</strong>: Ecom <code>POST /api/orders</code> yêu cầu Bearer token ngay. User phải register trước → tăng abandon 30-40%.',
+        '2. <strong>Cart expire sớm</strong>: TTL 30 ngày OK, nhưng Redis có thể bị evict sớm hơn nếu memory full.',
+        '3. <strong>Email reminder spam</strong>: Gửi 3 lần/ngày → user unsubscribe → tăng bounce rate.',
+        '4. <strong>Mobile UX</strong>: Ecom FE chưa optimize mobile. 60% user trên mobile.',
+      ],
+      verify: 'Đo funnel: <code>Add to cart</code> → <code>Checkout start</code> → <code>Payment</code> → <code>Success</code>. Tỷ lệ drop-off ở đâu → ưu tiên fix. Tool: Google Analytics funnel, Hotjar session recording.',
+      refs: '<code>BE/cart-service/.../repository/CartRepository.java:21, 116-129</code> · <code>FE/</code>',
+      tags: ['#ux', '#conversion', '#best-practice'],
+    },
+    {
+      id: 'q30', cat: 'ecom-general', diff: 'senior',
+      catLabel: 'E-com', difficulty: '★★★',
+      title: 'Distributed transaction giữa Order + Inventory + Payment. Tại sao không dùng 2PC? Ecom dùng gì?',
+      tldr: '2PC chặt (sync, blocking) → giảm availability, không scale, coordinator SPOF. Ecom dùng <strong>Saga</strong> (eventual consistency, mỗi step có compensation). Alternative: TCC, Event Sourcing. Trade-off Saga: khó debug, cần distributed tracing.',
+      flow: null,
+      flowPre: `2PC (XA transaction):
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│  Order   │     │Inventory │     │ Payment  │
+│  Service │     │ Service  │     │ Service  │
+└────┬─────┘     └────┬─────┘     └────┬─────┘
+     │                │                │
+     └────────────────┼────────────────┘
+                      │
+                ┌─────▼──────┐
+                │ Coordinator │  ← SPOF, sync block
+                └────────────┘
+
+Flow:
+  1. Coordinator → All: PREPARE
+  2. All: lock resource, write to log, vote YES/NO
+  3. If all YES → Coordinator: COMMIT → All: commit
+     If any NO → Coordinator: ROLLBACK → All: rollback
+  4. Lock held until step 3 → blocking, slow
+
+Saga (Ecom dùng):
+┌──────────┐  event   ┌──────────┐  event   ┌──────────┐
+│  Order   │ ───────▶ │Inventory │ ───────▶ │ Payment  │
+│  Service │          │ Service  │          │ Service  │
+└──────────┘          └──────────┘          └──────────┘
+     │                     │                     │
+     │  if fail            │  if fail            │
+     ▼                     ▼                     ▼
+compensate           compensate            compensate
+(cancel order)       (release stock)       (refund)
+
+Flow:
+  1. Order create → publish event
+  2. Inventory reserve → publish event
+  3. Payment charge → publish event
+  4. If step 2 fail → Order cancel (compensation)
+  5. Eventual consistency, no lock`,
+      tradeoff: [
+        '<strong>2PC</strong>: Strong consistency, đơn giản tư duy. Nhưng: (a) blocking, (b) coordinator SPOF, (c) không scale horizontally, (d) lock trong DB rất lâu → throughput thấp.',
+        '<strong>Saga (Ecom)</strong>: Eventual consistency (cuối cùng cũng đúng). Loose coupling, scale tốt. Nhưng: (a) phải viết compensation cho mỗi step, (b) khó debug, (c) business phải chấp nhận "tạm thời inconsistent".',
+        '<strong>TCC (Try-Confirm-Cancel)</strong>: Chia 3 phase. Rõ ràng hơn Saga nhưng phức tạp hơn. Dùng cho finance (Alibaba).',
+        '<strong>Event Sourcing</strong>: Lưu event, derive state. Audit tốt nhưng phức tạp nhất.',
+      ],
+      pitfall: [
+        '1. <strong>Compensation fail</strong>: Nếu compensation cũng fail (vd inventory-service down khi release) → data inconsistent. Cần retry + manual intervention.',
+        '2. <strong>Long-running saga</strong>: User đợi 30s cho payment → bad UX. Cần async + webhook.',
+        '3. <strong>Idempotency</strong>: Mỗi step phải idempotent vì event có thể deliver nhiều lần. Ecom đã làm.',
+        '4. <strong>Trace</strong>: Cần correlation ID + Zipkin. Ecom có.',
+      ],
+      verify: 'Ecom = Saga qua Kafka. <code>BE/order-service/.../messaging/*EventConsumer.java</code> chứng minh. Test: tạo order → stop payment-service → check inventory được release (compensation).',
+      refs: '<code>.claude/knowledge-map.md:126-142</code> · <code>BE/.../messaging/*EventConsumer.java</code>',
+      tags: ['#distributed-systems', '#saga', '#consistency'],
+    },
+    {
+      id: 'q31', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'SQL injection: tìm product theo keyword. Ecom có an toàn không? Cách verify?',
+      tldr: 'An toàn. Dùng JPA <code>Specification</code> với <code>criteriaBuilder.like(...)</code> → bind parameter (PreparedStatement) → không concatenate string. KHÔNG dùng <code>LIKE \'%" + userInput + "%\'</code>. Verify bằng cách thử payload injection: <code>\' OR \'1\'=\'1</code>.',
+      flow: null,
+      flowPre: `// BE/product-service/.../service/ProductCatalogService.java
+public Page<ProductSummaryResponse> search(ProductSearchCriteria criteria, ...) {
+  Specification<Product> spec = (root, query, cb) -> {
+    List<Predicate> predicates = new ArrayList<>();
+    predicates.add(cb.equal(root.get("active"), true));
+
+    if (criteria.keyword() != null) {
+      String pattern = "%" + criteria.keyword().toLowerCase() + "%";
+      predicates.add(cb.like(cb.lower(root.get("name")), pattern));
+      //                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      //                      JPA bind parameter → PreparedStatement
+    }
+    // ...
+    return cb.and(predicates.toArray(new Predicate[0]));
+  };
+  return productRepo.findAll(spec, pageable);
+}
+
+Khi chạy, Hibernate generate SQL:
+SELECT * FROM products WHERE active = true AND LOWER(name) LIKE ?
+--                          bind: %phone%
+-- KHÔNG phải: LOWER(name) LIKE '%phone%' (concatenate)`,
+      tradeoff: [
+        '<strong>PreparedStatement / Parameterized query (Ecom dùng)</strong>: Best practice. User input treated as data, not code.',
+        '<strong>ORM (Hibernate, JPA)</strong>: Tự động escape. An toàn nếu dùng API chuẩn.',
+        '<strong>Whitelist input</strong>: Chỉ cho phép alphanumeric, loại bỏ ký tự đặc biệt.',
+        '<strong>WAF (Web Application Firewall)</strong>: Cloudflare, ModSecurity. Defense in depth.',
+        '<strong>Escape function</strong>: MySQL <code>mysql_real_escape_string</code>. Dễ quên, không khuyến nghị.',
+      ],
+      pitfall: [
+        '1. <strong>Native query với string concat</strong>: <code>em.createNativeQuery("SELECT * FROM products WHERE name LIKE \'%" + input + "%\'")</code> → VULNERABLE. Ecom không dùng.',
+        '2. <strong>Order BY injection</strong>: <code>ORDER BY ${userInput}</code> → không thể bind. Phải whitelist: <code>if (sortBy in ["name", "price"])</code>.',
+        '3. <strong>JPA <code>@Query</code> với concat</strong>: <code>@Query("SELECT p FROM Product p WHERE p.name LIKE %:keyword%")</code> → OK nếu dùng <code>:keyword</code>. Nhưng <code>LIKE \'%" + kw + "%\'"</code> (Java concat trong JPQL) → VULNERABLE.',
+        '4. <strong>JSON field injection</strong>: <code>preferences->>\'key\' = \'value\'</code> (Postgres) → vẫn OK nếu bind.',
+      ],
+      verify: 'Test payload: <code>keyword = "\' OR \'1\'=\'1"</code>. Nếu trả về tất cả product → vulnerable. Nếu trả về 0 (no match cho ký tự đặc biệt) → OK. Test thêm <code>keyword = "phone\'; DROP TABLE products;--"</code> → nếu table bị drop → VULNERABLE.',
+      refs: '<code>BE/product-service/.../service/ProductCatalogService.java:94-113</code>',
+      tags: ['#security', '#sql-injection', '#best-practice'],
+    },
+    {
+      id: 'q32', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'Rate limiting cho <code>POST /api/auth/login</code> chống brute force. Ecom đã làm chưa? So sánh các cách?',
+      tldr: '<strong>Có</strong> (commit <code>0340f03</code> tháng 6): RequestRateLimiter STRICT ở gateway, 5 req/min/IP cho login/register, NORMAL cho refresh/products. Dùng Redis token bucket qua <code>spring-cloud-gateway</code>. Đã giải quyết một phần tech-debt #12.',
+      flow: null,
+      flowPre: `# BE/config-repo/api-gateway.yml (commit 0340f03)
+routes:
+  - id: auth-login
+    uri: lb://auth-service
+    predicates:
+      - Path=/api/auth/login
+    filters:
+      - name: RequestRateLimiter
+        args:
+          redis-rate-limiter.replenishRate: 5    # 5 token / giây? phút?
+          redis-rate-limiter.burstCapacity: 10   # burst tối đa
+          redis-rate-limiter.requestedTokens: 1
+          key-resolver: "#{@ipKeyResolver}"     # rate theo IP`,
+      tradeoff: [
+        '<strong>Per-IP (Ecom dùng)</strong>: Đơn giản, chống brute force 1 IP. Nhưng attacker dùng botnet (1M IP) → bypass.',
+        '<strong>Per-user</strong>: Sau login, rate theo userId. Tốt cho authenticated API.',
+        '<strong>Per-API-key</strong>: Cho B2B. Mỗi customer có quota riêng.',
+        '<strong>Global rate</strong>: Bảo vệ backend tổng quát. Production nên có cả global + per-endpoint.',
+        '<strong>Token bucket vs Sliding window</strong>: Token bucket cho phép burst, sliding window chính xác hơn.',
+      ],
+      pitfall: [
+        '1. <strong>Behind proxy</strong>: <code>X-Forwarded-For</code> header → IP thật nằm trong header, không phải remote IP. Cần config <code>setTrustedProxies</code>.',
+        '2. <strong>Shared IP (NAT)</strong>: Công ty, trường học → 100 user cùng IP → 1 user spam → 99 user bị block. Cần kết hợp per-IP + per-user.',
+        '3. <strong>Redis down</strong>: Nếu Redis down, rate limiter fail-open (cho qua) hay fail-closed (chặn)? Mặc định Ecom fail-open → rủi ro brute force khi Redis down.',
+        '4. <strong>Distributed attack</strong>: 1M IP cùng brute force → per-IP không đủ. Cần CAPTCHA hoặc device fingerprinting.',
+      ],
+      verify: '<code>BE/config-repo/api-gateway.yml</code> đọc config. Test: <code>for i in {1..20}; do curl -X POST /api/auth/login; done</code> → request 6+ trả 429 Too Many Requests.',
+      refs: '<code>BE/config-repo/api-gateway.yml</code> · commit <code>0340f03</code> · tech-debt #12',
+      tags: ['#security', '#rate-limiting', '#brute-force'],
+    },
+    {
+      id: 'q33', cat: 'ecom-general', diff: 'mid',
+      catLabel: 'E-com', difficulty: '★★',
+      title: 'Khi 1 service down (vd payment), đơn hàng đang xử lý thì sao? User trải nghiệm thế nào? Ecom có vấn đề gì?',
+      tldr: 'Circuit Breaker mở (đã có Resilience4j) → fail-fast → user thấy 503 "Service temporarily unavailable". Cart vẫn giữ, order vẫn PENDING. Khi service recover → user retry. UX tốt hơn: queue order async, xử lý qua Kafka, email khi hoàn tất. Ecom hiện sync → user đợi hoặc phải retry.',
+      flow: null,
+      flowPre: `User click "Place order"
+     │
+     ▼
+OrderService.createOrder()
+     │
+     ├─→ CartClient.getCart()  ── 200ms ✓
+     │
+     ├─→ InventoryClient.reserve()  ── 5000ms ✗ (payment-service down)
+     │     │
+     │     └─→ Resilience4j Circuit Breaker
+     │           ├─ count fail: 1, 2, 3, 4, 5 → 5 fail trong 10s
+     │           ├─ CB open → fail-fast (1ms)
+     │           ├─ Wait 30s (slidingWindow)
+     │           ├─ Half-open: cho 1 request thử
+     │           │   ├─ success → close CB
+     │           │   └─ fail → open lại 30s
+     │
+     └─→ throw ServiceUnavailableException
+          │
+          ▼
+  OrderController → 503 Service Unavailable
+  Body: { "code": "SVC_DOWN", "message": "Payment service tạm thời không khả dụng" }
+       │
+       ▼
+  User thấy toast "Đặt hàng thất bại, vui lòng thử lại sau 1 phút"`,
+      tradeoff: [
+        '<strong>Sync fail-fast (Ecom hiện tại)</strong>: User biết ngay, retry được. Nhưng cart vẫn giữ → user tự retry. Không tự động.',
+        '<strong>Async queue + email</strong>: Order POST → trả 202 Accepted ngay, queue xử lý, email khi xong. UX tốt nhưng phức tạp.',
+        '<strong>Degraded mode</strong>: Cho phép checkout không cần payment (trả sau) → business risk.',
+        '<strong>Cached fallback</strong>: Trả response cũ (nếu có) → consistency risk.',
+      ],
+      pitfall: [
+        '1. <strong>Cart stale</strong>: User giữ cart 30 phút, retry → cart có thể hết hàng (inventory thay đổi). Cần re-check khi retry.',
+        '2. <strong>Payment retry</strong>: Nếu user retry với key mới (Ecom <code>pay-{orderId}</code>) → fail vì order đã có payment PENDING.',
+        '3. <strong>CB config quá nhạy</strong>: 5 fail trong 10s → mở CB → 1 false positive (network blip) đóng cả service 30s. Cần tune threshold.',
+        '4. <strong>No graceful degradation</strong>: User thấy 503 → không biết khi nào retry. Cần <code>Retry-After</code> header.',
+      ],
+      verify: 'Stop payment-service → tạo order → check log có <code>CircuitBreaker \'payment\' is OPEN</code> không. Response time < 100ms (fail-fast). Add <code>Retry-After: 30</code> header.',
+      refs: 'Commit <code>f047a92</code>, <code>caa52b6</code>, <code>4c94a1d</code> (Resilience4j)',
+      tags: ['#resilience', '#ux', '#circuit-breaker'],
+    },
+  ];
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+
+  const list = document.getElementById('qa-list');
+
+  function escPre(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderBody(q) {
+    let html = '';
+    // TL;DR
+    if (q.tldr) {
+      html += '<div class="ans-tldr"><span class="ans-section-label">🎯 TL;DR:</span>' + q.tldr + '</div>';
+    }
+    // Flow
+    if (q.flow && q.flow.length) {
+      html += '<div class="ans-flow"><span class="ans-section-label">🔁 Flow:</span>';
+      q.flow.forEach(p => { html += '<p>' + p + '</p>'; });
+      html += '</div>';
+    }
+    if (q.flowPre) {
+      html += '<div class="ans-flow"><span class="ans-section-label">🔁 Flow:</span><pre><code>' + escPre(q.flowPre) + '</code></pre></div>';
+    }
+    // Trade-off
+    if (q.tradeoff) {
+      html += '<div class="ans-tradeoff"><span class="ans-section-label">⚖️ Trade-off:</span>';
+      if (Array.isArray(q.tradeoff)) {
+        q.tradeoff.forEach(p => { html += '<p>' + p + '</p>'; });
+      } else {
+        html += '<p>' + q.tradeoff + '</p>';
+      }
+      html += '</div>';
+    }
+    // Pitfall
+    if (q.pitfall) {
+      html += '<div class="ans-pitfall"><span class="ans-section-label">⚠️ Pitfall:</span>';
+      if (Array.isArray(q.pitfall)) {
+        q.pitfall.forEach(p => { html += '<p>' + p + '</p>'; });
+      } else {
+        html += '<p>' + q.pitfall + '</p>';
+      }
+      html += '</div>';
+    }
+    // Verify
+    if (q.verify) {
+      html += '<div class="ans-verify"><span class="ans-section-label">🔍 Verify:</span><p>' + q.verify + '</p></div>';
+    }
+    // Refs
+    html += '<div class="qa-refs"><strong>📎 Tham chiếu:</strong> ' + q.refs;
+    html += '<div class="qa-tags">🏷️ ';
+    q.tags.forEach(t => { html += '<span class="qa-tag">' + t + '</span>'; });
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderCard(q) {
+    return `
+      <article class="qa-card" data-category="${q.cat}" data-difficulty="${q.diff}" data-id="${q.id}">
+        <button class="qa-question" aria-expanded="false">
+          <span class="qa-num">${q.id.toUpperCase()}</span>
+          <span class="qa-title">${q.title}</span>
+          <span class="qa-meta">
+            <span class="qa-cat cat-${q.cat}">${q.catLabel}</span>
+            <span class="qa-difficulty">${q.difficulty}</span>
+            <span class="qa-toggle">▼</span>
+          </span>
+        </button>
+        <div class="qa-answer" hidden>
+          ${renderBody(q)}
+        </div>
+      </article>
+    `;
+  }
+
+  // Render Q1-Q20
+  list.innerHTML = Q.map(renderCard).join('');
+
+  // ============================================================
+  // STATE
+  // ============================================================
+
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle');
+  const openedCountEl = document.getElementById('opened-count');
+  const STORAGE_THEME = 'ecom-qa-theme';
+  const STORAGE_OPENED = 'ecom-qa-opened';
+
+  // Theme
+  const savedTheme = localStorage.getItem(STORAGE_THEME) || 'dark';
+  html.dataset.theme = savedTheme;
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    localStorage.setItem(STORAGE_THEME, next);
+  });
+
+  // Accordion
+  const cards = document.querySelectorAll('.qa-card');
+  let opened = new Set();
+  try { opened = new Set(JSON.parse(localStorage.getItem(STORAGE_OPENED) || '[]')); } catch (e) {}
+
+  cards.forEach(card => {
+    const id = card.dataset.id;
+    const btn = card.querySelector('.qa-question');
+    const ans = card.querySelector('.qa-answer');
+    if (opened.has(id)) {
+      ans.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+    }
+    btn.addEventListener('click', () => {
+      const isOpen = !ans.hidden;
+      ans.hidden = isOpen;
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      if (!isOpen) opened.add(id); else opened.delete(id);
+      localStorage.setItem(STORAGE_OPENED, JSON.stringify([...opened]));
+      updateProgress();
+    });
+  });
+
+  function updateProgress() {
+    const count = [...document.querySelectorAll('.qa-question')]
+      .filter(b => b.getAttribute('aria-expanded') === 'true').length;
+    openedCountEl.textContent = count;
+  }
+  updateProgress();
+
+  // Filter
+  const chips = document.querySelectorAll('.chip');
+  const counts = { 'all': 33, 'kafka-saga': 6, 'outbox-idempotency': 5, 'jwt-security': 4, 'redis-cart': 5, 'tech-debt': 6, 'ecom-general': 7 };
+  const baseLabels = {};
+  chips.forEach(c => { baseLabels[c.dataset.filter] = c.textContent.split(' (')[0]; });
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const f = chip.dataset.filter;
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      let visible = 0;
+      cards.forEach(card => {
+        const match = f === 'all' || card.dataset.category === f;
+        card.hidden = !match;
+        card.dataset.hiddenByFilter = !match ? 'true' : 'false';
+        if (match) visible++;
+      });
+      // Update chip labels with visible count
+      chips.forEach(c => {
+        const k = c.dataset.filter;
+        c.textContent = baseLabels[k] + ` (${k === 'all' ? cards.length : [...cards].filter(x => x.dataset.category === k).length})`;
+      });
+    });
+  });
+
+  // Search
+  const search = document.getElementById('search');
+  search.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    if (!q) {
+      cards.forEach(c => { c.hidden = c.dataset.hiddenByFilter === 'true'; });
+      return;
+    }
+    cards.forEach(card => {
+      const match = card.textContent.toLowerCase().includes(q);
+      card.hidden = !match || card.dataset.hiddenByFilter === 'true';
+    });
+  });
+
+  // Mark all as visible by default
+  cards.forEach(card => { card.dataset.hiddenByFilter = 'false'; });
+
+})();
+</script>
+
+</body>
+</html>

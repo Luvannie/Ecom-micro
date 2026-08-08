@@ -55,7 +55,7 @@ class AdminProductControllerIT {
                         .header("X-User-Roles", "CUSTOMER")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateProductRequest(
-                                category.id(), "Margherita", "margherita", "Demo", new BigDecimal("11.50"), null, null))))
+                                category.getId(), "Margherita", "margherita", "Demo", new BigDecimal("11.50"), null, null))))
                 .andExpect(status().isForbidden());
     }
 
@@ -67,7 +67,7 @@ class AdminProductControllerIT {
                         .header("X-User-Roles", "CUSTOMER,ADMIN")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateProductRequest(
-                                category.id(), "Margherita", "margherita", "Demo", new BigDecimal("11.50"), null, null))))
+                                category.getId(), "Margherita", "margherita", "Demo", new BigDecimal("11.50"), null, null))))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.startsWith("/api/admin/products/")))
                 .andExpect(jsonPath("$.name").value("Margherita"));

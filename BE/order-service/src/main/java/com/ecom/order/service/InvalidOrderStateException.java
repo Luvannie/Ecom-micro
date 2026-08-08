@@ -1,6 +1,8 @@
 package com.ecom.order.service;
 
-public class InvalidOrderStateException extends RuntimeException {
+import com.ecom.common.web.ConflictException;
+
+public class InvalidOrderStateException extends ConflictException {
     public InvalidOrderStateException(String message) {
         super(message);
     }

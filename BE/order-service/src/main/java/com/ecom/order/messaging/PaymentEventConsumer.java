@@ -14,14 +14,11 @@ import java.util.UUID;
 public class PaymentEventConsumer {
     private static final Logger log = LoggerFactory.getLogger(PaymentEventConsumer.class);
     private final OrderService orderService;
-    private final OrderEventProducer eventProducer;
     private final KafkaListenerResilienceWrapper wrapper;
 
     public PaymentEventConsumer(OrderService orderService,
-                                OrderEventProducer eventProducer,
                                 KafkaListenerResilienceWrapper wrapper) {
         this.orderService = orderService;
-        this.eventProducer = eventProducer;
         this.wrapper = wrapper;
     }
 
@@ -34,7 +31,7 @@ public class PaymentEventConsumer {
         log.info("Processing PAYMENT_SUCCEEDED for orderId={}", event.orderId());
         wrapper.execute(
             () -> {
-                eventProducer.publishOrderConfirmed(orderService.markConfirmed(event.orderId()));
+                orderService.markConfirmed(event.orderId());
                 log.info("Successfully processed PAYMENT_SUCCEEDED for orderId={}", event.orderId());
                 return null;
             },
@@ -52,7 +49,7 @@ public class PaymentEventConsumer {
         log.info("Processing PAYMENT_FAILED for orderId={}", event.orderId());
         wrapper.execute(
             () -> {
-                eventProducer.publishOrderCancelled(orderService.cancelAfterPaymentFailure(event.orderId()));
+                orderService.cancelAfterPaymentFailure(event.orderId());
                 log.info("Successfully processed PAYMENT_FAILED for orderId={}", event.orderId());
                 return null;
             },

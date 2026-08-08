@@ -17,7 +17,7 @@ import './App.css';
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
@@ -38,12 +38,15 @@ function Navbar() {
           <>
             <button className={location.pathname === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>Cart ({cartCount})</button>
             <button className={location.pathname === '/orders' ? 'active' : ''} onClick={() => navigate('/orders')}>Orders</button>
-            <button className={location.pathname === '/profile' ? 'active' : ''} onClick={() => navigate('/profile')}>{user.displayName}</button>
+            <button className={location.pathname === '/profile' ? 'active' : ''} onClick={() => navigate('/profile')}>{user.displayName || user.email}</button>
+            {hasRole('admin') && (
+              <button onClick={() => navigate('/admin')}>Admin</button>
+            )}
             <button onClick={() => { logout(); navigate('/'); }}>Logout</button>
           </>
         ) : (
           <>
-            <button className={location.pathname === '/login' ? 'active' : ''} onClick={() => navigate('/login')}>Login</button>
+            <button className={location.pathname === '/login' ? 'active' : ''} onClick={() => navigate('/login')}>Sign in</button>
             <button className={location.pathname === '/register' ? 'active' : ''} onClick={() => navigate('/register')}>Register</button>
           </>
         )}
@@ -78,6 +81,11 @@ function AppContent() {
           } />
           <Route path="/profile" element={
             <ProtectedRoute><Profile onNavigate={navigate} /></ProtectedRoute>
+          } />
+
+          {/* Admin-only route example — replace element with real component when ready */}
+          <Route path="/admin" element={
+            <ProtectedRoute requiredRole="admin"><div style={{padding: '2rem'}}>Admin dashboard (placeholder)</div></ProtectedRoute>
           } />
         </Routes>
       </main>

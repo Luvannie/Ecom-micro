@@ -48,10 +48,11 @@ spring:
           predicates:
             - Path=/api/payments/**
 
+keycloak:
+  jwk-set-uri: "${KEYCLOAK_JWK_SET_URI:?KEYCLOAK_JWK_SET_URI environment variable is required}"
+  issuer: "${KEYCLOAK_ISSUER:?KEYCLOAK_ISSUER environment variable is required}"
+
 security:
-  jwt:
-    issuer: ecom-auth-service
-    secret: ${JWT_SECRET:?JWT_SECRET environment variable is required}
   public-paths:
     - /api/auth/register
     - /api/auth/login

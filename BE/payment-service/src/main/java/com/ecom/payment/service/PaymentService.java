@@ -3,7 +3,11 @@ package com.ecom.payment.service;
 import com.ecom.payment.domain.Payment;
 import com.ecom.payment.domain.PaymentStatus;
 import com.ecom.payment.domain.Refund;
+import com.ecom.payment.messaging.event.PaymentFailedEvent;
+import com.ecom.payment.messaging.event.PaymentRefundedEvent;
+import com.ecom.payment.messaging.event.PaymentSucceededEvent;
 import com.ecom.payment.outbox.OutboxService;
+import com.ecom.payment.provider.PaymentProvider;
 import com.ecom.payment.repository.PaymentRepository;
 import com.ecom.payment.repository.RefundRepository;
 import com.ecom.payment.web.dto.CreatePaymentRequest;
@@ -15,18 +19,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final RefundRepository refundRepository;
-    private final MockPaymentProvider paymentProvider;
+    private final PaymentProvider paymentProvider;
     private final OutboxService outboxService;
 
     public PaymentService(PaymentRepository paymentRepository, RefundRepository refundRepository,
-                          MockPaymentProvider paymentProvider, OutboxService outboxService) {
+                          PaymentProvider paymentProvider, OutboxService outboxService) {
         this.paymentRepository = paymentRepository;
         this.refundRepository = refundRepository;
         this.paymentProvider = paymentProvider;
@@ -47,7 +50,9 @@ public class PaymentService {
         paymentProvider.markSucceeded(providerPaymentId);
         if (payment.getStatus() != PaymentStatus.SUCCEEDED) {
             payment.markSucceeded();
-            outboxService.append("Payment", payment.getId(), "payment.succeeded", eventPayload(payment));
+            outboxService.append("Payment", payment.getId(), "payment.succeeded",
+                    PaymentSucceededEvent.of(payment.getId(), payment.getOrderId(), payment.getUserId(),
+                            payment.getAmount(), payment.getCurrency()));
         }
         return PaymentResponse.from(payment, null);
     }
@@ -59,7 +64,9 @@ public class PaymentService {
         paymentProvider.markFailed(providerPaymentId, reason);
         if (payment.getStatus() != PaymentStatus.FAILED) {
             payment.markFailed();
-            outboxService.append("Payment", payment.getId(), "payment.failed", eventPayload(payment));
+            outboxService.append("Payment", payment.getId(), "payment.failed",
+                    PaymentFailedEvent.of(payment.getId(), payment.getOrderId(), payment.getUserId(),
+                            payment.getAmount(), payment.getCurrency(), reason));
         }
         return PaymentResponse.from(payment, null);
     }
@@ -89,7 +96,9 @@ public class PaymentService {
         }
         refundRepository.save(new Refund(payment, refundAmount, request.reason()));
         payment.markRefunded();
-        outboxService.append("Payment", payment.getId(), "payment.refunded", eventPayload(payment));
+        outboxService.append("Payment", payment.getId(), "payment.refunded",
+                PaymentRefundedEvent.of(payment.getId(), payment.getOrderId(), payment.getUserId(),
+                        refundAmount, request.reason()));
         return PaymentResponse.from(payment, null);
     }
 
@@ -102,15 +111,5 @@ public class PaymentService {
         payment.attachProviderPayment(providerPayment.providerPaymentId());
         Payment saved = paymentRepository.save(payment);
         return PaymentResponse.from(saved, providerPayment.redirectUrl());
-    }
-
-    private Map<String, Object> eventPayload(Payment payment) {
-        return Map.of(
-                "paymentId", payment.getId(),
-                "orderId", payment.getOrderId(),
-                "userId", payment.getUserId(),
-                "amount", payment.getAmount(),
-                "currency", payment.getCurrency(),
-                "status", payment.getStatus().name());
     }
 }

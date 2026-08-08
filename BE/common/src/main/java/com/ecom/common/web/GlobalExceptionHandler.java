@@ -61,6 +61,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomain(DomainException ex, HttpServletRequest request) {
+        log.warn("Domain exception: code={} status={} path={} message={}",
+                ex.getCode(), ex.getHttpStatus().value(), request.getRequestURI(), ex.getMessage());
+        ErrorResponse body = ErrorResponse.of(
+                ex.getCode(),
+                ex.getMessage(),
+                List.of(),
+                getCorrelationId(request),
+                java.time.Instant.now()
+        );
+        return ResponseEntity.status(ex.getHttpStatus()).body(body);
+    }
+
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<ErrorResponse> handleNullPointer(NullPointerException ex,
                                                             HttpServletRequest request) {

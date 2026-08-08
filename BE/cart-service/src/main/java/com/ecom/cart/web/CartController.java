@@ -1,6 +1,6 @@
 package com.ecom.cart.web;
 
-import com.ecom.cart.security.GatewayUserContext;
+import com.ecom.common.security.GatewayUserContext;
 import com.ecom.cart.service.CartService;
 import com.ecom.cart.web.dto.AddCartItemRequest;
 import com.ecom.cart.web.dto.CartResponse;

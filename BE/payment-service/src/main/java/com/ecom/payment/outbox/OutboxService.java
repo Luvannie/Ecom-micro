@@ -19,11 +19,29 @@ public class OutboxService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * @deprecated use {@link #append(String, UUID, String, com.ecom.payment.messaging.event.PaymentEvent)}
+     *             instead. The typed overload is the preferred API for new callers; this overload is
+     *             retained for backward compatibility while other code paths (e.g. webhook processing)
+     *             are migrated.
+     */
+    @Deprecated(forRemoval = true)
     @Transactional
     public OutboxEvent append(String aggregateType, UUID aggregateId, String eventType, Object payload) {
         try {
             return repository.save(new OutboxEvent(aggregateType, aggregateId, eventType,
                     objectMapper.writeValueAsString(payload)));
+        } catch (JsonProcessingException exception) {
+            throw new IllegalArgumentException("Could not serialize outbox payload", exception);
+        }
+    }
+
+    @Transactional
+    public OutboxEvent append(String aggregateType, UUID aggregateId, String eventType,
+                              com.ecom.payment.messaging.event.PaymentEvent event) {
+        try {
+            return repository.save(new OutboxEvent(aggregateType, aggregateId, eventType,
+                    objectMapper.writeValueAsString(event)));
         } catch (JsonProcessingException exception) {
             throw new IllegalArgumentException("Could not serialize outbox payload", exception);
         }

@@ -1,10 +1,12 @@
 package com.ecom.order.service;
 
 import com.ecom.common.web.ServiceUnavailableException;
-import com.ecom.order.client.CartClient;
-import com.ecom.order.client.InventoryClient;
 import com.ecom.order.domain.Order;
 import com.ecom.order.domain.OrderStatus;
+import com.ecom.order.port.CartQueryPort;
+import com.ecom.order.port.EventPublishPort;
+import com.ecom.order.port.InventoryCommandPort;
+import com.ecom.order.port.dto.CartView;
 import com.ecom.order.repository.OrderRepository;
 import com.ecom.order.web.dto.OrderResponse;
 import com.ecom.order.web.dto.OrderSummaryResponse;
@@ -25,13 +27,18 @@ public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
-    private final CartClient cartClient;
-    private final InventoryClient inventoryClient;
+    private final CartQueryPort cartQueryPort;
+    private final InventoryCommandPort inventoryCommandPort;
+    private final EventPublishPort eventPublishPort;
 
-    public OrderService(OrderRepository orderRepository, CartClient cartClient, InventoryClient inventoryClient) {
+    public OrderService(OrderRepository orderRepository,
+                        CartQueryPort cartQueryPort,
+                        InventoryCommandPort inventoryCommandPort,
+                        EventPublishPort eventPublishPort) {
         this.orderRepository = orderRepository;
-        this.cartClient = cartClient;
-        this.inventoryClient = inventoryClient;
+        this.cartQueryPort = cartQueryPort;
+        this.inventoryCommandPort = inventoryCommandPort;
+        this.eventPublishPort = eventPublishPort;
     }
 
     @CircuitBreaker(name = "cartService", fallbackMethod = "createOrderFallback")
@@ -39,14 +46,15 @@ public class OrderService {
     @Bulkhead(name = "cartService")
     @Transactional
     public OrderResponse createOrder(UUID userId, String email) {
-        var cart = cartClient.getCart(userId, email);
+        CartView cart = cartQueryPort.getCart(userId, email);
         if (cart.items().isEmpty()) {
             throw new EmptyCartException();
         }
         Order order = new Order(userId);
         cart.items().forEach(item -> order.addItem(item.productId(), item.productName(), item.unitPrice(), item.quantity()));
         Order saved = orderRepository.save(order);
-        cartClient.clearCart(userId, email);
+        eventPublishPort.publishReservationRequested(OrderResponse.from(saved));
+        cartQueryPort.clearCart(userId, email);
         return OrderResponse.from(saved);
     }
 
@@ -70,10 +78,12 @@ public class OrderService {
             throw new InvalidOrderStateException("Order cannot be cancelled from status " + order.getStatus());
         }
         if (order.getStatus() == OrderStatus.RESERVED && order.getReservationId() != null) {
-            inventoryClient.release(order.getReservationId());
+            inventoryCommandPort.release(order.getReservationId());
         }
         order.cancel();
-        return OrderResponse.from(orderRepository.save(order));
+        OrderResponse cancelled = OrderResponse.from(orderRepository.save(order));
+        eventPublishPort.publishOrderCancelled(cancelled);
+        return cancelled;
     }
 
     @Transactional
@@ -99,7 +109,9 @@ public class OrderService {
             throw new InvalidOrderStateException("Order can only be confirmed from RESERVED status, current: " + order.getStatus());
         }
         order.markConfirmed();
-        return OrderResponse.from(orderRepository.save(order));
+        OrderResponse confirmed = OrderResponse.from(orderRepository.save(order));
+        eventPublishPort.publishOrderConfirmed(confirmed);
+        return confirmed;
     }
 
     @CircuitBreaker(name = "inventoryService", fallbackMethod = "cancelAfterPaymentFailureFallback")
@@ -109,12 +121,14 @@ public class OrderService {
     public OrderResponse cancelAfterPaymentFailure(UUID orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         if (order.getStatus() == OrderStatus.RESERVED && order.getReservationId() != null) {
-            inventoryClient.release(order.getReservationId());
+            inventoryCommandPort.release(order.getReservationId());
         }
         if (order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.RESERVED) {
             order.cancel();
         }
-        return OrderResponse.from(order);
+        OrderResponse cancelled = OrderResponse.from(order);
+        eventPublishPort.publishOrderCancelled(cancelled);
+        return cancelled;
     }
 
     private Order findForUser(UUID userId, UUID orderId) {

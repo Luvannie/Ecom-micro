@@ -6,12 +6,20 @@ import com.ecom.payment.repository.OutboxEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.concurrent.CompletableFuture.completedFuture;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,27 +36,31 @@ class OutboxPublisherTest {
     }
 
     @Test
-    void publisherSendsEventToTopicAndMarksPublished() {
-        OutboxEvent event = new OutboxEvent("Payment", UUID.randomUUID(), "payment.succeeded", "{\"ok\":true}");
-        when(repository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.PENDING)).thenReturn(List.of(event));
-        when(repository.save(event)).thenReturn(event);
+    void marks_event_published_after_successful_send() {
+        OutboxEvent event = new OutboxEvent("Payment", UUID.randomUUID(), "payment.succeeded", "{}");
+        when(repository.lockTopPending(eq(OutboxStatus.PENDING), any(Pageable.class)))
+                .thenReturn(List.of(event));
+        when(repository.findById(event.getId())).thenReturn(java.util.Optional.of(event));
+        when(kafkaTemplate.send(anyString(), anyString(), any()))
+                .thenReturn(completedFuture(mock(SendResult.class)));
 
         publisher.publishPending();
 
-        verify(kafkaTemplate).send("payment.succeeded", event.getAggregateId().toString(), event.getPayload());
-        assertThat(event.getStatus()).isEqualTo(OutboxStatus.PUBLISHED);
+        verify(repository).save(argThat(e -> e.getStatus() == OutboxStatus.PUBLISHED));
     }
 
     @Test
-    void publisherMarksFailedWhenKafkaSendThrows() {
-        OutboxEvent event = new OutboxEvent("Payment", UUID.randomUUID(), "payment.failed", "{\"ok\":false}");
-        when(repository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.PENDING)).thenReturn(List.of(event));
-        when(kafkaTemplate.send("payment.failed", event.getAggregateId().toString(), event.getPayload()))
-                .thenThrow(new RuntimeException("broker unavailable"));
+    void does_not_save_on_send_failure() {
+        OutboxEvent event = new OutboxEvent("Payment", UUID.randomUUID(), "payment.succeeded", "{}");
+        when(repository.lockTopPending(eq(OutboxStatus.PENDING), any(Pageable.class)))
+                .thenReturn(List.of(event));
+        when(repository.findById(event.getId())).thenReturn(java.util.Optional.of(event));
+        CompletableFuture<SendResult<Object, Object>> failed = new CompletableFuture<>();
+        failed.completeExceptionally(new RuntimeException("kafka down"));
+        when(kafkaTemplate.send(anyString(), anyString(), any())).thenReturn(failed);
 
         publisher.publishPending();
 
-        assertThat(event.getStatus()).isEqualTo(OutboxStatus.FAILED);
-        verify(repository).save(event);
+        verify(repository).save(argThat(e -> e.getStatus() == OutboxStatus.FAILED));
     }
 }

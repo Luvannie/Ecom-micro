@@ -1,6 +1,6 @@
 package com.ecom.payment.web;
 
-import com.ecom.payment.security.GatewayUserContext;
+import com.ecom.common.security.GatewayUserContext;
 import com.ecom.payment.service.PaymentService;
 import com.ecom.payment.web.dto.CreatePaymentRequest;
 import com.ecom.payment.web.dto.PaymentResponse;
