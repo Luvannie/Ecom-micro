@@ -45,7 +45,7 @@ public class CartService {
     @Bulkhead(name = "productService")
     public Cart updateQuantity(UUID userId, UUID productId, int quantity) {
         if (quantity < 0 || quantity > 99) {
-            throw new InvalidCartQuantityException();
+            throw new InvalidCartQuantityException(quantity);
         }
         Cart cart = getCart(userId);
         if (quantity == 0) {
@@ -76,7 +76,7 @@ public class CartService {
 
     private void validateQuantity(int quantity) {
         if (quantity < 1 || quantity > 99) {
-            throw new InvalidCartQuantityException();
+            throw new InvalidCartQuantityException(quantity);
         }
     }
 

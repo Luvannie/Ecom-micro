@@ -1,6 +1,8 @@
 package com.ecom.user.service;
 
-public class AddressNotFoundException extends RuntimeException {
+import com.ecom.common.web.NotFoundException;
+
+public class AddressNotFoundException extends NotFoundException {
     public AddressNotFoundException(String message) {
         super(message);
     }
