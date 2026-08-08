@@ -4,13 +4,11 @@ import com.ecom.product.domain.Category;
 import com.ecom.product.domain.Product;
 import com.ecom.product.repository.CategoryRepository;
 import com.ecom.product.repository.ProductRepository;
-import com.ecom.product.web.dto.CategoryResponse;
 import com.ecom.product.web.dto.CreateCategoryRequest;
 import com.ecom.product.web.dto.CreateProductRequest;
-import com.ecom.product.web.dto.ProductResponse;
 import com.ecom.product.web.dto.ProductSearchCriteria;
-import com.ecom.product.web.dto.ProductSummaryResponse;
 import com.ecom.product.web.dto.UpdateProductRequest;
+import com.ecom.product.web.mapper.ProductMapper;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,61 +27,62 @@ import java.util.UUID;
 public class ProductCatalogService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-    public ProductCatalogService(CategoryRepository categoryRepository, ProductRepository productRepository) {
+    public ProductCatalogService(CategoryRepository categoryRepository, ProductRepository productRepository,
+                                 ProductMapper productMapper) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
-    public CategoryResponse createCategory(CreateCategoryRequest request) {
+    public Category createCategory(CreateCategoryRequest request) {
         if (categoryRepository.existsBySlug(request.slug())) {
             throw new DuplicateSlugException(request.slug());
         }
-        return toCategoryResponse(categoryRepository.save(new Category(request.name(), request.slug())));
+        return categoryRepository.save(new Category(request.name(), request.slug()));
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryResponse> listActiveCategories() {
+    public List<Category> listActiveCategories() {
         return categoryRepository.findByActiveTrueOrderByNameAsc().stream()
-                .map(this::toCategoryResponse)
                 .toList();
     }
 
     @CacheEvict(cacheNames = {"product-detail", "product-search"}, allEntries = true)
-    public ProductResponse createProduct(CreateProductRequest request) {
+    public Product createProduct(CreateProductRequest request) {
         Category category = findCategory(request.categoryId());
         Product product = new Product(category, request.name(), request.slug(), request.description(), request.price(),
                 request.imageUrl(), request.promotionTag());
-        return toProductResponse(productRepository.save(product));
+        return productRepository.save(product);
     }
 
     @CacheEvict(cacheNames = {"product-detail", "product-search"}, allEntries = true)
-    public ProductResponse updateProduct(UUID productId, UpdateProductRequest request) {
+    public Product updateProduct(UUID productId, UpdateProductRequest request) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
         Category category = findCategory(request.categoryId());
         product.update(category, request.name(), request.slug(), request.description(), request.price(), request.imageUrl(),
                 request.promotionTag());
-        return toProductResponse(product);
+        return product;
     }
 
     @CacheEvict(cacheNames = {"product-detail", "product-search"}, allEntries = true)
-    public ProductResponse changeStatus(UUID productId, boolean active) {
+    public Product changeStatus(UUID productId, boolean active) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
         product.setActive(active);
-        return toProductResponse(product);
+        return product;
     }
 
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "product-search", key = "#p0.toCacheKey() + ':' + #p1.pageNumber + ':' + #p1.pageSize")
-    public Page<ProductSummaryResponse> search(ProductSearchCriteria criteria, Pageable pageable) {
-        return productRepository.findAll(specification(criteria), pageable).map(this::toProductSummary);
+    public Page<Product> search(ProductSearchCriteria criteria, Pageable pageable) {
+        return productRepository.findAll(specification(criteria), pageable);
     }
 
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "product-detail", key = "#p0")
-    public ProductResponse getProduct(UUID productId) {
+    public Product getProduct(UUID productId) {
         return productRepository.findByIdAndActiveTrue(productId)
-                .map(this::toProductResponse)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
@@ -110,20 +109,5 @@ public class ProductCatalogService {
             }
             return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
         };
-    }
-
-    private CategoryResponse toCategoryResponse(Category category) {
-        return new CategoryResponse(category.getId(), category.getName(), category.getSlug(), category.isActive());
-    }
-
-    private ProductResponse toProductResponse(Product product) {
-        return new ProductResponse(product.getId(), product.getCategory().getId(), product.getCategory().getName(),
-                product.getName(), product.getSlug(), product.getDescription(), product.getPrice(), product.getImageUrl(),
-                product.isActive(), product.getPromotionTag());
-    }
-
-    private ProductSummaryResponse toProductSummary(Product product) {
-        return new ProductSummaryResponse(product.getId(), product.getCategory().getId(), product.getName(),
-                product.getSlug(), product.getPrice(), product.getImageUrl(), product.getPromotionTag());
     }
 }

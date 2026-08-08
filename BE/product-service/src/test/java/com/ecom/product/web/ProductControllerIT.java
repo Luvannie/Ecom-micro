@@ -57,12 +57,12 @@ class ProductControllerIT {
     void publicProductSearchSupportsKeywordAndCategoryFilter() throws Exception {
         var pizza = catalogService.createCategory(new CreateCategoryRequest("Pizza", "pizza"));
         var drinks = catalogService.createCategory(new CreateCategoryRequest("Drinks", "drinks"));
-        catalogService.createProduct(product(pizza.id(), "Margherita Pizza", "margherita"));
-        catalogService.createProduct(product(drinks.id(), "Pizza Soda", "pizza-soda"));
+        catalogService.createProduct(product(pizza.getId(), "Margherita Pizza", "margherita"));
+        catalogService.createProduct(product(drinks.getId(), "Pizza Soda", "pizza-soda"));
 
         mockMvc.perform(get("/api/products")
                         .param("keyword", "pizza")
-                        .param("categoryId", pizza.id().toString())
+                        .param("categoryId", pizza.getId().toString())
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -73,10 +73,10 @@ class ProductControllerIT {
     @Test
     void publicProductDetailReturnsNotFoundForInactiveProduct() throws Exception {
         var category = catalogService.createCategory(new CreateCategoryRequest("Sides", "sides"));
-        var product = catalogService.createProduct(product(category.id(), "Fries", "fries"));
-        catalogService.changeStatus(product.id(), false);
+        var product = catalogService.createProduct(product(category.getId(), "Fries", "fries"));
+        catalogService.changeStatus(product.getId(), false);
 
-        mockMvc.perform(get("/api/products/{productId}", product.id()))
+        mockMvc.perform(get("/api/products/{productId}", product.getId()))
                 .andExpect(status().isNotFound());
     }
 
