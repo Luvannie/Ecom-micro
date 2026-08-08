@@ -7,6 +7,7 @@ import com.ecom.payment.messaging.event.PaymentFailedEvent;
 import com.ecom.payment.messaging.event.PaymentRefundedEvent;
 import com.ecom.payment.messaging.event.PaymentSucceededEvent;
 import com.ecom.payment.outbox.OutboxService;
+import com.ecom.payment.provider.PaymentProvider;
 import com.ecom.payment.repository.PaymentRepository;
 import com.ecom.payment.repository.RefundRepository;
 import com.ecom.payment.web.dto.CreatePaymentRequest;
@@ -24,11 +25,11 @@ import java.util.UUID;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final RefundRepository refundRepository;
-    private final MockPaymentProvider paymentProvider;
+    private final PaymentProvider paymentProvider;
     private final OutboxService outboxService;
 
     public PaymentService(PaymentRepository paymentRepository, RefundRepository refundRepository,
-                          MockPaymentProvider paymentProvider, OutboxService outboxService) {
+                          PaymentProvider paymentProvider, OutboxService outboxService) {
         this.paymentRepository = paymentRepository;
         this.refundRepository = refundRepository;
         this.paymentProvider = paymentProvider;
