@@ -61,6 +61,20 @@ class GatewayUserContextFilterTest {
     }
 
     @Test
+    void returns_401_when_userEmail_blank_on_protected_path() throws Exception {
+        var filter = new GatewayUserContextFilter(List.of(PROTECTED));
+        var req = new MockHttpServletRequest("GET", "/api/cart/items");
+        req.addHeader("X-User-Id", "11111111-1111-1111-1111-111111111111");
+        req.addHeader("X-User-Email", "   ");
+        var res = new MockHttpServletResponse();
+        FilterChain chain = new MockFilterChain();
+
+        filter.doFilter(req, res, chain);
+
+        assertThat(res.getStatus()).isEqualTo(401);
+    }
+
+    @Test
     void skips_authentication_for_public_paths() throws Exception {
         var filter = new GatewayUserContextFilter(List.of(PROTECTED));
         var req = new MockHttpServletRequest("GET", "/actuator/health");

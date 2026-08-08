@@ -20,6 +20,10 @@ import java.util.List;
  * pass through untouched. Requests inside the patterns require non-blank
  * {@code X-User-Id} and {@code X-User-Email} headers, which the API gateway
  * forwards after verifying the Keycloak access token.
+ *
+ * <p>The attribute-name constants are {@code public} so controllers and
+ * tests in downstream services can reference them by symbol rather than
+ * by string literal.
  */
 public class GatewayUserContextFilter extends OncePerRequestFilter {
 
