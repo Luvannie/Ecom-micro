@@ -1,0 +1,34 @@
+# Multi-stage Dockerfile for Spring Boot microservices
+# Build context: D:/project/Ecom/BE (parent pom.xml level)
+# Usage: docker build -f Dockerfile.service --build-arg SERVICE_NAME=product-service -t ecom/product-service .
+
+FROM maven:3.9-eclipse-temurin-21 AS builder
+ARG SERVICE_NAME
+WORKDIR /build
+COPY pom.xml .
+COPY common common
+COPY payment-contracts payment-contracts
+COPY discovery-server discovery-server
+COPY config-server config-server
+COPY api-gateway api-gateway
+COPY auth-service auth-service
+COPY user-service user-service
+COPY product-service product-service
+COPY cart-service cart-service
+COPY inventory-service inventory-service
+COPY order-service order-service
+COPY payment-service payment-service
+COPY notification-service notification-service
+COPY architecture-rules architecture-rules
+COPY benchmark benchmark
+# Build all dependencies first (no clean), then run `package` which triggers
+# the spring-boot:repackage goal automatically (bound to package phase in
+# Spring Boot plugin). Library modules without the plugin skip repackage silently.
+RUN mvn -B -ntp -pl ${SERVICE_NAME} -am package -DskipTests -Dmaven.test.skip=true -q
+
+FROM eclipse-temurin:21-jre-alpine
+ARG SERVICE_NAME
+WORKDIR /app
+COPY --from=builder /build/${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

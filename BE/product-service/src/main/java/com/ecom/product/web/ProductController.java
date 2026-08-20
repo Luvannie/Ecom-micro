@@ -49,6 +49,6 @@ public class ProductController {
 
     @GetMapping("/api/products/{productId}")
     public ProductResponse product(@PathVariable("productId") UUID productId) {
-        return productMapper.toProductResponse(catalogService.getProduct(productId));
+        return catalogService.getProduct(productId);
     }
 }

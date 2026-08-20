@@ -6,6 +6,7 @@ import com.ecom.product.repository.CategoryRepository;
 import com.ecom.product.repository.ProductRepository;
 import com.ecom.product.web.dto.CreateCategoryRequest;
 import com.ecom.product.web.dto.CreateProductRequest;
+import com.ecom.product.web.dto.ProductResponse;
 import com.ecom.product.web.dto.ProductSearchCriteria;
 import com.ecom.product.web.dto.UpdateProductRequest;
 import com.ecom.product.web.mapper.ProductMapper;
@@ -74,16 +75,20 @@ public class ProductCatalogService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "product-search", key = "#p0.toCacheKey() + ':' + #p1.pageNumber + ':' + #p1.pageSize")
+    // Note: product-search cache was disabled because Page<Product> has the same
+    // Hibernate-proxy serialization problem as Product — Jackson cannot
+    // round-trip a PageImpl with @ManyToOne(LAZY) children. Re-enable only
+    // when caching a serializable Page<ProductResponse> instead.
     public Page<Product> search(ProductSearchCriteria criteria, Pageable pageable) {
         return productRepository.findAll(specification(criteria), pageable);
     }
 
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "product-detail", key = "#p0")
-    public Product getProduct(UUID productId) {
-        return productRepository.findByIdAndActiveTrue(productId)
+    public ProductResponse getProduct(UUID productId) {
+        Product product = productRepository.findByIdAndActiveTrue(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
+        return productMapper.toProductResponse(product);
     }
 
     private Category findCategory(UUID categoryId) {

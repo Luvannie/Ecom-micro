@@ -1,0 +1,32 @@
+log4j:ERROR Could not read configuration file from URL [file://opt/kafka/bin/../config/tools-log4j.properties].
+java.net.UnknownHostException: opt
+	at java.base/sun.nio.ch.NioSocketImpl.connect(Unknown Source)
+	at java.base/java.net.Socket.connect(Unknown Source)
+	at java.base/sun.net.ftp.impl.FtpClient.doConnect(Unknown Source)
+	at java.base/sun.net.ftp.impl.FtpClient.tryConnect(Unknown Source)
+	at java.base/sun.net.ftp.impl.FtpClient.connect(Unknown Source)
+	at java.base/sun.net.ftp.impl.FtpClient.connect(Unknown Source)
+	at java.base/sun.net.www.protocol.ftp.FtpURLConnection.connect(Unknown Source)
+	at java.base/sun.net.www.protocol.ftp.FtpURLConnection.getInputStream(Unknown Source)
+	at org.apache.log4j.PropertyConfigurator.doConfigure(PropertyConfigurator.java:532)
+	at org.apache.log4j.helpers.OptionConverter.selectAndConfigure(OptionConverter.java:485)
+	at org.apache.log4j.LogManager.<clinit>(LogManager.java:115)
+	at org.slf4j.impl.Reload4jLoggerFactory.<init>(Reload4jLoggerFactory.java:67)
+	at org.slf4j.impl.StaticLoggerBinder.<init>(StaticLoggerBinder.java:72)
+	at org.slf4j.impl.StaticLoggerBinder.<clinit>(StaticLoggerBinder.java:45)
+	at org.slf4j.LoggerFactory.bind(LoggerFactory.java:150)
+	at org.slf4j.LoggerFactory.performInitialization(LoggerFactory.java:124)
+	at org.slf4j.LoggerFactory.getILoggerFactory(LoggerFactory.java:417)
+	at org.slf4j.LoggerFactory.getLogger(LoggerFactory.java:362)
+	at org.slf4j.LoggerFactory.getLogger(LoggerFactory.java:388)
+	at org.apache.kafka.common.utils.Utils.<clinit>(Utils.java:109)
+	at org.apache.kafka.clients.producer.KafkaProducer.<init>(KafkaProducer.java:321)
+	at org.apache.kafka.clients.producer.KafkaProducer.<init>(KafkaProducer.java:306)
+	at org.apache.kafka.tools.ProducerPerformance.createKafkaProducer(ProducerPerformance.java:165)
+	at org.apache.kafka.tools.ProducerPerformance.start(ProducerPerformance.java:85)
+	at org.apache.kafka.tools.ProducerPerformance.main(ProducerPerformance.java:52)
+log4j:ERROR Ignoring configuration file [file://opt/kafka/bin/../config/tools-log4j.properties].
+log4j:WARN No appenders could be found for logger (org.apache.kafka.clients.producer.ProducerConfig).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+30000 records sent, 51369.863014 records/sec (25.08 MB/sec), 104.89 ms avg latency, 265.00 ms max latency, 123 ms 50th, 139 ms 95th, 143 ms 99th, 145 ms 99.9th.

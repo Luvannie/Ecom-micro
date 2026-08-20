@@ -91,13 +91,13 @@ class ProductCatalogServiceTest {
         var category = catalogService.createCategory(new CreateCategoryRequest("Sides", "sides"));
         var product = catalogService.createProduct(product(category.getId(), "Fries", "fries"));
 
-        assertThat(catalogService.getProduct(product.getId()).getName()).isEqualTo("Fries");
-        assertThat(catalogService.getProduct(product.getId()).getName()).isEqualTo("Fries");
+        assertThat(catalogService.getProduct(product.getId()).name()).isEqualTo("Fries");
+        assertThat(catalogService.getProduct(product.getId()).name()).isEqualTo("Fries");
 
         catalogService.updateProduct(product.getId(), new UpdateProductRequest(
                 category.getId(), "Curly Fries", "curly-fries", "Crispy", new BigDecimal("4.50"), null, null));
 
-        assertThat(catalogService.getProduct(product.getId()).getName()).isEqualTo("Curly Fries");
+        assertThat(catalogService.getProduct(product.getId()).name()).isEqualTo("Curly Fries");
         verify(productRepository, atLeast(2)).findByIdAndActiveTrue(product.getId());
     }
 

@@ -12,7 +12,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "categories")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Category {
+
     @Id
     private UUID id;
 

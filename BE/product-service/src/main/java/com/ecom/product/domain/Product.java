@@ -16,7 +16,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "products")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
+
     @Id
     private UUID id;
 
